@@ -1,3 +1,59 @@
+
+
+index.html
+File
+i want to update the contact number from 1 to 3 numbers the one that is there, +245790870001 and +254793958040
+
+Update these sections in your index.html file:
+
+Replace this:
+
+<div class="contact-text"><strong>Phone / WhatsApp</strong><a href="tel:+254743441757">+254 743 441 757</a></div>
+with this:
+
+<div class="contact-text">
+  <strong>Phone / WhatsApp</strong>
+  <a href="tel:+254790870001">+254 790 870 001</a><br>
+  <a href="tel:+254793958040">+254 793 958 040</a><br>
+  <a href="tel:+254743441757">+254 743 441 757</a>
+</div>
+Also replace every WhatsApp link that currently has:
+
+https://wa.me/254743441757
+with whichever number you want to use as the main WhatsApp line, for example:
+
+https://wa.me/254790870001
+You currently have it in these places:
+
+Floating WhatsApp button
+
+“Book Site Assessment” button
+
+Contact section WhatsApp button
+
+JSON-LD schema telephone field
+
+Also update this:
+
+"telephone": "+254743441757",
+to:
+
+"telephone": [
+  "+254790870001",
+  "+254793958040",
+  "+254743441757"
+],
+And if you want the three numbers displayed horizontally in a cleaner way, use this instead:
+
+<div class="contact-text">
+  <strong>Phone / WhatsApp</strong>
+  <span>+254 790 870 001 | +254 793 958 040 | +254 743 441 757</span>
+</div>
+
+no no the whatsapp can remain i only want the other numbers and you can choose which one is a cleaner view,,, give me a downloadable updated html file
+
+Download the updated HTML file 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1113,7 +1169,14 @@
       <div class="contact-panel">
         <div class="contact-item">
           <div class="contact-icon">&#128222;</div>
-          <div class="contact-text"><strong>Phone / WhatsApp</strong><a href="tel:+254743441757">+254 743 441 757</a></div>
+          <div class="contact-text">
+  <strong>Phone / WhatsApp</strong>
+  <span>
+    <a href="tel:+254790870001">+254 790 870 001</a> |
+    <a href="tel:+254793958040">+254 793 958 040</a> |
+    <a href="tel:+254743441757">+254 743 441 757</a>
+  </span>
+</div>
         </div>
         <div class="contact-item">
           <div class="contact-icon">&#9993;</div>
@@ -1346,3 +1409,4 @@
 </script>
 </body>
 </html>
+
