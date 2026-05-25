@@ -1,0 +1,148 @@
+---
+layout: null
+title: Blog | ZeroPoint Geospatial
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog | ZeroPoint Geospatial</title>
+  <meta name="description" content="Practical guides on land verification, survey planning, and geospatial workflows in Kenya.">
+  <link rel="icon" type="image/svg+xml" href="{{ "/favicon.svg" | relative_url }}">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --primary: #0d2454;
+      --primary-light: #1e40af;
+      --accent: #2563eb;
+      --success: #2ab04a;
+      --success-hover: #229940;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #334155;
+      --text-light: #64748b;
+      --border: #e2e8f0;
+      --radius: 12px;
+      --shadow: 0 4px 12px rgba(13, 36, 84, 0.08);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: var(--text); background: var(--bg); line-height: 1.6; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: var(--primary); }
+    .container { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+
+    /* Nav */
+    nav { background: white; padding: 16px 0; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 8px rgba(13, 36, 84, 0.1); border-bottom: 3px solid var(--primary); }
+    .nav-inner { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 1.3rem; color: var(--primary); text-decoration: none; }
+    .brand-logo { width: 40px; height: 40px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--success); font-weight: 900; font-size: 0.9rem; }
+    .nav-links { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+    .nav-links a { font-weight: 600; color: var(--text); }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-links a.active { color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 2px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 8px; font-weight: 600; transition: all 0.2s; border: none; cursor: pointer; font-size: 0.95rem; }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-primary:hover { background: #1d4ed8; color: white; }
+    .btn-outline { background: transparent; border: 2px solid var(--accent); color: var(--accent); }
+    .btn-outline:hover { background: var(--accent); color: white; }
+
+    /* Hero banner */
+    .blog-hero { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: white; padding: 60px 0 50px; }
+    .blog-hero .label { display: inline-block; background: rgba(42, 176, 74, 0.2); color: var(--success); padding: 6px 14px; border-radius: 20px; font-weight: 600; font-size: 0.85rem; letter-spacing: 0.05em; margin-bottom: 16px; border: 1px solid var(--success); }
+    .blog-hero h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; margin-bottom: 12px; }
+    .blog-hero p { font-size: 1.05rem; opacity: 0.88; max-width: 600px; }
+
+    /* Post grid */
+    .blog-section { padding: 60px 0; }
+    .post-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 28px; margin-top: 8px; }
+    .post-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; transition: all 0.3s; display: flex; flex-direction: column; }
+    .post-card:hover { transform: translateY(-5px); box-shadow: 0 8px 24px rgba(13, 36, 84, 0.12); border-color: var(--accent); }
+    .post-card-body { padding: 28px; flex: 1; display: flex; flex-direction: column; }
+    .post-date { font-size: 0.8rem; color: var(--success); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 10px; }
+    .post-card h2 { font-size: 1.15rem; color: var(--primary); font-weight: 700; margin-bottom: 12px; line-height: 1.4; }
+    .post-excerpt { color: var(--text-light); font-size: 0.92rem; flex: 1; margin-bottom: 20px; }
+    .read-link { font-weight: 600; color: var(--accent); font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px; }
+    .read-link:hover { gap: 10px; }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 80px 24px; }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 16px; }
+    .empty-state h2 { color: var(--primary); margin-bottom: 12px; }
+    .empty-state p { color: var(--text-light); max-width: 400px; margin: 0 auto 24px; }
+
+    /* Footer */
+    footer { background: var(--primary); color: #cbd5e1; padding: 32px 0; margin-top: 40px; text-align: center; font-size: 0.9rem; }
+    footer a { color: #93c5fd; }
+
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .post-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="container nav-inner">
+      <a href="{{ "/" | relative_url }}" class="brand">
+        <div class="brand-logo">ZG</div>
+        <span>ZeroPoint Geospatial</span>
+      </a>
+      <div class="nav-links">
+        <a href="{{ "/#services" | relative_url }}">Services</a>
+        <a href="{{ "/#about" | relative_url }}">About</a>
+        <a href="{{ "/#projects" | relative_url }}">Work</a>
+        <a href="{{ "/#contact" | relative_url }}">Contact</a>
+        <a href="{{ "/blog/" | relative_url }}" class="active">Blog</a>
+        <a href="{{ "/#contact" | relative_url }}" class="btn btn-primary">Request Quote</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="blog-hero">
+    <div class="container">
+      <div class="label">INSIGHTS & FIELD NOTES</div>
+      <h1>ZeroPoint Blog</h1>
+      <p>Practical guides on land verification, survey planning, and geospatial workflows in Kenya.</p>
+    </div>
+  </div>
+
+  <section class="blog-section">
+    <div class="container">
+      {% if site.posts.size > 0 %}
+        <div class="post-grid">
+          {% for post in site.posts %}
+          <article class="post-card">
+            <div class="post-card-body">
+              <div class="post-date">{{ post.date | date: "%B %-d, %Y" }}</div>
+              <h2>{{ post.title }}</h2>
+              <p class="post-excerpt">
+                {% if post.excerpt %}
+                  {{ post.excerpt | strip_html | truncatewords: 30 }}
+                {% endif %}
+              </p>
+              <a href="{{ post.url | relative_url }}" class="read-link">Read article →</a>
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <div class="icon">📝</div>
+          <h2>Posts Coming Soon</h2>
+          <p>We're writing practical guides on land surveying, RTK workflows, and GIS in Kenya. Follow us on LinkedIn for early access.</p>
+          <a href="https://www.linkedin.com/company/zeropoint-geospatial/" target="_blank" class="btn btn-outline">Follow on LinkedIn</a>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p>© {{ site.time | date: "%Y" }} ZeroPoint Geospatial · Nairobi, Kenya · <a href="mailto:zeropointgeospatial@gmail.com">zeropointgeospatial@gmail.com</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>
