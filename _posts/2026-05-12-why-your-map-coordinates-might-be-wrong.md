@@ -1,7 +1,6 @@
 ---
 layout: post
 title: "Why Your Map Coordinates Might Be Wrong (And How to Fix It)"
-date: 2026-05-12
 ---
 
 # Why Your Map Coordinates Might Be Wrong (And How to Fix It)
