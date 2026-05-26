@@ -1,7 +1,6 @@
 ---
 layout: post
 title: "Drone Mapping vs Traditional Survey: What You Actually Need to Know"
-date: 2026-05-19
 ---
 
 # Drone Mapping vs Traditional Survey: What You Actually Need to Know
