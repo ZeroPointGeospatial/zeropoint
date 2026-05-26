@@ -1,7 +1,6 @@
 ---
 layout: post
 title: "How GIS Is Reshaping Urban Planning in African Cities"
-date: 2026-05-20
 ---
 
 # How GIS Is Reshaping Urban Planning in African Cities
