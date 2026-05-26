@@ -1,7 +1,6 @@
 ---
 layout: post
 title: "Remote Sensing for Agriculture: How Satellite Data Is Changing Farming in Kenya"
-date: 2026-05-05
 ---
 
 # Remote Sensing for Agriculture: How Satellite Data Is Changing Farming in Kenya
