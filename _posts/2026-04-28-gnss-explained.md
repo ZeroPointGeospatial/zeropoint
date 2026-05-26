@@ -1,7 +1,6 @@
 ---
 layout: post
 title: "GNSS Explained: Why Your Phone GPS and a Survey GPS Are Not the Same Thing"
-date: 2026-04-28
 ---
 
 # GNSS Explained: Why Your Phone GPS and a Survey GPS Are Not the Same Thing
