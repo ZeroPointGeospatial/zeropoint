@@ -344,7 +344,7 @@ Follow ZeroPoint Geospatial →
 <h3>📰 Latest Posts</h3>
 {% if site.posts.size > 0 %}
 <ul>{% for post in site.posts limit:5 %}<li><a href="{{ post.url | relative_url }}">{{ post.title }}</a><small style="color:var(--text-light);display:block;font-size:0.8rem;">{{ post.date | date: "%B %-d, %Y" }}</small></li>{% endfor %}</ul>
-<a href="{{ "/blog/" | relative_url }}" class="btn btn-outline">View All Posts →</a>
+<a href="./blog/" class="btn btn-outline">View All Posts →</a>
 {% else %}
 <p style="color:var(--text-light);margin-bottom:16px;">No posts yet — follow us on LinkedIn.</p>
 <a href="https://www.linkedin.com/company/zeropoint-geospatial/" target="_blank" rel="noopener" class="btn btn-outline">Follow on LinkedIn</a>
