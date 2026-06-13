@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>{{ page.title }} | ZeroPoint Geospatial</title>
+<meta name="description" content="{{ page.excerpt | strip_html | strip_newlines | truncate: 155 }}"/>
+<link rel="icon" href="{{ '/favicon.svg' | relative_url }}" type="image/svg+xml"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link rel="stylesheet" href="{{ '/css/site.css' | relative_url }}"/>
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<nav>
+  <a href="{{ '/' | relative_url }}" class="nav-logo">
+    <img src="{{ '/assets/zeropoint-logo.jpg' | relative_url }}" alt="ZeroPoint Geospatial" width="48" height="48"/>
+    <div class="nav-brand-text">
+      <div class="name"><span class="blue">ZEROPOINT</span> <span class="green">GEOSPATIAL</span></div>
+      <div class="tagline">Precision Data. Smarter Decisions.</div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="{{ '/#services' | relative_url }}">Services</a></li>
+    <li><a href="{{ '/#about' | relative_url }}">About</a></li>
+    <li><a href="{{ '/#projects' | relative_url }}">Work</a></li>
+    <li><a href="{{ '/projects.html' | relative_url }}">Projects</a></li>
+    <li><a href="{{ '/blog/' | relative_url }}">Blog</a></li>
+    <li><a href="{{ '/#contact' | relative_url }}">Contact</a></li>
+  </ul>
+  <a href="{{ '/#contact' | relative_url }}" class="nav-cta">Request Quote</a>
+</nav>
+
+<main id="main">
+  <article class="post-shell">
+    <header class="post-hero">
+      <div class="panel-kicker">{{ page.date | date: "%B %-d, %Y" }} | ZeroPoint Field Note</div>
+      <h1>{{ page.title }}</h1>
+      <p>Practical geospatial insight for survey planning, land verification, GIS workflows, and spatial decision-making in Kenya.</p>
+    </header>
+    <div class="post-layout">
+      <aside class="post-sidebar">
+        <div class="post-sidebar-card">
+          <span>Article Type</span>
+          <strong>Field Note</strong>
+        </div>
+        <div class="post-sidebar-card">
+          <span>Prepared By</span>
+          <strong>ZeroPoint Geospatial</strong>
+        </div>
+        <a class="btn-primary" href="{{ '/#contact' | relative_url }}">Request Survey Quote</a>
+      </aside>
+      <div class="post-content">
+        {{ content }}
+      </div>
+    </div>
+  </article>
+</main>
+
+<footer>
+  <div class="footer-brand">
+    <a href="{{ '/' | relative_url }}" class="nav-logo">
+      <img src="{{ '/assets/zeropoint-logo.jpg' | relative_url }}" alt="ZeroPoint Geospatial" width="40" height="40" style="filter:brightness(1.1);"/>
+    </a>
+    <p><span class="accent">Precision Data. Smarter Decisions.</span><br/>&copy; {{ site.time | date: "%Y" }} ZeroPoint Geospatial. All rights reserved.</p>
+  </div>
+  <div class="footer-col">
+    <h4>Quick Links</h4>
+    <ul>
+      <li><a href="{{ '/' | relative_url }}">Home</a></li>
+      <li><a href="{{ '/blog/' | relative_url }}">Blog</a></li>
+      <li><a href="{{ '/#contact' | relative_url }}">Get a Quote</a></li>
+    </ul>
+  </div>
+  <div class="footer-col">
+    <h4>Connect</h4>
+    <div class="footer-social">
+      <a href="https://x.com/ZeroGeospatial" target="_blank" rel="noopener" aria-label="X">X</a>
+      <a href="https://github.com/ZeroPointGeospatial" target="_blank" rel="noopener" aria-label="GitHub">GH</a>
+      <a href="https://www.linkedin.com/company/zeropoint-geospatial/" target="_blank" rel="noopener" aria-label="LinkedIn">IN</a>
+    </div>
+  </div>
+  <div class="footer-bottom">Nairobi, Kenya | Professional land surveying &amp; GIS</div>
+</footer>
+
+</body>
+</html>
