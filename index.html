@@ -14,7 +14,9 @@ layout: null
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link rel="preconnect" href="https://formspree.io"/>
-<link rel="preconnect" href="https://assets.calendly.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Barlow+Condensed:wght@600;700;800;900&display=swap"/>
+<link rel="preload" as="image" href="assets/rtk-base-station-field.jpg"/>
+<link rel="preload" as="image" href="assets/dashboard.jpg"/>
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://zeropointgeospatial.github.io/zeropoint/"/>
 <meta property="og:title" content="ZeroPoint Geospatial | Precision Data. Smarter Decisions."/>
@@ -117,13 +119,7 @@ layout: null
         <span>GIS</span>
       </div>
       <div class="dashboard-map" aria-hidden="true">
-        <span class="map-line line-a"></span>
-        <span class="map-line line-b"></span>
-        <span class="map-line line-c"></span>
-        <span class="map-node node-a"></span>
-        <span class="map-node node-b"></span>
-        <span class="map-node node-c"></span>
-        <span class="map-node node-d"></span>
+        <img src="assets/dashboard.jpg" alt="Survey field map preview" style="width:100%;height:100%;object-fit:cover;border-radius:4px;display:block;"/>
       </div>
       <div class="dashboard-metrics">
         <div><span>EPSG</span><strong>21037</strong></div>
@@ -207,7 +203,7 @@ layout: null
   </div>
   <div class="services-grid">
     <article class="service-card">
-      <img class="service-img" src="assets/boundary.jpg" alt="Boundary and cadastral survey" loading="lazy"/>
+      <img class="service-img" src="assets/boundary.jpg" alt="Boundary and cadastral survey" width="380" height="190" loading="lazy"/>
       <div class="service-body">
         <h3 class="service-name">Boundary &amp; Cadastral Survey</h3>
         <p class="service-desc">Beacon identification, parcel boundary confirmation, and coordinate-based documentation.</p>
@@ -218,7 +214,7 @@ layout: null
       </div>
     </article>
     <article class="service-card">
-      <img class="service-img" src="assets/rtk-base-station-field.jpg" alt="Topographic survey" style="object-position:center 35%" loading="lazy"/>
+      <img class="service-img" src="assets/rtk-base-station-field.jpg" alt="Topographic survey" width="380" height="190" style="object-position:center 35%" loading="lazy"/>
       <div class="service-body">
         <h3 class="service-name">Topographic Survey</h3>
         <p class="service-desc">Contours, spot heights, site features, and terrain data for design work.</p>
@@ -229,7 +225,7 @@ layout: null
       </div>
     </article>
     <article class="service-card">
-      <img class="service-img" src="assets/engineering.jpg" alt="Engineering and construction survey" loading="lazy"/>
+      <img class="service-img" src="assets/engineering.jpg" alt="Engineering and construction survey" width="380" height="190" loading="lazy"/>
       <div class="service-body">
         <h3 class="service-name">Engineering &amp; Construction Survey</h3>
         <p class="service-desc">Setting-out, grid control, and level transfer for construction teams.</p>
@@ -240,7 +236,7 @@ layout: null
       </div>
     </article>
     <article class="service-card">
-      <img class="service-img" src="assets/gps.jpg" alt="GPS and RTK survey" loading="lazy"/>
+      <img class="service-img" src="assets/gps.jpg" alt="GPS and RTK survey" width="380" height="190" loading="lazy"/>
       <div class="service-body">
         <h3 class="service-name">GPS / RTK Survey</h3>
         <p class="service-desc">Fast coordinate capture and high-accuracy location data.</p>
@@ -251,7 +247,7 @@ layout: null
       </div>
     </article>
     <article class="service-card">
-      <img class="service-img" src="assets/gis-mapping.jpg" alt="GIS mapping and spatial analysis" loading="lazy"/>
+      <img class="service-img" src="assets/gis-mapping.jpg" alt="GIS mapping and spatial analysis" width="380" height="190" loading="lazy"/>
       <div class="service-body">
         <h3 class="service-name">GIS Mapping &amp; Spatial Analysis</h3>
         <p class="service-desc">Digital mapping, GIS layers, and spatial analysis.</p>
@@ -262,7 +258,7 @@ layout: null
       </div>
     </article>
     <article class="service-card">
-      <img class="service-img" src="assets/plans.jpg" alt="Plans, drawings and deliverables" loading="lazy"/>
+      <img class="service-img" src="assets/plans.jpg" alt="Plans, drawings and deliverables" width="380" height="190" loading="lazy"/>
       <div class="service-body">
         <h3 class="service-name">Plans, Drawings &amp; Deliverables</h3>
         <p class="service-desc">PDF maps, CAD drawings, and GIS-ready files.</p>
@@ -309,7 +305,7 @@ layout: null
   </div>
   <div class="deliverables-grid">
     <article class="deliverable-card">
-      <img src="assets/boundary_overlay.jpg" alt="Boundary survey package" loading="lazy"/>
+      <img src="assets/boundary_overlay.jpg" alt="Boundary survey package" width="400" height="220" loading="lazy"/>
       <div class="deliverable-body">
         <h3>Boundary Survey Package</h3>
         <p>Parcel outline, beacon notes, coordinate table, and client-ready map.</p>
@@ -317,7 +313,7 @@ layout: null
       </div>
     </article>
     <article class="deliverable-card">
-      <img src="assets/topo.jpg" alt="Topographic survey output" loading="lazy"/>
+      <img src="assets/topo.jpg" alt="Topographic survey output" width="400" height="220" loading="lazy"/>
       <div class="deliverable-body">
         <h3>Topographic Survey Output</h3>
         <p>Contours, levels, site features, and CAD/PDF outputs.</p>
@@ -325,7 +321,7 @@ layout: null
       </div>
     </article>
     <article class="deliverable-card">
-      <img src="assets/control.jpg" alt="Construction control layout" loading="lazy"/>
+      <img src="assets/control.jpg" alt="Construction control layout" width="400" height="220" loading="lazy"/>
       <div class="deliverable-body">
         <h3>Construction Control Layout</h3>
         <p>Grid lines, control points, reference marks, and level transfer.</p>
@@ -333,7 +329,7 @@ layout: null
       </div>
     </article>
     <article class="deliverable-card">
-      <img src="assets/gis.jpg" alt="GIS mapping layers" loading="lazy"/>
+      <img src="assets/gis.jpg" alt="GIS mapping layers" width="400" height="220" loading="lazy"/>
       <div class="deliverable-body">
         <h3>GIS Mapping Layers</h3>
         <p>Spatial layers, attribute data, and reusable geospatial files.</p>
@@ -481,7 +477,7 @@ layout: null
   </div>
   <div class="case-grid">
     <article class="case-card">
-      <img src="assets/boundary_overlay.jpg" alt="Boundary verification case preview" loading="lazy"/>
+      <img src="assets/boundary_overlay.jpg" alt="Boundary verification case preview" width="400" height="220" loading="lazy"/>
       <div class="case-body">
         <span>Boundary verification</span>
         <h3>Parcel confidence before purchase</h3>
@@ -489,7 +485,7 @@ layout: null
       </div>
     </article>
     <article class="case-card">
-      <img src="assets/topo.jpg" alt="Topographic survey case preview" loading="lazy"/>
+      <img src="assets/topo.jpg" alt="Topographic survey case preview" width="400" height="220" loading="lazy"/>
       <div class="case-body">
         <span>Topographic design</span>
         <h3>Terrain data for site planning</h3>
@@ -497,7 +493,7 @@ layout: null
       </div>
     </article>
     <article class="case-card">
-      <img src="assets/control.jpg" alt="Construction control case preview" loading="lazy"/>
+      <img src="assets/control.jpg" alt="Construction control case preview" width="400" height="220" loading="lazy"/>
       <div class="case-body">
         <span>Construction control</span>
         <h3>Repeatable site control</h3>
@@ -528,7 +524,6 @@ layout: null
     <div class="blog-panel blog-featured">
       <div class="panel-kicker">Published Field Notes</div>
       <h3>Latest from the blog</h3>
-      <p>Jekyll reads these directly from the Markdown files in the `_posts` folder.</p>
       <ul class="blog-list static-fallback">
         <li>
           <a href="blog/index.html">How to Verify Land Beacons Before Buying in Kenya</a>
@@ -606,8 +601,23 @@ layout: null
             <strong>Book a Consultation</strong>
           </div>
         </div>
-        <div class="calendly-inline-widget" data-url="https://calendly.com/zeropointgeospatial/30min"></div>
-        <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
+        <div class="calendly-inline-widget" data-url="https://calendly.com/zeropointgeospatial/30min" id="calendly-widget"></div>
+        <script>
+        (function(){
+          var loaded = false;
+          var observer = new IntersectionObserver(function(entries){
+            if(entries[0].isIntersecting && !loaded){
+              loaded = true;
+              var s = document.createElement('script');
+              s.src = 'https://assets.calendly.com/assets/external/widget.js';
+              s.async = true;
+              document.head.appendChild(s);
+              observer.disconnect();
+            }
+          }, { rootMargin: '200px' });
+          observer.observe(document.getElementById('calendly-widget'));
+        })();
+        </script>
       </div>
       <a href="https://wa.me/254743441757?text=Hello%20ZeroPoint%20Geospatial%2C%20I%20need%20a%20survey%20quote." class="btn-wa" target="_blank" rel="noopener" style="margin-top:1rem;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
@@ -615,7 +625,7 @@ layout: null
       </a>
     </div>
     <div class="contact-form-wrap">
-      <img class="form-img" src="assets/form.jpg" alt="Survey quote request" loading="lazy"/>
+      <img class="form-img" src="assets/form.jpg" alt="Survey quote request" width="480" height="320" loading="lazy"/>
       <form class="contact-form" id="quote-form" action="https://formspree.io/f/xredlvbp" method="POST" onsubmit="handleSubmit(event)">
         <input type="hidden" name="_subject" value="New Survey Quote Request"/>
         <div class="form-row">
