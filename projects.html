@@ -10,203 +10,115 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link rel="preload" as="image" href="assets/rtk-base-station-field.jpg"/>
 <link rel="stylesheet" href="css/site.css"/>
+<style>
+/* Projects page safety layer: this page must remain styled even if the shared CSS is delayed. */
+:root{--ink:#0b0d0c;--paper:#f1f0eb;--white:#fafaf7;--text:#1a1d1b;--muted:#6e746f;--line:#d3d3cc;--olive:#788653;--olive-light:#aab590}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--text);font-family:Arial,sans-serif;line-height:1.55;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.skip-link{position:absolute;left:-9999px}
+.container{width:min(1180px,89.6%);margin:0 auto}
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;min-height:74px;padding:.75rem 5.2%;display:flex;align-items:center;justify-content:space-between;background:rgba(11,13,12,.94);border-bottom:1px solid rgba(255,255,255,.12);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.nav-logo{display:flex;align-items:center;gap:.7rem;flex-shrink:0}
+.nav-logo img{width:auto;height:42px;display:block}
+.nav-brand-text{display:flex;flex-direction:column;line-height:1.1}
+.nav-brand-text .name{font-size:.92rem;font-weight:700;letter-spacing:1.5px}
+.nav-brand-text .blue{color:#fff}.nav-brand-text .green{color:var(--olive-light)}
+.nav-brand-text .tagline{margin-top:3px;color:rgba(255,255,255,.46);font-size:.57rem;letter-spacing:1.4px;text-transform:uppercase}
+.nav-links{display:flex;gap:1.45rem;align-items:center;list-style:none;margin:0;padding:0}
+.nav-links a{color:rgba(255,255,255,.7);font-size:.68rem;font-weight:500;letter-spacing:1.1px;text-transform:uppercase}
+.nav-links a:hover{color:#fff}
+.nav-cta{background:#fff;color:#111;padding:.68rem 1rem;font-size:.66rem;font-weight:600;letter-spacing:1.2px;text-transform:uppercase}
+.hamburger{display:none;flex-direction:column;gap:5px;padding:6px;border:0;background:transparent;cursor:pointer}
+.hamburger span{display:block;width:24px;height:2px;background:#fff;transition:.2s}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0}.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.mobile-menu{display:none!important;position:fixed;top:74px;left:0;right:0;z-index:999;background:var(--ink);padding:1rem 5%;border-bottom:1px solid rgba(255,255,255,.12);box-shadow:0 18px 40px rgba(0,0,0,.24)}
+.mobile-menu.open{display:flex!important;flex-direction:column;gap:0}
+.mobile-menu a{display:block;padding:.8rem 0;color:rgba(255,255,255,.82);border-bottom:1px solid rgba(255,255,255,.1);font-size:.8rem;letter-spacing:1px;text-transform:uppercase}
+.page-hero{min-height:520px;padding:11rem 5.2% 4.5rem;display:flex;align-items:flex-end;position:relative;overflow:hidden;background:var(--ink);color:#fff}
+.page-hero:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(11,13,12,.97),rgba(11,13,12,.7) 55%,rgba(11,13,12,.28)),linear-gradient(0deg,rgba(11,13,12,.6),transparent 55%)}
+.page-hero .container{position:relative;z-index:2}
+.section-label{color:var(--olive);font-size:.6rem;font-weight:600;letter-spacing:2px;text-transform:uppercase}
+.page-hero .section-label{color:rgba(255,255,255,.55)!important}
+.page-hero h1{max-width:900px;margin:.7rem 0 1rem;font-size:clamp(3.5rem,7vw,7rem);line-height:.88;font-weight:300;letter-spacing:-3px;text-transform:uppercase}
+.page-hero p{max-width:650px;margin:0;color:rgba(255,255,255,.62);font-size:.95rem;line-height:1.7}
+.page-hero-stats{display:flex;flex-wrap:wrap;margin-top:2.2rem;border-top:1px solid rgba(255,255,255,.15)}
+.page-hero-stats span{padding:1rem 1.4rem 0 0;margin-right:1.4rem;color:rgba(255,255,255,.48);font-size:.58rem;letter-spacing:1.1px;text-transform:uppercase}
+main>section:not(.page-hero){padding:7rem 5.2%}
+.section-header-center{width:min(760px,100%);margin:0 auto 3.5rem;text-align:center}
+.section-title{margin:.5rem 0 0;font-size:clamp(2.5rem,4.5vw,4.5rem);font-weight:300;line-height:.95;letter-spacing:-2px}
+.section-sub{max-width:600px;margin:1rem auto 0;color:var(--muted);font-size:.9rem;line-height:1.7}
+.project-grid{width:min(1180px,100%);margin:0 auto;display:grid!important;grid-template-columns:repeat(12,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+.project-card{grid-column:span 6;display:flex;flex-direction:column;background:var(--white);border:0;border-radius:0;overflow:hidden;box-shadow:none;min-width:0;transition:background .2s ease}
+.project-card:nth-child(1),.project-card:nth-child(4){grid-column:span 7}.project-card:nth-child(2),.project-card:nth-child(3),.project-card:nth-child(5),.project-card:nth-child(6){grid-column:span 5}
+.project-card:hover{background:#fff}
+.project-card>img{width:100%;height:310px;display:block;object-fit:cover;filter:grayscale(.1) saturate(.76);transition:filter .3s,transform .45s}
+.project-card:hover>img{filter:grayscale(0) saturate(.92);transform:scale(1.015)}
+.project-card-body{padding:1.65rem 1.7rem 1.8rem;flex:1}
+.project-card-body h3{margin:0 0 .65rem;color:#171a18;font-size:1.35rem;font-weight:400;line-height:1.08}
+.project-card-body p{margin:0;color:var(--muted);font-size:.82rem;line-height:1.7;max-width:560px}
+.project-tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:1.25rem}
+.project-tags .chip{padding:.3rem .5rem;border:1px solid var(--line);border-radius:0;background:transparent;color:#5e655f;font-size:.56rem;letter-spacing:.8px;text-transform:uppercase}
+.project-tags .chip-green{border-color:var(--olive-light);color:#647043}
+main>section:last-of-type{background:#e8e7e1}
+.coming-soon-panel{width:min(900px,100%);margin:0 auto;padding:3rem;background:var(--white);border:1px solid var(--line)}
+.coming-soon-panel h2{margin:0 0 .8rem;font-size:2.5rem;font-weight:300;letter-spacing:-1px}
+.coming-soon-panel p{max-width:650px;color:var(--muted)}
+.checklist{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem 2rem;margin:1.6rem 0 2rem;padding:0;list-style:none}
+.checklist li{padding:.65rem 0;border-bottom:1px solid #deded8;color:#4f5651;font-size:.78rem}
+.coming-soon-panel .btn-primary{display:inline-flex;background:var(--ink);color:#fff;padding:.8rem 1rem;font-size:.65rem;letter-spacing:1px;text-transform:uppercase}
+footer{padding:3rem 5.2%;background:var(--ink);color:#fff;display:grid;grid-template-columns:2fr 1fr 1fr;gap:2rem;position:relative}
+footer .nav-logo img{height:40px}.footer-brand p{color:rgba(255,255,255,.45);font-size:.72rem;line-height:1.7}.footer-brand .accent{color:var(--olive-light)}
+.footer-col h4{margin:0 0 .7rem;font-size:.65rem;letter-spacing:1.3px;text-transform:uppercase}.footer-col ul{list-style:none;padding:0;margin:0}.footer-col li{margin:.4rem 0;color:rgba(255,255,255,.5);font-size:.72rem}.footer-social{display:flex;gap:.7rem}.footer-social a{color:rgba(255,255,255,.6);font-size:.72rem}.footer-bottom{grid-column:1/-1;padding-top:1rem;border-top:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.35);font-size:.65rem}
+.whatsapp-btn{position:fixed!important;right:22px!important;bottom:22px!important;width:58px!important;height:58px!important;min-width:58px!important;max-width:58px!important;border-radius:50%!important;background:#7f9058!important;color:#050605!important;display:flex!important;align-items:center!important;justify-content:center!important;z-index:1100!important;box-shadow:0 8px 24px rgba(0,0,0,.2)!important}
+.whatsapp-btn svg{width:30px!important;height:30px!important;display:block!important;fill:currentColor!important}
+.mobile-bar{display:none}
+@media(max-width:900px){.nav-links,.nav-cta{display:none}.hamburger{display:flex}.project-card,.project-card:nth-child(n){grid-column:span 6}}
+@media(max-width:680px){.container{width:90%}.page-hero{min-height:470px;padding:8rem 5% 3.5rem}.page-hero h1{font-size:clamp(3rem,14vw,5rem);letter-spacing:-2px}.page-hero-stats{gap:0}.page-hero-stats span{padding-right:.8rem;margin-right:.8rem}.project-grid{grid-template-columns:1fr}.project-card,.project-card:nth-child(n){grid-column:1!important}.project-card>img{height:240px}.main>section:not(.page-hero){padding:5rem 5%}.coming-soon-panel{padding:2rem 1.35rem}.checklist{grid-template-columns:1fr}footer{grid-template-columns:1fr;padding:2.5rem 5%}.footer-bottom{grid-column:auto}.whatsapp-btn{width:54px!important;height:54px!important;min-width:54px!important;max-width:54px!important;right:16px!important;bottom:74px!important}.whatsapp-btn svg{width:28px!important;height:28px!important}}
+</style>
 </head>
 <body>
-
 <a class="skip-link" href="#main">Skip to content</a>
-
 <nav>
-  <a href="index.html" class="nav-logo">
-    <img src="assets/zeropoint-logo.jpg" alt="ZeroPoint Geospatial" width="48" height="48"/>
-    <div class="nav-brand-text">
-      <div class="name"><span class="blue">ZEROPOINT</span> <span class="green">GEOSPATIAL</span></div>
-      <div class="tagline">Precision Data. Smarter Decisions.</div>
-    </div>
-  </a>
+  <a href="index.html" class="nav-logo"><img src="assets/zeropoint-logo.jpg" alt="ZeroPoint Geospatial" width="48" height="48"/><div class="nav-brand-text"><div class="name"><span class="blue">ZEROPOINT</span> <span class="green">GEOSPATIAL</span></div><div class="tagline">Precision Data. Smarter Decisions.</div></div></a>
   <ul class="nav-links">
-    <li><a href="index.html#services">Services</a></li>
-    <li><a href="index.html#about">About</a></li>
-    <li><a href="index.html#projects">Work</a></li>
-    <li><a href="projects.html">Projects</a></li>
-    <li><a href="prints-shop.html">Prints</a></li>
-    <li><a href="index.html#process">Process</a></li>
-    <li><a href="blog/index.html">Blog</a></li>
-    <li><a href="index.html#contact">Contact</a></li>
+    <li><a href="index.html#services">Services</a></li><li><a href="index.html#about">About</a></li><li><a href="index.html#projects">Work</a></li><li><a href="projects.html">Projects</a></li><li><a href="prints-shop.html">Prints</a></li><li><a href="index.html#process">Process</a></li><li><a href="blog/index.html">Blog</a></li><li><a href="index.html#contact">Contact</a></li>
   </ul>
   <a href="index.html#contact" class="nav-cta">Request Quote</a>
-  <button class="hamburger" aria-label="Toggle menu" aria-expanded="false" onclick="toggleMenu()">
-    <span></span><span></span><span></span>
-  </button>
+  <button class="hamburger" aria-label="Toggle menu" aria-expanded="false" onclick="toggleMenu()"><span></span><span></span><span></span></button>
 </nav>
-
 <div id="mobileMenu" class="mobile-menu">
-  <a href="index.html#services">Services</a>
-  <a href="index.html#about">About</a>
-  <a href="index.html#projects">Work</a>
-  <a href="projects.html">Projects</a>
-  <a href="prints-shop.html">Prints</a>
-  <a href="blog/index.html">Blog</a>
-  <a href="index.html#contact">Contact</a>
+  <a href="index.html#services">Services</a><a href="index.html#about">About</a><a href="index.html#projects">Work</a><a href="projects.html">Projects</a><a href="prints-shop.html">Prints</a><a href="blog/index.html">Blog</a><a href="index.html#contact">Contact</a>
 </div>
-
 <main id="main">
-
-<section class="page-hero">
-  <div class="container">
-    <div class="section-label" style="color:rgba(255,255,255,0.6);">Field Work &amp; Deliverables</div>
-    <h1>Projects &amp; Field Work</h1>
-    <p>Real geospatial engineering projects - RTK surveys, topographic mapping, control networks, GIS workflows, and construction support across Kenya.</p>
-    <div class="page-hero-stats">
-      <span>RTK / GNSS surveys</span>
-      <span>Topographic mapping</span>
-      <span>Construction setting-out</span>
-      <span>GIS deliverables</span>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="section-header-center">
-    <div class="section-label">Our Work</div>
-    <h2 class="section-title">Survey <span>Projects</span></h2>
-    <p class="section-sub">A sample of field work, deliverables, and geospatial outputs produced for clients across Kenya.</p>
-  </div>
-  <div class="project-grid">
-
-    <article class="project-card">
-      <img src="assets/boundary_overlay.jpg" alt="Boundary and parcel survey" loading="lazy"/>
-      <div class="project-card-body">
-        <h3>Boundary &amp; Parcel Survey</h3>
-        <p>Boundary verification and coordinate confirmation for landowners and developers. Beacon identification, parcel mapping, and signed survey report.</p>
-        <div class="project-tags">
-          <span class="chip">RTK</span>
-          <span class="chip">Boundary</span>
-          <span class="chip chip-green">Control</span>
-        </div>
-      </div>
-    </article>
-
-    <article class="project-card">
-      <img src="assets/control.jpg" alt="Construction control survey" loading="lazy"/>
-      <div class="project-card-body">
-        <h3>Construction Control Survey</h3>
-        <p>Control point establishment and setting-out support for engineering works. Grid layouts, level transfers, and as-built verification.</p>
-        <div class="project-tags">
-          <span class="chip">Construction</span>
-          <span class="chip">Control Points</span>
-          <span class="chip chip-green">Engineering</span>
-        </div>
-      </div>
-    </article>
-
-    <article class="project-card">
-      <img src="assets/topo.jpg" alt="Topographic mapping" loading="lazy"/>
-      <div class="project-card-body">
-        <h3>Topographic Mapping</h3>
-        <p>Contours, spot heights, terrain models, and CAD-ready mapping outputs for design, planning, and development teams.</p>
-        <div class="project-tags">
-          <span class="chip">Contours</span>
-          <span class="chip">Topo</span>
-          <span class="chip chip-green">CAD</span>
-        </div>
-      </div>
-    </article>
-
-    <article class="project-card">
-      <img src="assets/gis-mapping.jpg" alt="GIS mapping and spatial analysis" loading="lazy"/>
-      <div class="project-card-body">
-        <h3>GIS Mapping &amp; Spatial Analysis</h3>
-        <p>Digital mapping, spatial layers, and analysis outputs. Deliverables in GIS formats ready for further processing or client use.</p>
-        <div class="project-tags">
-          <span class="chip">GIS</span>
-          <span class="chip">Layers</span>
-          <span class="chip chip-green">Analysis</span>
-        </div>
-      </div>
-    </article>
-
-    <article class="project-card">
-      <img src="assets/rtk-base-station-field.jpg" alt="RTK base station field setup" loading="lazy" style="object-position:center 35%"/>
-      <div class="project-card-body">
-        <h3>RTK / GNSS Control Networks</h3>
-        <p>High-accuracy GNSS control point surveys for engineering projects and large site layouts requiring precise coordinate control.</p>
-        <div class="project-tags">
-          <span class="chip">GNSS</span>
-          <span class="chip">RTK</span>
-          <span class="chip chip-green">Precision</span>
-        </div>
-      </div>
-    </article>
-
-    <article class="project-card">
-      <img src="assets/plans.jpg" alt="Survey plans and deliverables" loading="lazy"/>
-      <div class="project-card-body">
-        <h3>Plans, Reports &amp; Deliverables</h3>
-        <p>PDF maps, CAD drawings, coordinate reports, and GIS files - formatted for clients, consultants, architects, and contractors.</p>
-        <div class="project-tags">
-          <span class="chip">PDF</span>
-          <span class="chip">CAD</span>
-          <span class="chip chip-green">Reports</span>
-        </div>
-      </div>
-    </article>
-
-  </div>
-</section>
-
-<section style="background:var(--off-white);">
-  <div class="coming-soon-panel">
-    <h2>Case Studies in Production</h2>
-    <p>Detailed project breakdowns are being prepared with deliverable samples, field notes, quality checks, and technical summaries.</p>
-    <ul class="checklist">
-      <li>Boundary dispute resolution surveys</li>
-      <li>RTK / GNSS control networks</li>
-      <li>Pier and engineering surveys</li>
-      <li>GIS mapping workflows</li>
-      <li>Construction setting-out projects</li>
-      <li>Topographic survey deliverables</li>
-    </ul>
-    <a class="btn-primary" href="https://www.linkedin.com/company/zeropoint-geospatial/" target="_blank" rel="noopener">Follow Field Updates on LinkedIn</a>
-  </div>
-</section>
-
+<section class="page-hero"><div class="container"><div class="section-label">Field Work &amp; Deliverables</div><h1>Projects &amp; Field Work</h1><p>Real geospatial engineering projects - RTK surveys, topographic mapping, control networks, GIS workflows, and construction support across Kenya.</p><div class="page-hero-stats"><span>RTK / GNSS surveys</span><span>Topographic mapping</span><span>Construction setting-out</span><span>GIS deliverables</span></div></div></section>
+<section><div class="section-header-center"><div class="section-label">Our Work</div><h2 class="section-title">Survey <span>Projects</span></h2><p class="section-sub">A sample of field work, deliverables, and geospatial outputs produced for clients across Kenya.</p></div>
+<div class="project-grid">
+<article class="project-card"><img src="assets/boundary_overlay.jpg" alt="Boundary and parcel survey" loading="lazy"/><div class="project-card-body"><h3>Boundary &amp; Parcel Survey</h3><p>Boundary verification and coordinate confirmation for landowners and developers. Beacon identification, parcel mapping, and signed survey report.</p><div class="project-tags"><span class="chip">RTK</span><span class="chip">Boundary</span><span class="chip chip-green">Control</span></div></div></article>
+<article class="project-card"><img src="assets/control.jpg" alt="Construction control survey" loading="lazy"/><div class="project-card-body"><h3>Construction Control Survey</h3><p>Control point establishment and setting-out support for engineering works. Grid layouts, level transfers, and as-built verification.</p><div class="project-tags"><span class="chip">Construction</span><span class="chip">Control Points</span><span class="chip chip-green">Engineering</span></div></div></article>
+<article class="project-card"><img src="assets/topo.jpg" alt="Topographic mapping" loading="lazy"/><div class="project-card-body"><h3>Topographic Mapping</h3><p>Contours, spot heights, terrain models, and CAD-ready mapping outputs for design, planning, and development teams.</p><div class="project-tags"><span class="chip">Contours</span><span class="chip">Topo</span><span class="chip chip-green">CAD</span></div></div></article>
+<article class="project-card"><img src="assets/gis-mapping.jpg" alt="GIS mapping and spatial analysis" loading="lazy"/><div class="project-card-body"><h3>GIS Mapping &amp; Spatial Analysis</h3><p>Digital mapping, spatial layers, and analysis outputs. Deliverables in GIS formats ready for further processing or client use.</p><div class="project-tags"><span class="chip">GIS</span><span class="chip">Layers</span><span class="chip chip-green">Analysis</span></div></div></article>
+<article class="project-card"><img src="assets/rtk-base-station-field.jpg" alt="RTK base station field setup" loading="lazy" style="object-position:center 35%"/><div class="project-card-body"><h3>RTK / GNSS Control Networks</h3><p>High-accuracy GNSS control point surveys for engineering projects and large site layouts requiring precise coordinate control.</p><div class="project-tags"><span class="chip">GNSS</span><span class="chip">RTK</span><span class="chip chip-green">Precision</span></div></div></article>
+<article class="project-card"><img src="assets/plans.jpg" alt="Survey plans and deliverables" loading="lazy"/><div class="project-card-body"><h3>Plans, Reports &amp; Deliverables</h3><p>PDF maps, CAD drawings, coordinate reports, and GIS files - formatted for clients, consultants, architects, and contractors.</p><div class="project-tags"><span class="chip">PDF</span><span class="chip">CAD</span><span class="chip chip-green">Reports</span></div></div></article>
+</div></section>
+<section><div class="coming-soon-panel"><h2>Case Studies in Production</h2><p>Detailed project breakdowns are being prepared with deliverable samples, field notes, quality checks, and technical summaries.</p><ul class="checklist"><li>Boundary dispute resolution surveys</li><li>RTK / GNSS control networks</li><li>Pier and engineering surveys</li><li>GIS mapping workflows</li><li>Construction setting-out projects</li><li>Topographic survey deliverables</li></ul><a class="btn-primary" href="https://www.linkedin.com/company/zeropoint-geospatial/" target="_blank" rel="noopener">Follow Field Updates on LinkedIn</a></div></section>
 </main>
-
-<footer>
-  <div class="footer-brand">
-    <a href="index.html" class="nav-logo">
-      <img src="assets/zeropoint-logo.jpg" alt="ZeroPoint Geospatial" width="40" height="40" style="filter:brightness(1.1);"/>
-    </a>
-    <p><span class="accent">Precision Data. Smarter Decisions.</span><br/>&copy; 2026 ZeroPoint Geospatial. All rights reserved.</p>
-  </div>
-  <div class="footer-col">
-    <h4>Quick Links</h4>
-    <ul>
-      <li><a href="index.html">Home</a></li>
-      <li><a href="index.html#services">Services</a></li>
-      <li><a href="index.html#contact">Get a Quote</a></li>
-    </ul>
-  </div>
-  <div class="footer-col">
-    <h4>Connect</h4>
-    <div class="footer-social">
-      <a href="https://x.com/ZeroGeospatial" target="_blank" rel="noopener" aria-label="X">X</a>
-      <a href="https://github.com/ZeroPointGeospatial" target="_blank" rel="noopener" aria-label="GitHub">GH</a>
-      <a href="https://www.linkedin.com/company/zeropoint-geospatial/" target="_blank" rel="noopener" aria-label="LinkedIn">IN</a>
-    </div>
-  </div>
-  <div class="footer-bottom">Nairobi, Kenya | Professional land surveying &amp; GIS</div>
-</footer>
-
-<a href="https://wa.me/254743441757?text=Hello%20ZeroPoint%20Geospatial" class="whatsapp-btn" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
-  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-</a>
-
-<div class="mobile-bar">
-  <a class="call" href="tel:+254743441757">Call</a>
-  <a class="wa" href="https://wa.me/254743441757?text=Hello%20ZeroPoint%20Geospatial" target="_blank" rel="noopener">WhatsApp</a>
-</div>
-
+<footer><div class="footer-brand"><a href="index.html" class="nav-logo"><img src="assets/zeropoint-logo.jpg" alt="ZeroPoint Geospatial" width="40" height="40"/></a><p><span class="accent">Precision Data. Smarter Decisions.</span><br/>&copy; 2026 ZeroPoint Geospatial. All rights reserved.</p></div><div class="footer-col"><h4>Quick Links</h4><ul><li><a href="index.html">Home</a></li><li><a href="index.html#services">Services</a></li><li><a href="index.html#contact">Get a Quote</a></li></ul></div><div class="footer-col"><h4>Connect</h4><div class="footer-social"><a href="https://x.com/ZeroGeospatial" target="_blank" rel="noopener" aria-label="X">X</a><a href="https://github.com/ZeroPointGeospatial" target="_blank" rel="noopener" aria-label="GitHub">GH</a><a href="https://www.linkedin.com/company/zeropoint-geospatial/" target="_blank" rel="noopener" aria-label="LinkedIn">IN</a></div></div><div class="footer-bottom">Nairobi, Kenya | Professional land surveying &amp; GIS</div></footer>
+<a href="https://wa.me/254743441757?text=Hello%20ZeroPoint%20Geospatial" class="whatsapp-btn" target="_blank" rel="noopener" aria-label="Chat on WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.198.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>
+<div class="mobile-bar"><a class="call" href="tel:+254743441757">Call</a><a class="wa" href="https://wa.me/254743441757?text=Hello%20ZeroPoint%20Geospatial" target="_blank" rel="noopener">WhatsApp</a></div>
+<script>
+(function(){
+  const menu=document.getElementById('mobileMenu'), button=document.querySelector('.hamburger');
+  function setMenu(open){menu.classList.toggle('open',open);button.classList.toggle('open',open);button.setAttribute('aria-expanded',open?'true':'false');}
+  window.toggleMenu=function(){setMenu(!menu.classList.contains('open'));};
+  menu.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>setMenu(false)));
+  document.addEventListener('click',e=>{if(menu.classList.contains('open')&&!menu.contains(e.target)&&!button.contains(e.target))setMenu(false);});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')setMenu(false);});
+  window.addEventListener('resize',()=>{if(window.innerWidth>900)setMenu(false);});
+})();
+</script>
 <script src="js/main.js" defer></script>
 </body>
 </html>
