@@ -69,6 +69,16 @@
       whatsapp.style.right = '20px';
       whatsapp.style.bottom = mobile ? '76px' : '20px';
       whatsapp.style.zIndex = '90';
+      whatsapp.style.borderRadius = '50%';
+      whatsapp.style.padding = '0';
+      whatsapp.style.overflow = 'hidden';
+      const icon = whatsapp.querySelector('svg');
+      if (icon) {
+        icon.style.width = '27px';
+        icon.style.height = '27px';
+        icon.style.display = 'block';
+        icon.style.flex = '0 0 27px';
+      }
     }
   }
   syncFloatingControls();
@@ -240,6 +250,134 @@
     }
   `;
   document.head.appendChild(navStyle);
+
+  /* Contact section polish: keep the existing form and Calendly functionality, only fix presentation. */
+  const contactStyle = document.createElement('style');
+  contactStyle.id = 'zp-contact-polish';
+  contactStyle.textContent = `
+    #contact .contact-wrap {
+      align-items: start !important;
+    }
+    #contact .calendly-wrap {
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+    #contact .calendly-inline-widget {
+      width: 100% !important;
+      min-width: 0 !important;
+      height: 680px !important;
+      min-height: 680px !important;
+      overflow: hidden !important;
+      background: #fff !important;
+    }
+    #contact .calendly-inline-widget iframe {
+      width: 100% !important;
+      min-width: 0 !important;
+      height: 680px !important;
+      min-height: 680px !important;
+      border: 0 !important;
+    }
+    #contact .contact-form-wrap {
+      width: 100% !important;
+      overflow: hidden !important;
+      background: #f4f3ee !important;
+      border: 1px solid #d5d5ce !important;
+    }
+    #contact .form-img {
+      display: block !important;
+      width: 100% !important;
+      height: 190px !important;
+      object-fit: cover !important;
+      object-position: center !important;
+      filter: grayscale(.35) saturate(.55) !important;
+    }
+    #contact .contact-form {
+      display: block !important;
+      padding: 1.75rem !important;
+    }
+    #contact .form-row {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 1rem !important;
+      margin: 0 0 1rem !important;
+    }
+    #contact .form-group {
+      display: flex !important;
+      flex-direction: column !important;
+      min-width: 0 !important;
+      width: 100% !important;
+      gap: .4rem !important;
+    }
+    #contact .form-group label {
+      display: block !important;
+      margin: 0 !important;
+      line-height: 1.2 !important;
+    }
+    #contact .form-group input,
+    #contact .form-group select,
+    #contact .form-group textarea {
+      display: block !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      min-height: 42px !important;
+      padding: .7rem .75rem !important;
+      font: inherit !important;
+      font-size: .82rem !important;
+      line-height: 1.3 !important;
+    }
+    #contact .form-group select {
+      appearance: auto !important;
+      -webkit-appearance: auto !important;
+    }
+    #contact .hidden-field {
+      display: none !important;
+      visibility: hidden !important;
+    }
+    #contact .submit-btn {
+      display: block !important;
+      width: 100% !important;
+      min-height: 48px !important;
+      margin-top: .25rem !important;
+    }
+    #contact .form-success {
+      margin-top: .8rem !important;
+      line-height: 1.55 !important;
+    }
+    .whatsapp-btn {
+      width: 56px !important;
+      height: 56px !important;
+      min-width: 56px !important;
+      min-height: 56px !important;
+      padding: 0 !important;
+      border-radius: 50% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      background: #0b0d0c !important;
+      color: #fff !important;
+      border: 1px solid rgba(255,255,255,.16) !important;
+      box-shadow: 0 8px 24px rgba(0,0,0,.16) !important;
+      overflow: hidden !important;
+    }
+    .whatsapp-btn svg {
+      width: 27px !important;
+      height: 27px !important;
+      display: block !important;
+      flex: 0 0 27px !important;
+    }
+    @media (max-width: 900px) {
+      #contact .form-row {
+        grid-template-columns: 1fr !important;
+        gap: .85rem !important;
+      }
+      #contact .calendly-inline-widget,
+      #contact .calendly-inline-widget iframe {
+        height: 650px !important;
+        min-height: 650px !important;
+      }
+    }
+  `;
+  document.head.appendChild(contactStyle);
 
   /* Existing Jekyll fallback cleanup. */
   function cleanUnbuiltJekyllText() {
