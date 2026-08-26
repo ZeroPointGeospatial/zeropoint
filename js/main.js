@@ -1,4 +1,16 @@
 (function () {
+  // Hide the mobile menu immediately, before any other page logic runs.
+  // This prevents the menu from ever appearing as a permanent open panel.
+  const mobileMenu = document.getElementById('mobileMenu');
+  const hamburger = document.querySelector('.hamburger');
+  const nav = document.querySelector('nav');
+  if (mobileMenu) {
+    mobileMenu.classList.remove('open');
+    mobileMenu.hidden = true;
+    mobileMenu.style.display = 'none';
+  }
+  if (hamburger) hamburger.setAttribute('aria-expanded', 'false');
+
   function cleanUnbuiltJekyllText() {
     const bodyText = document.body?.innerText || '';
     const looksUnbuilt = bodyText.includes('{%') || bodyText.includes('{{') || bodyText.trim().startsWith('---');
@@ -16,10 +28,6 @@
   }
 
   cleanUnbuiltJekyllText();
-
-  const mobileMenu = document.getElementById('mobileMenu');
-  const hamburger = document.querySelector('.hamburger');
-  const nav = document.querySelector('nav');
 
   function syncFloatingControls() {
     const mobile = window.innerWidth <= 800;
@@ -45,7 +53,10 @@
     hamburger?.classList.toggle('open', shouldOpen);
     hamburger?.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
     document.body.classList.toggle('menu-open', shouldOpen);
-    if (mobileMenu) mobileMenu.style.display = shouldOpen ? 'flex' : 'none';
+    if (mobileMenu) {
+      mobileMenu.hidden = !shouldOpen;
+      mobileMenu.style.display = shouldOpen ? 'flex' : 'none';
+    }
   }
 
   // Always start closed. Desktop should never show the mobile menu.
