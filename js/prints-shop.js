@@ -87,7 +87,74 @@
     /* Keep the page content from hiding underneath the fixed shop header. */
     body.prints-shop-page main { padding-top: 74px !important; }
 
-    /* Floating WhatsApp: green, circular and clean. */
+    /* Two-card collection rows: no awkward empty third column. */
+    body.prints-shop-page .print-grid-compact {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      max-width: 1200px !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+    }
+
+    /* Custom-print CTA: keep buttons in normal document flow so they never
+       sit on top of the bullet list or other copy. */
+    body.prints-shop-page .prints-custom-btns {
+      position: relative !important;
+      display: flex !important;
+      align-items: center !important;
+      flex-wrap: wrap !important;
+      gap: .75rem !important;
+      width: 100% !important;
+      margin-top: 2rem !important;
+      padding-top: 0 !important;
+      clear: both !important;
+    }
+    body.prints-shop-page .prints-custom-btns .btn-primary,
+    body.prints-shop-page .prints-custom-btns .btn-wa {
+      position: static !important;
+      float: none !important;
+      transform: none !important;
+      margin: 0 !important;
+      min-height: 46px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: .5rem !important;
+      box-sizing: border-box !important;
+      text-decoration: none !important;
+      white-space: nowrap !important;
+    }
+    body.prints-shop-page .prints-custom-btns .btn-primary {
+      background: #151817 !important;
+      color: #fff !important;
+      border: 1px solid #151817 !important;
+      padding: .78rem 1.15rem !important;
+    }
+    body.prints-shop-page .prints-custom-btns .btn-primary:hover {
+      background: #8fa36f !important;
+      border-color: #8fa36f !important;
+      color: #111 !important;
+    }
+    body.prints-shop-page .prints-custom-btns .btn-wa {
+      background: #25D366 !important;
+      color: #fff !important;
+      border: 1px solid #25D366 !important;
+      padding: .78rem 1.15rem !important;
+      opacity: 1 !important;
+    }
+    body.prints-shop-page .prints-custom-btns .btn-wa:hover {
+      background: #1fb957 !important;
+      border-color: #1fb957 !important;
+      color: #fff !important;
+    }
+    body.prints-shop-page .prints-custom-btns .btn-wa svg {
+      width: 18px !important;
+      height: 18px !important;
+      flex: 0 0 18px !important;
+      display: block !important;
+      fill: currentColor !important;
+    }
+
+    /* Floating WhatsApp: unmistakably WhatsApp, never black. */
     body.prints-shop-page .whatsapp-btn {
       position: fixed !important;
       right: 24px !important;
@@ -103,14 +170,53 @@
       justify-content: center !important;
       background: #25D366 !important;
       color: #fff !important;
-      border: 0 !important;
+      border: 2px solid #fff !important;
       border-radius: 50% !important;
-      box-shadow: 0 8px 22px rgba(0,0,0,.18) !important;
+      box-shadow: 0 8px 22px rgba(0,0,0,.22) !important;
+      overflow: hidden !important;
     }
     body.prints-shop-page .whatsapp-btn svg {
       width: 27px !important;
       height: 27px !important;
+      display: block !important;
+      flex: 0 0 27px !important;
       fill: currentColor !important;
+    }
+
+    /* Mobile bottom contact bar: reserve space and keep it out of page copy. */
+    body.prints-shop-page .mobile-bar {
+      position: fixed !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      z-index: 1090 !important;
+      display: none !important;
+      grid-template-columns: 1fr 1fr !important;
+      gap: 8px !important;
+      padding: 10px !important;
+      background: rgba(11,13,12,.97) !important;
+      border-top: 1px solid rgba(255,255,255,.14) !important;
+      box-shadow: 0 -10px 30px rgba(0,0,0,.18) !important;
+    }
+    body.prints-shop-page .mobile-bar a {
+      min-height: 44px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-decoration: none !important;
+      font-size: .65rem !important;
+      font-weight: 600 !important;
+      letter-spacing: 1px !important;
+      text-transform: uppercase !important;
+    }
+    body.prints-shop-page .mobile-bar .call {
+      background: #fff !important;
+      color: #111 !important;
+    }
+    body.prints-shop-page .mobile-bar .wa {
+      background: #25D366 !important;
+      color: #fff !important;
+      border: 1px solid #25D366 !important;
     }
 
     @media (max-width: 1050px) {
@@ -122,6 +228,30 @@
       }
       body.prints-shop-page .prints-shop-logo {
         margin-right: 0 !important;
+      }
+    }
+
+    @media (max-width: 800px) {
+      body.prints-shop-page .mobile-bar {
+        display: grid !important;
+      }
+      body.prints-shop-page main {
+        padding-bottom: 76px !important;
+      }
+      body.prints-shop-page .whatsapp-btn {
+        right: 16px !important;
+        bottom: 86px !important;
+      }
+      body.prints-shop-page .print-grid-compact {
+        grid-template-columns: 1fr !important;
+      }
+      body.prints-shop-page .prints-custom-btns {
+        flex-direction: column !important;
+        align-items: stretch !important;
+      }
+      body.prints-shop-page .prints-custom-btns .btn-primary,
+      body.prints-shop-page .prints-custom-btns .btn-wa {
+        width: 100% !important;
       }
     }
 
@@ -138,10 +268,6 @@
       }
       body.prints-shop-page .prints-shop-logo-tagline {
         display: none !important;
-      }
-      body.prints-shop-page .whatsapp-btn {
-        right: 16px !important;
-        bottom: 76px !important;
       }
     }
   `;
