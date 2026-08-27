@@ -45,7 +45,7 @@
       display: block !important;
     }
     body.prints-shop-page .print-frames {
-      margin-top: 0 !important;
+      margin-top: auto !important;
       margin-bottom: .85rem !important;
       padding-top: .8rem !important;
       flex-shrink: 0 !important;
