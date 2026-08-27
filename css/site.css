@@ -196,7 +196,7 @@ nav.scrolled .hamburger span { background: var(--zp-ink); }
   position: relative;
   z-index: 6;
   width: min(850px, 72vw);
-  padding: 10.7rem 0 0 5.2%;
+  padding: 10.7rem 0 7rem 5.2%;
 }
 .hero-badge {
   display: inline-flex;
