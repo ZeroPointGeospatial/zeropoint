@@ -29,13 +29,32 @@
     body.prints-shop-page .prints-sticky-nav-inner > a:not(.prints-shop-logo):focus { color: #fff !important; }
     body.prints-shop-page main { padding-top: 74px !important; }
 
-    /* Keep the product grid dense and balanced. A 9-card collection becomes a clean 3 x 3. */
+    /* Product cards: keep the row level and remove the artificial white void. */
     body.prints-shop-page .print-grid > .print-card,
-    body.prints-shop-page .print-grid-compact > .print-card { min-width: 0 !important; }
-    body.prints-shop-page .print-card-body { box-sizing: border-box !important; }
-    body.prints-shop-page .print-card-body > p:not(.print-price):not(.print-size) { min-height: 3.2em !important; }
-    body.prints-shop-page .print-frames { margin-top: auto !important; }
-    body.prints-shop-page .print-order-btn { flex: 0 0 42px !important; }
+    body.prints-shop-page .print-grid-compact > .print-card { min-width: 0 !important; min-height: 0 !important; }
+    body.prints-shop-page .print-card-body {
+      box-sizing: border-box !important;
+      display: flex !important;
+      flex-direction: column !important;
+      flex: 1 1 auto !important;
+      min-height: 0 !important;
+    }
+    body.prints-shop-page .print-card-body > p:not(.print-price):not(.print-size) {
+      min-height: 4.25rem !important;
+      margin-bottom: .8rem !important;
+      display: block !important;
+    }
+    body.prints-shop-page .print-frames {
+      margin-top: 0 !important;
+      margin-bottom: .85rem !important;
+      padding-top: .8rem !important;
+      flex-shrink: 0 !important;
+    }
+    body.prints-shop-page .print-order-btn {
+      margin-top: 0 !important;
+      flex: 0 0 42px !important;
+      min-height: 42px !important;
+    }
 
     body.prints-shop-page .prints-custom-btns {
       position: relative !important; display: flex !important; align-items: center !important;
@@ -51,7 +70,7 @@
     }
     body.prints-shop-page .prints-custom-btns .btn-primary { background: #151817 !important; color: #fff !important; border: 1px solid #151817 !important; padding: .78rem 1.15rem !important; }
     body.prints-shop-page .prints-custom-btns .btn-primary:hover { background: #8fa36f !important; border-color: #8fa36f !important; color: #111 !important; }
-    body.prints-shop-page .prints-custom-btns .btn-wa { background: #25D366 !important; color: #fff !important; border: 1px solid #25D366 !important; padding: .78rem 1.15rem !important; opacity: 1 !important; }
+    body.prints-shop-page .prints-custom-btns .btn-wa { background: #25D366 !important; color: #fff !important; border: 1px solid #25D366 !important; padding: .78rem 1.15rem !important; }
     body.prints-shop-page .prints-custom-btns .btn-wa:hover { background: #1fb957 !important; border-color: #1fb957 !important; color: #fff !important; }
     body.prints-shop-page .prints-custom-btns .btn-wa svg { width: 18px !important; height: 18px !important; flex: 0 0 18px !important; display: block !important; fill: currentColor !important; }
 
@@ -74,7 +93,6 @@
     body.prints-shop-page .mobile-bar .call { background: #fff !important; color: #111 !important; }
     body.prints-shop-page .mobile-bar .wa { background: #25D366 !important; color: #fff !important; border: 1px solid #25D366 !important; }
 
-    /* Placeholder card uses an existing ZeroPoint image and follows the same proportions. */
     body.prints-shop-page .print-card.print-card-placeholder .print-image-wrap { min-height: 0 !important; }
     body.prints-shop-page .print-card.print-card-placeholder .print-frame-mock { aspect-ratio: 16 / 10 !important; overflow: hidden !important; }
     body.prints-shop-page .print-card.print-card-placeholder .print-frame-mock img { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block !important; }
