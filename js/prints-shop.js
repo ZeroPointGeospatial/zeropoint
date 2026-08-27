@@ -29,13 +29,13 @@
     body.prints-shop-page .prints-sticky-nav-inner > a:not(.prints-shop-logo):focus { color: #fff !important; }
     body.prints-shop-page main { padding-top: 74px !important; }
 
-    /* Balanced print grids */
-    body.prints-shop-page .print-grid:has(> .print-card:nth-child(2):last-child),
-    body.prints-shop-page .print-grid-compact:has(> .print-card:nth-child(2):last-child) { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
-    body.prints-shop-page .print-grid:has(> .print-card:nth-child(3):last-child),
-    body.prints-shop-page .print-grid-compact:has(> .print-card:nth-child(3):last-child) { grid-template-columns: repeat(3, minmax(0,1fr)) !important; }
+    /* Keep the product grid dense and balanced. A 9-card collection becomes a clean 3 x 3. */
     body.prints-shop-page .print-grid > .print-card,
     body.prints-shop-page .print-grid-compact > .print-card { min-width: 0 !important; }
+    body.prints-shop-page .print-card-body { box-sizing: border-box !important; }
+    body.prints-shop-page .print-card-body > p:not(.print-price):not(.print-size) { min-height: 3.2em !important; }
+    body.prints-shop-page .print-frames { margin-top: auto !important; }
+    body.prints-shop-page .print-order-btn { flex: 0 0 42px !important; }
 
     body.prints-shop-page .prints-custom-btns {
       position: relative !important; display: flex !important; align-items: center !important;
@@ -74,7 +74,7 @@
     body.prints-shop-page .mobile-bar .call { background: #fff !important; color: #111 !important; }
     body.prints-shop-page .mobile-bar .wa { background: #25D366 !important; color: #fff !important; border: 1px solid #25D366 !important; }
 
-    /* Keep dynamically added print cards consistent with the existing shop */
+    /* Placeholder card uses an existing ZeroPoint image and follows the same proportions. */
     body.prints-shop-page .print-card.print-card-placeholder .print-image-wrap { min-height: 0 !important; }
     body.prints-shop-page .print-card.print-card-placeholder .print-frame-mock { aspect-ratio: 16 / 10 !important; overflow: hidden !important; }
     body.prints-shop-page .print-card.print-card-placeholder .print-frame-mock img { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block !important; }
@@ -85,17 +85,15 @@
       body.prints-shop-page .prints-shop-logo { margin-right: 0 !important; }
     }
     @media (max-width: 1000px) {
-      body.prints-shop-page .print-grid:has(> .print-card:nth-child(3):last-child),
-      body.prints-shop-page .print-grid-compact:has(> .print-card:nth-child(3):last-child) { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+      body.prints-shop-page .print-grid,
+      body.prints-shop-page .print-grid-compact { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
     }
     @media (max-width: 800px) {
       body.prints-shop-page .mobile-bar { display: grid !important; }
       body.prints-shop-page main { padding-bottom: 76px !important; }
       body.prints-shop-page .whatsapp-btn { right: 16px !important; bottom: 86px !important; }
-      body.prints-shop-page .print-grid:has(> .print-card:nth-child(3):last-child),
-      body.prints-shop-page .print-grid:has(> .print-card:nth-child(2):last-child),
-      body.prints-shop-page .print-grid-compact:has(> .print-card:nth-child(3):last-child),
-      body.prints-shop-page .print-grid-compact:has(> .print-card:nth-child(2):last-child) { grid-template-columns: 1fr !important; }
+      body.prints-shop-page .print-grid,
+      body.prints-shop-page .print-grid-compact { grid-template-columns: 1fr !important; }
       body.prints-shop-page .prints-custom-btns { flex-direction: column !important; align-items: stretch !important; }
       body.prints-shop-page .prints-custom-btns .btn-primary,
       body.prints-shop-page .prints-custom-btns .btn-wa { width: 100% !important; }
@@ -136,7 +134,7 @@
     var grids = document.querySelectorAll('body.prints-shop-page .print-grid, body.prints-shop-page .print-grid-compact');
     grids.forEach(function (grid) {
       var cards = grid.querySelectorAll(':scope > .print-card');
-      if (cards.length !== 9 || grid.querySelector('.print-card-placeholder')) return;
+      if (cards.length !== 8 || grid.querySelector('.print-card-placeholder')) return;
 
       var card = document.createElement('article');
       card.className = 'print-card print-card-placeholder';
