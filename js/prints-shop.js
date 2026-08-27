@@ -94,8 +94,8 @@
     body.prints-shop-page .mobile-bar .wa { background: #25D366 !important; color: #fff !important; border: 1px solid #25D366 !important; }
 
     body.prints-shop-page .print-card.print-card-placeholder .print-image-wrap { min-height: 0 !important; }
-    body.prints-shop-page .print-card.print-card-placeholder .print-frame-mock { aspect-ratio: 16 / 10 !important; overflow: hidden !important; }
-    body.prints-shop-page .print-card.print-card-placeholder .print-frame-mock img { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block !important; }
+    body.prints-shop-page .print-card.print-card-placeholder .print-frame-mock { overflow: hidden !important; }
+    body.prints-shop-page .print-card.print-card-placeholder .print-frame-mock img { width: 100% !important; height: 230px !important; object-fit: cover !important; display: block !important; }
 
     @media (max-width: 1050px) {
       body.prints-shop-page .prints-sticky-nav-inner > a:not(.prints-shop-logo) { display: none !important; }
