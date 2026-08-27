@@ -29,15 +29,11 @@
     body.prints-shop-page .prints-sticky-nav-inner > a:not(.prints-shop-logo):focus { color: #fff !important; }
     body.prints-shop-page main { padding-top: 74px !important; }
 
-    /* Balanced print grids: two cards use two columns; three cards use three columns. */
+    /* Balanced print grids */
     body.prints-shop-page .print-grid:has(> .print-card:nth-child(2):last-child),
-    body.prints-shop-page .print-grid-compact:has(> .print-card:nth-child(2):last-child) {
-      grid-template-columns: repeat(2, minmax(0,1fr)) !important;
-    }
+    body.prints-shop-page .print-grid-compact:has(> .print-card:nth-child(2):last-child) { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
     body.prints-shop-page .print-grid:has(> .print-card:nth-child(3):last-child),
-    body.prints-shop-page .print-grid-compact:has(> .print-card:nth-child(3):last-child) {
-      grid-template-columns: repeat(3, minmax(0,1fr)) !important;
-    }
+    body.prints-shop-page .print-grid-compact:has(> .print-card:nth-child(3):last-child) { grid-template-columns: repeat(3, minmax(0,1fr)) !important; }
     body.prints-shop-page .print-grid > .print-card,
     body.prints-shop-page .print-grid-compact > .print-card { min-width: 0 !important; }
 
@@ -77,6 +73,11 @@
     body.prints-shop-page .mobile-bar a { min-height: 44px !important; display: flex !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; font-size: .65rem !important; font-weight: 600 !important; letter-spacing: 1px !important; text-transform: uppercase !important; }
     body.prints-shop-page .mobile-bar .call { background: #fff !important; color: #111 !important; }
     body.prints-shop-page .mobile-bar .wa { background: #25D366 !important; color: #fff !important; border: 1px solid #25D366 !important; }
+
+    /* Keep dynamically added print cards consistent with the existing shop */
+    body.prints-shop-page .print-card.print-card-placeholder .print-image-wrap { min-height: 0 !important; }
+    body.prints-shop-page .print-card.print-card-placeholder .print-frame-mock { aspect-ratio: 16 / 10 !important; overflow: hidden !important; }
+    body.prints-shop-page .print-card.print-card-placeholder .print-frame-mock img { width: 100% !important; height: 100% !important; object-fit: cover !important; display: block !important; }
 
     @media (max-width: 1050px) {
       body.prints-shop-page .prints-sticky-nav-inner > a:not(.prints-shop-logo) { display: none !important; }
@@ -131,6 +132,38 @@
     }
   }
 
+  function addPlaceholderToNineItemGrid() {
+    var grids = document.querySelectorAll('body.prints-shop-page .print-grid, body.prints-shop-page .print-grid-compact');
+    grids.forEach(function (grid) {
+      var cards = grid.querySelectorAll(':scope > .print-card');
+      if (cards.length !== 9 || grid.querySelector('.print-card-placeholder')) return;
+
+      var card = document.createElement('article');
+      card.className = 'print-card print-card-placeholder';
+      card.innerHTML = `
+        <div class="print-image-wrap">
+          <div class="print-frame-mock">
+            <img src="assets/gis.jpg" alt="GIS and infrastructure map print" loading="lazy">
+          </div>
+        </div>
+        <div class="print-card-body">
+          <span class="print-category-tag">Thematic</span>
+          <h3>GIS &amp; Infrastructure Map — Kenya</h3>
+          <p class="print-price">From KSh 9,000</p>
+          <p class="print-size">A2 · A1 · A0 · Custom</p>
+          <p>A clean spatial map combining infrastructure, roads, locations, and geographic context — designed as a statement print for offices and planning spaces.</p>
+          <div class="print-frames">
+            <span class="frame-swatch"><i class="swatch-black"></i>Black</span>
+            <span class="frame-swatch"><i class="swatch-gold"></i>Gold</span>
+            <span class="frame-swatch"><i class="swatch-silver"></i>Silver</span>
+            <span class="frame-swatch frame-swatch-framed"><i class="swatch-green"></i>Framed</span>
+          </div>
+          <a class="print-order-btn" href="https://wa.me/254743441757?text=Hello%20ZeroPoint%2C%20I%20want%20to%20order%20the%20GIS%20and%20Infrastructure%20Map%20-%20Kenya%20print." target="_blank" rel="noopener">Order Print</a>
+        </div>`;
+      grid.appendChild(card);
+    });
+  }
+
   function closePrintsMenu() {
     var menu = document.getElementById('mobileMenu');
     var button = document.querySelector('body.prints-shop-page > nav .hamburger');
@@ -142,5 +175,6 @@
   }
 
   setupPrintsHeader();
+  addPlaceholderToNineItemGrid();
   closePrintsMenu();
 })();
