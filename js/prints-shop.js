@@ -109,7 +109,7 @@
     @media (max-width: 800px) {
       body.prints-shop-page .mobile-bar { display: grid !important; }
       body.prints-shop-page main { padding-bottom: 76px !important; }
-      body.prints-shop-page .whatsapp-btn { right: 16px !important; bottom: 86px !important; }
+      body.prints-shop-page .whatsapp-btn { display: none !important; }
       body.prints-shop-page .print-grid,
       body.prints-shop-page .print-grid-compact { grid-template-columns: 1fr !important; }
       body.prints-shop-page .prints-custom-btns { flex-direction: column !important; align-items: stretch !important; }
