@@ -1,0 +1,12 @@
+{%- comment -%}
+  Sets `root`: the relative path from the current page back to the site root
+  ("./", "../" or "../../"). Every internal link is built from it, so the
+  site works unchanged under /zeropoint/ on GitHub Pages, at the root of
+  another host, or from a local folder.
+{%- endcomment -%}
+{%- assign _parts = page.url | split: '/' -%}
+{%- assign _last = page.url | slice: -1 -%}
+{%- if _last == '/' -%}{%- assign _up = _parts.size | minus: 1 -%}{%- else -%}{%- assign _up = _parts.size | minus: 2 -%}{%- endif -%}
+{%- assign root = '' -%}
+{%- if _up > 0 -%}{%- for i in (1.._up) -%}{%- assign root = root | append: '../' -%}{%- endfor -%}{%- endif -%}
+{%- if root == '' -%}{%- assign root = './' -%}{%- endif -%}

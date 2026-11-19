@@ -1,0 +1,16 @@
+# One place for every contact detail used across the site.
+whatsapp: "254743441757"
+phones:
+  - { label: "+254 743 441 757", tel: "+254743441757" }
+  - { label: "+254 790 870 001", tel: "+254790870001" }
+  - { label: "+254 793 958 040", tel: "+254793958040" }
+email: zeropointgeospatial@gmail.com
+location: Nairobi, Kenya
+hours: Monday to Friday, 08:00 to 17:00
+booking: https://calendly.com/zeropointgeospatial/30min
+form_action: https://formspree.io/f/xredlvbp
+review_form: https://forms.gle/pQ8zzixwnjA6qkj98
+social:
+  - { name: LinkedIn, url: "https://www.linkedin.com/company/zeropoint-geospatial/" }
+  - { name: X, url: "https://x.com/ZeroGeospatial" }
+  - { name: GitHub, url: "https://github.com/ZeroPointGeospatial" }

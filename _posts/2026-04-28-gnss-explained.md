@@ -3,8 +3,6 @@ layout: post
 title: "GNSS Explained: Why Your Phone GPS and a Survey GPS Are Not the Same Thing"
 ---
 
-# GNSS Explained: Why Your Phone GPS and a Survey GPS Are Not the Same Thing
-
 When people find out what professional survey equipment costs, the first question is usually some version of: *But my phone has GPS. Why can't you just use that?*
 
 It is a fair question. Your phone does have GPS. It does give you coordinates. It can navigate you across Nairobi with reasonable accuracy. So what exactly is the difference — and why does it matter?

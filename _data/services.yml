@@ -1,0 +1,26 @@
+# The six services listed on the home page. `quote` is the WhatsApp message
+# a visitor starts with when they tap "Get a quote".
+- name: Boundary and cadastral survey
+  desc: Beacon identification, parcel boundary confirmation and coordinate-based documentation.
+  turnaround: 2 to 4 days
+  quote: Hello ZeroPoint Geospatial, I would like a quote for a Boundary Survey.
+- name: Topographic survey
+  desc: Contours, spot heights, site features and terrain data for design work.
+  turnaround: 3 to 5 days
+  quote: Hello ZeroPoint Geospatial, I would like a quote for a Topographic Survey.
+- name: Engineering and construction survey
+  desc: Setting-out, grid control and level transfer for construction teams.
+  turnaround: 1 to 3 days
+  quote: Hello ZeroPoint Geospatial, I would like a quote for a Construction Survey.
+- name: GPS and RTK survey
+  desc: Fast coordinate capture and high-accuracy location data.
+  turnaround: Same day to 1 day
+  quote: Hello ZeroPoint Geospatial, I would like a quote for an RTK Survey.
+- name: GIS mapping and spatial analysis
+  desc: Digital mapping, GIS layers and spatial analysis.
+  turnaround: 3 to 7 days
+  quote: Hello ZeroPoint Geospatial, I would like a quote for GIS Mapping.
+- name: Plans, drawings and deliverables
+  desc: PDF maps, CAD drawings and GIS-ready files.
+  turnaround: 2 to 5 days
+  quote: Hello ZeroPoint Geospatial, I would like survey plans prepared.

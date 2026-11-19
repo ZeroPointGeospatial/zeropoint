@@ -1,0 +1,89 @@
+---
+layout: default
+---
+{%- include root.html -%}
+{%- assign c = site.data.contact -%}
+{%- assign shop = site.data.shop -%}
+{%- assign d = site.data.print_images[page.slug] -%}
+{%- assign fullname = page.title | append: ': ' | append: page.theme -%}
+<section class="band band--paper band--tight">
+  <div class="wrap print">
+    <div>
+      <div class="print__stage">
+        <button class="frame" type="button" data-frame="black" aria-label="View {{ fullname }} larger">
+          <img src="{{ root }}assets/prints/{{ page.slug }}-1280.webp"
+               srcset="{{ root }}assets/prints/{{ page.slug }}-640.webp 640w, {{ root }}assets/prints/{{ page.slug }}-1280.webp 1280w"
+               sizes="(min-width: 900px) 40vw, 86vw" width="{{ d.w }}" height="{{ d.h }}"
+               alt="{{ fullname }}, map print" fetchpriority="high">
+        </button>
+      </div>
+      <p class="print__hint">Select the print to see it larger</p>
+    </div>
+
+    <div>
+      <p class="label"><a href="{{ root }}prints/">Map prints</a> <span class="sep">/</span> {{ page.series }} <span class="sep">/</span> Plate {{ page.plate }}</p>
+      <h1 class="print__title">{{ page.title }}</h1>
+      <p class="print__theme">{{ page.theme }}</p>
+      <div class="print__body">{{ content }}</div>
+
+      <div class="print__price"><strong>{{ shop.price }}</strong><span>{{ shop.price_note }}</span></div>
+
+      <form id="print-order" data-print="{{ fullname | escape }}" onsubmit="return false">
+        <fieldset class="options">
+          <legend>Size</legend>
+          <div class="options__row">
+            {%- for s in shop.sizes %}
+            <label class="option"><input type="radio" name="size" value="{{ s.id }}" data-label="{{ s.label }}"{% if forloop.first %} checked{% endif %}><span>{{ s.label }} <small>{{ s.dims }}</small></span></label>
+            {%- endfor %}
+          </div>
+        </fieldset>
+        <fieldset class="options">
+          <legend>Finish</legend>
+          <div class="options__row">
+            {%- for f in shop.frames %}
+            <label class="option"><input type="radio" name="frame" value="{{ f.id }}" data-label="{{ f.label }}"{% if forloop.first %} checked{% endif %}><span><i style="background:{{ f.swatch }}"></i>{{ f.label }}</span></label>
+            {%- endfor %}
+          </div>
+        </fieldset>
+      </form>
+
+      {%- assign msg = 'Hello ZeroPoint, I would like to order the print "' | append: fullname | append: '".' %}
+      <div class="btn-row">
+        <a class="btn btn--wa" id="order-wa" data-number="{{ c.whatsapp }}" href="https://wa.me/{{ c.whatsapp }}?text={{ msg | url_encode | replace: '+', '%20' }}" target="_blank" rel="noopener">{% include wa-icon.html %} Order on WhatsApp</a>
+        <a class="btn btn--ghost" id="order-mail" data-email="{{ c.email }}" href="mailto:{{ c.email }}?subject={{ 'Print order: ' | append: fullname | url_encode | replace: '+', '%20' }}">Order by email</a>
+      </div>
+      <p class="print__assure">Free delivery and installation in Nairobi for framed prints. Delivery across Kenya on request.</p>
+
+      <dl class="sheet">
+        {%- for f in page.facts %}
+        <div><dt>{{ f[0] }}</dt><dd>{{ f[1] }}</dd></div>
+        {%- endfor %}
+        <div><dt>Paper</dt><dd>Matte or satin, your choice</dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section class="band band--white">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="label">More prints</p>
+      <div class="sec-head__body"><h2 class="h2">From the <strong>same collection</strong></h2></div>
+    </div>
+    <div class="catalogue">
+      {%- assign others = site.prints | sort: 'order' | where_exp: 'p', 'p.slug != page.slug' -%}
+      {%- assign same = others | where: 'series', page.series -%}
+      {%- assign rest = others | where_exp: 'p', 'p.series != page.series' -%}
+      {%- assign picks = same | concat: rest -%}
+      {%- for p in picks limit: 3 %}
+      {% include print-card.html print=p %}
+      {%- endfor %}
+    </div>
+    <p class="mt-l"><a class="text-link" href="{{ root }}prints/">All map prints</a></p>
+  </div>
+</section>
+
+<dialog class="zoom" id="zoom" aria-label="{{ fullname }}, enlarged">
+  <button class="btn btn--light btn--sm zoom__close" type="button">Close</button>
+  <div class="zoom__inner"><img data-src="{{ root }}assets/prints/{{ page.slug }}-2000.webp" alt="{{ fullname }}, enlarged" width="{{ d.w2000 }}" height="{{ d.h2000 }}"></div>
+</dialog>

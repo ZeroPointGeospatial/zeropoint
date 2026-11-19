@@ -3,8 +3,6 @@ layout: post
 title: "Why Your Map Coordinates Might Be Wrong (And How to Fix It)"
 ---
 
-# Why Your Map Coordinates Might Be Wrong (And How to Fix It)
-
 Here is a situation that happens more often than it should:
 
 A client receives a GIS shapefile from one consultant. They bring in another consultant who collects new survey data. When both datasets are loaded into the same GIS, the features are 50 metres apart — even though they are supposed to represent the same things.

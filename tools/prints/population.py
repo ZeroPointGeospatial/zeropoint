@@ -26,11 +26,11 @@ PLATES = {
     "kenya": dict(
         number="01", title="Kenya", subtitle="Where 55 million people live",
         tilt=62.0, max_height_km=440.0, model_width=0.90, drop=0.075),
-    "nairobi": dict(
-        number="09", title="Nairobi", subtitle="Population of the metropolitan area",
-        bounds_lonlat=(36.60, -1.52, 37.12, -0.98), tilt=54.0, max_height_km=30.0,
-        model_width=0.86, drop=0.16),
 }
+# A plate can also be limited to one city by adding `bounds_lonlat=(w, s, e, n)`.
+# Mind that Kontur caps very dense hexagons: central Nairobi tops out at
+# 37 287 people in dozens of neighbouring cells, which shows as a flat-topped
+# block at city scale. At country scale it does not.
 
 
 def polygon_slab(poly, thickness):

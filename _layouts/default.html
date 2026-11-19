@@ -1,0 +1,18 @@
+{%- include root.html -%}
+<!DOCTYPE html>
+<html lang="{{ site.lang }}">
+<head>
+{% include head.html %}
+{%- if page.schema %}
+<script type="application/ld+json">{{ page.schema | jsonify }}</script>
+{%- endif %}
+</head>
+<body{% if page.body_class %} class="{{ page.body_class }}"{% endif %}>
+{% include header.html %}
+<main id="main">
+{{ content }}
+</main>
+{% include footer.html %}
+<script src="{{ root }}js/site.js?v={{ site.time | date: '%Y%m%d%H%M' }}" defer></script>
+</body>
+</html>

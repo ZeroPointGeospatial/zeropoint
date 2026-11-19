@@ -3,8 +3,6 @@ layout: post
 title: "Remote Sensing for Agriculture: How Satellite Data Is Changing Farming in Kenya"
 ---
 
-# Remote Sensing for Agriculture: How Satellite Data Is Changing Farming in Kenya
-
 In 1972, NASA launched Landsat 1 — the first satellite designed specifically to observe the earth's land surface. The images it returned were revolutionary, even at a resolution of 80 metres per pixel.
 
 Today, a constellation of commercial and government satellites produces imagery at resolutions below 50 centimetres, updated daily, accessible via API, and in many cases free. The same satellite data that intelligence agencies and multinational corporations relied on a decade ago is now available to a county agricultural extension officer with a laptop and an internet connection.

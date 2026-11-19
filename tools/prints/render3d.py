@@ -264,10 +264,26 @@ def render(shapes, width, height, view_width, tilt=60.0, heading=0.0, centre=(0,
     albedo, normal, pos_z = img[..., 3:6], img[..., 6:9], img[..., 11]
     if denoise:
         import pyoidn
-        rgb = pyoidn.denoise(np.ascontiguousarray(rgb),
-                             albedo=np.ascontiguousarray(np.clip(albedo, 0, 1)),
-                             normal=np.ascontiguousarray(np.clip(normal, -1, 1)),
-                             hdr=True, quality="high")
+        # Denoise in overlapping tiles so a print-size image stays within
+        # memory; the overlaps are feathered so tile joins cannot show.
+        out = np.zeros_like(rgb)
+        wsum = np.zeros(rgb.shape[:2], dtype="float32")
+        size, pad = 2048, 96
+        for y in range(0, height, size):
+            for x in range(0, width, size):
+                ya, yb = max(y - pad, 0), min(y + size + pad, height)
+                xa, xb = max(x - pad, 0), min(x + size + pad, width)
+                piece = pyoidn.denoise(
+                    np.ascontiguousarray(rgb[ya:yb, xa:xb]),
+                    albedo=np.ascontiguousarray(np.clip(albedo[ya:yb, xa:xb], 0, 1)),
+                    normal=np.ascontiguousarray(np.clip(normal[ya:yb, xa:xb], -1, 1)),
+                    hdr=True, quality="high")
+                wy = np.minimum(np.arange(yb - ya) + 1, np.arange(yb - ya)[::-1] + 1)
+                wx = np.minimum(np.arange(xb - xa) + 1, np.arange(xb - xa)[::-1] + 1)
+                wgt = np.minimum.outer(np.minimum(wy, pad), np.minimum(wx, pad)).astype("float32")
+                out[ya:yb, xa:xb] += piece * wgt[..., None]
+                wsum[ya:yb, xa:xb] += wgt
+        rgb = out / wsum[..., None]
     # Coverage of the model over the floor. Position is averaged per pixel, so
     # a pixel half on the model's rim (which stands `edge_height` above the
     # floor) comes out near 0.5: an anti-aliased edge.

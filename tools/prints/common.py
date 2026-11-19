@@ -318,7 +318,7 @@ class Plate:
         f_c = font("Barlow-400", px(2.25))
         y_c = self.h - m
         draw_text(d, (left, y_c), credit, f_c, faint, 0.04)
-        draw_text(d, (right, y_c), "zeropointgeospatial · Nairobi, Kenya", f_c, faint,
+        draw_text(d, (right, y_c), "© ZeroPoint Geospatial, Nairobi", f_c, faint,
                   0.04, anchor="rs")
         return self
 

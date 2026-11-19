@@ -1,0 +1,11 @@
+{%- comment -%}
+  A responsive image of a print. Usage:
+    {% include print-img.html print=p sizes="(min-width: 1020px) 30vw, 90vw" lazy=true %}
+{%- endcomment -%}
+{%- assign d = site.data.print_images[include.print.slug] -%}
+<img src="{{ root }}assets/prints/{{ include.print.slug }}-640.webp"
+     srcset="{{ root }}assets/prints/{{ include.print.slug }}-640.webp 640w, {{ root }}assets/prints/{{ include.print.slug }}-1280.webp 1280w"
+     sizes="{{ include.sizes | default: '(min-width: 1020px) 30vw, (min-width: 560px) 45vw, 90vw' }}"
+     width="{{ d.w }}" height="{{ d.h }}"
+     alt="{{ include.print.title }}: {{ include.print.theme | downcase }}, map print"
+     {%- if include.lazy %} loading="lazy"{% endif %} decoding="async">

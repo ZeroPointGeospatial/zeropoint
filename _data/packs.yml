@@ -1,0 +1,28 @@
+- kicker: Land confidence
+  title: Boundary verification pack
+  text: For land buying, subdivision checks, disputes and ownership confidence.
+  items:
+    - Beacon location and parcel check
+    - Coordinate table and boundary sketch
+    - Field notes and client-ready report
+- kicker: Design ready
+  title: Topographic design pack
+  text: For architects, engineers, developers and planners starting design work.
+  items:
+    - Contours, spot levels and site features
+    - CAD and PDF drawings with terrain notes
+    - Control points for future survey work
+- kicker: Build control
+  title: Construction control pack
+  text: For contractors who need repeatable, verified site control.
+  items:
+    - Setting-out points and grid references
+    - Level transfer and control network
+    - As-built checks and QA notes
+- kicker: Spatial intelligence
+  title: GIS layer pack
+  text: For organisations that need reusable map data, analysis and reporting.
+  items:
+    - Clean GIS layers and attributes
+    - Map layouts and spatial summaries
+    - Remote sensing or land-use analysis

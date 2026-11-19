@@ -1,0 +1,57 @@
+{%- assign c = site.data.contact -%}
+<footer class="site-footer">
+  <div class="wrap site-footer__grid">
+    <div class="site-footer__brand">
+      <a class="brand" href="{{ root }}" aria-label="ZeroPoint Geospatial, home">
+        <img class="brand__mark" src="{{ root }}assets/img/logo-mark.png" alt="" width="40" height="40" loading="lazy">
+        <span class="brand__text">
+          <span class="brand__name">ZeroPoint <span>Geospatial</span></span>
+          <span class="brand__tag">Precision data. Smarter decisions.</span>
+        </span>
+      </a>
+      <p>Land surveying, RTK and GNSS control, topographic mapping and GIS for landowners, developers and contractors across Kenya.</p>
+    </div>
+    <nav class="site-footer__col" aria-label="Footer">
+      <h2>Explore</h2>
+      <ul>
+        <li><a href="{{ root }}#services">Services</a></li>
+        <li><a href="{{ root }}projects.html">Projects</a></li>
+        <li><a href="{{ root }}prints/">Map prints</a></li>
+        <li><a href="{{ root }}blog/">Field notes</a></li>
+        <li><a href="{{ root }}#contact">Request a quote</a></li>
+      </ul>
+    </nav>
+    <div class="site-footer__col">
+      <h2>Contact</h2>
+      <ul>
+        {%- for p in c.phones %}
+        <li><a href="tel:{{ p.tel }}">{{ p.label }}</a></li>
+        {%- endfor %}
+        <li><a href="mailto:{{ c.email }}">{{ c.email }}</a></li>
+        <li>{{ c.hours }}</li>
+      </ul>
+    </div>
+    <div class="site-footer__col">
+      <h2>Follow</h2>
+      <ul>
+        {%- for s in c.social %}
+        <li><a href="{{ s.url }}" target="_blank" rel="noopener">{{ s.name }}</a></li>
+        {%- endfor %}
+        <li><a href="{{ c.review_form }}" target="_blank" rel="noopener">Leave a review</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="wrap site-footer__base">
+    <p>&copy; {{ site.time | date: '%Y' }} ZeroPoint Geospatial. All rights reserved.</p>
+    <p class="mono">{{ c.location }}</p>
+  </div>
+</footer>
+
+{%- assign wa_text = page.wa_text | default: 'Hello ZeroPoint Geospatial' | url_encode | replace: '+', '%20' %}
+<a class="wa-float" href="https://wa.me/{{ c.whatsapp }}?text={{ wa_text }}" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
+  {% include wa-icon.html %}
+</a>
+<div class="mobile-bar">
+  <a href="tel:{{ c.phones[0].tel }}">Call</a>
+  <a class="mobile-bar__wa" href="https://wa.me/{{ c.whatsapp }}?text={{ wa_text }}" target="_blank" rel="noopener">{% include wa-icon.html %} WhatsApp</a>
+</div>

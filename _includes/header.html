@@ -1,0 +1,29 @@
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <a class="brand" href="{{ root }}" aria-label="ZeroPoint Geospatial, home">
+    <img class="brand__mark" src="{{ root }}assets/img/logo-mark.png" alt="" width="40" height="40">
+    <span class="brand__text">
+      <span class="brand__name">ZeroPoint <span>Geospatial</span></span>
+      <span class="brand__tag">Precision data. Smarter decisions.</span>
+    </span>
+  </a>
+  <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+    <span class="nav-toggle__bars" aria-hidden="true"></span>
+    <span class="sr-only">Menu</span>
+  </button>
+  <nav class="site-nav" id="site-nav" aria-label="Main">
+    <ul>
+      {%- for item in site.data.nav -%}
+        {%- assign href = root | append: item.path -%}
+        {%- assign current = false -%}
+        {%- unless item.home -%}
+          {%- assign target = '/' | append: item.path -%}
+          {%- assign here = page.url | slice: 0, target.size -%}
+          {%- if here == target -%}{%- assign current = true -%}{%- endif -%}
+        {%- endunless %}
+      <li><a href="{{ href }}"{% if current %} aria-current="page"{% endif %}>{{ item.title }}</a></li>
+      {%- endfor %}
+    </ul>
+    <a class="btn btn--light btn--sm" href="{{ root }}#contact">Request a quote</a>
+  </nav>
+</header>

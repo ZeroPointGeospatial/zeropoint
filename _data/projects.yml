@@ -1,0 +1,30 @@
+- title: Boundary and parcel survey
+  text: Boundary verification and coordinate confirmation for landowners and developers. Beacon identification, parcel mapping and a signed survey report.
+  image: total-station
+  alt: Total station set up over a point on site
+  tags: [RTK, Boundary, Control]
+- title: Construction control survey
+  text: Control point establishment and setting-out support for engineering works. Grid layouts, level transfers and as-built verification.
+  image: construction
+  alt: Tower crane and scaffolding on a building site
+  tags: [Construction, Control points, Engineering]
+- title: Topographic mapping
+  text: Contours, spot heights, terrain models and CAD-ready mapping outputs for design, planning and development teams.
+  image: topo-contours
+  alt: Contour lines of Mount Longonot drawn from elevation data
+  tags: [Contours, Topo, CAD]
+- title: GIS mapping and spatial analysis
+  text: Digital mapping, spatial layers and analysis outputs. Deliverables in GIS formats ready for further processing or client use.
+  image: gis
+  alt: Kenya's road network around Nairobi and Mount Kenya, mapped from open data
+  tags: [GIS, Layers, Analysis]
+- title: RTK and GNSS control networks
+  text: High-accuracy GNSS control point surveys for engineering projects and large site layouts that need precise coordinate control.
+  image: rtk-field
+  alt: GNSS receiver on a tripod in a field in Kenya
+  tags: [GNSS, RTK, Precision]
+- title: Plans, reports and deliverables
+  text: PDF maps, CAD drawings, coordinate reports and GIS files, formatted for clients, consultants, architects and contractors.
+  image: plans
+  alt: Printed building plan with dimensions
+  tags: [PDF, CAD, Reports]

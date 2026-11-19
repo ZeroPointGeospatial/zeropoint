@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://zeropointgeospatial.github.io/zeropoint/sitemap.xml

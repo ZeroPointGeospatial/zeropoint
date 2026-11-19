@@ -1,0 +1,136 @@
+---
+layout: default
+title: Map Prints
+description: Map prints of Kenya made by geospatial engineers from real data. Rivers, relief, population, roads and forests, in A2 to A0, framed and delivered.
+og_image: assets/img/og-prints.jpg
+wa_text: Hello ZeroPoint Geospatial, I would like to order a map print.
+---
+{%- include root.html -%}
+{%- assign c = site.data.contact -%}
+{%- assign shop = site.data.shop -%}
+{%- assign prints = site.prints | sort: 'order' -%}
+{%- assign wa = 'https://wa.me/' | append: c.whatsapp | append: '?text=' -%}
+
+<section class="shop-hero band band--ink">
+  <div class="wrap shop-hero__grid">
+    <div>
+      <p class="label">Map prints <span class="sep">/</span> {{ prints.size }} plates</p>
+      <h1 class="display">Kenya, mapped<br><strong>for the wall</strong></h1>
+      <p class="lede">Prints made by geospatial engineers from real data: rivers traced from the terrain, relief ray-traced like a physical model, 55 million people as a landscape of columns. Framed and ready to hang.</p>
+      <div class="btn-row">
+        <a class="btn btn--light" href="#collection">Browse the collection</a>
+        <a class="btn btn--ghost" href="{{ wa }}{{ page.wa_text | url_encode | replace: '+', '%20' }}" target="_blank" rel="noopener">{% include wa-icon.html %} Order on WhatsApp</a>
+      </div>
+    </div>
+    <div class="shop-hero__wall" aria-hidden="true">
+      {%- assign heroes = "kenya-rivers,kenya-population,kenya-roads" | split: "," -%}
+      {%- for slug in heroes -%}
+        {%- assign p = prints | where: "slug", slug | first %}
+      <span class="frame"><img src="{{ root }}assets/prints/{{ slug }}-640.webp" alt="" width="640" height="905"{% if forloop.index == 2 %} fetchpriority="high"{% endif %}></span>
+      {%- endfor %}
+    </div>
+  </div>
+</section>
+
+<dl class="specs">
+  <div><dt>Sizes</dt><dd>A2, A1, A0 and custom</dd></div>
+  <div><dt>Paper</dt><dd>Matte or satin</dd></div>
+  <div><dt>Frames</dt><dd>Black, natural, gold, silver</dd></div>
+  <div><dt>Delivery</dt><dd>Nairobi and Kenya-wide</dd></div>
+</dl>
+
+<section class="band band--paper" id="collection">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="label"><span class="num">01</span>The collection</p>
+      <div class="sec-head__body">
+        <h2 class="h2">{{ prints.size }} plates, <strong>three series</strong></h2>
+        <p class="lede">The Kenya atlas plates share one scale and projection, so they hang as a set. Prices are for A2 to A0 and depend on size and framing.</p>
+      </div>
+    </div>
+    <div class="filters" role="group" aria-label="Filter by series">
+      <button class="filter" type="button" data-series="all" aria-pressed="true">All</button>
+      {%- for s in shop.series %}
+      <button class="filter" type="button" data-series="{{ s }}" aria-pressed="false">{{ s }}</button>
+      {%- endfor %}
+    </div>
+    <div class="catalogue">
+      {%- for p in prints %}
+      {% include print-card.html print=p %}
+      {%- endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="band band--white" id="made">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="label"><span class="num">02</span>How they are made</p>
+      <div class="sec-head__body">
+        <h2 class="h2">Mapped by engineers, <strong>not a poster shop</strong></h2>
+        <p class="lede">Each plate starts as data and goes through the same handling as our survey work: a stated source, a stated projection and a method we can explain.</p>
+      </div>
+    </div>
+    <div class="rule-grid cols-3">
+      <article class="card">
+        <p class="label">Source</p>
+        <h3 class="h3">Open, citable data</h3>
+        <p>Copernicus elevation models at 30 and 90 metres, OpenStreetMap roads, Kontur population and Hansen tree cover. The source and licence are printed on every plate.</p>
+      </article>
+      <article class="card">
+        <p class="label">Processing</p>
+        <h3 class="h3">Our own analysis</h3>
+        <p>The river network is computed from the terrain by flow accumulation rather than downloaded. Relief and population are built as 3D models and ray-traced so shadows fall the way they would on a physical model.</p>
+      </article>
+      <article class="card">
+        <p class="label">Sheet</p>
+        <h3 class="h3">Scale and projection stated</h3>
+        <p>Country plates are drawn in UTM zone 37S at 1:2 400 000 on A2, which is 1:1 200 000 on A0. Each sheet carries its scale, centre coordinates and plate number.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="band band--paper" id="order">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="label"><span class="num">03</span>Ordering</p>
+      <div class="sec-head__body">
+        <h2 class="h2">How to <strong>order</strong></h2>
+      </div>
+    </div>
+    <ol class="steps" style="grid-template-columns:repeat(3,1fr)">
+      <li><span class="mono">01</span><h3 class="h3">Choose your print</h3><p>Pick a plate, a size from A2 to A0 and a frame finish.</p></li>
+      <li><span class="mono">02</span><h3 class="h3">Confirm and pay</h3><p>Send your selection on WhatsApp or by email. We confirm the price and the production timeline.</p></li>
+      <li><span class="mono">03</span><h3 class="h3">Delivery and installation</h3><p>Most prints are ready within 24 hours of confirmation. Framed prints are delivered and installed free within Nairobi.</p></li>
+    </ol>
+    <div class="strip">
+      <div><h3>Fast turnaround</h3><p>Most prints are ready within 24 hours. Orders confirmed after 12 noon EAT are processed the next business day.</p></div>
+      <div><h3>Free in Nairobi</h3><p>Delivery and installation are free within Nairobi for framed prints from the collection.</p></div>
+      <div><h3>Kenya-wide</h3><p>We deliver outside Nairobi on request. Ask for a delivery quote with your order.</p></div>
+      <div><h3>Replaced if damaged</h3><p>Damaged or defective prints are replaced or refunded. We stand behind every frame and print we deliver.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band band--paper-2" id="custom">
+  <div class="wrap">
+    <div class="panel">
+      <p class="label">Custom work</p>
+      <h2 class="h2" style="margin-top:16px">Need a map of <strong>your own place</strong>?</h2>
+      <p class="lede">We can turn a survey deliverable, a GIS output or a site plan into a framed wall print, or make any plate in the collection for another county, mountain or town. Send us the area, the size and the frame finish and we will prepare a quote.</p>
+      <ul class="checklist">
+        <li>Relief or rivers for a county or region</li>
+        <li>Framed boundary and parcel maps</li>
+        <li>Corporate office map installations</li>
+        <li>Multi-panel map collections</li>
+        <li>Your own survey plan as a wall print</li>
+        <li>Bulk orders for developments and offices</li>
+      </ul>
+      <div class="btn-row">
+        <a class="btn btn--dark" href="{{ root }}#contact">Request a custom quote</a>
+        <a class="btn btn--wa" href="{{ wa }}{{ 'Hello ZeroPoint Geospatial, I would like a custom map print quote.' | url_encode | replace: '+', '%20' }}" target="_blank" rel="noopener">{% include wa-icon.html %} WhatsApp</a>
+      </div>
+    </div>
+  </div>
+</section>

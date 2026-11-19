@@ -3,8 +3,6 @@ layout: post
 title: "How GIS Is Reshaping Urban Planning in African Cities"
 ---
 
-# How GIS Is Reshaping Urban Planning in African Cities
-
 African cities are growing faster than any region on earth. By 2050, over 1.3 billion people will live in urban areas across the continent — many in cities that did not meaningfully exist 30 years ago. Nairobi, Kampala, Kigali, Accra. These cities are expanding outward and upward simultaneously, and the infrastructure that should support that growth is perpetually playing catch-up.
 
 At the centre of the planning response — where it is working — is Geographic Information Systems (GIS). Not as a buzzword. As a genuine operational tool that is changing how decisions get made about roads, water, housing, and land.

@@ -1,6 +1,32 @@
 title: ZeroPoint Geospatial
-description: Land Surveying, GIS & RTK Mapping in Kenya
+tagline: Precision Data. Smarter Decisions.
+description: Land surveying, RTK/GNSS control, topographic mapping and GIS deliverables across Kenya.
 baseurl: "/zeropoint"
 url: "https://zeropointgeospatial.github.io"
-permalink: /blog/:title/
+lang: en
 markdown: kramdown
+
+# Blog posts live at /blog/<title>/
+permalink: /blog/:title/
+
+# One page per map print, from the files in _prints/
+collections:
+  prints:
+    output: true
+    permalink: /prints/:name/
+
+defaults:
+  - scope: { path: "", type: posts }
+    values: { layout: post }
+  - scope: { path: "", type: prints }
+    values: { layout: print }
+
+# Not part of the published site
+exclude:
+  - tools
+  - originals
+  - Gemfile
+  - Gemfile.lock
+  - vercel.json
+  - README.md
+  - vendor

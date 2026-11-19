@@ -3,8 +3,6 @@ layout: post
 title: "Drone Mapping vs Traditional Survey: What You Actually Need to Know"
 ---
 
-# Drone Mapping vs Traditional Survey: What You Actually Need to Know
-
 The question comes up on almost every project brief: *Can you just use a drone for this?*
 
 Sometimes yes. Sometimes no. And sometimes the right answer is both — drone for the broad picture, RTK GPS for the precise details.
