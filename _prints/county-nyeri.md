@@ -1,5 +1,4 @@
 ---
-published: false
 slug: county-nyeri
 order: 23
 plate: "019"

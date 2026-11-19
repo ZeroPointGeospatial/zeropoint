@@ -1,5 +1,4 @@
 ---
-published: false
 slug: east-africa
 order: 13
 plate: "14"
