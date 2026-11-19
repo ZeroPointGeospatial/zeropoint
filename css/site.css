@@ -463,8 +463,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .frame[data-frame="silver"] { --moulding: #a9adab; --moulding-hi: #dfe2e0; }
 
 .shop-hero { position: relative; overflow: hidden; padding-block: clamp(56px, 8vw, 120px); }
-.shop-hero__grid { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: clamp(32px, 6vw, 88px); align-items: center; }
-.shop-hero .display { margin-top: 20px; font-size: clamp(2.8rem, 6.4vw, 5.6rem); }
+.shop-hero__grid { display: grid; grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr); gap: clamp(32px, 6vw, 88px); align-items: center; }
+.shop-hero .display { margin-top: 20px; font-size: clamp(2.5rem, 4.7vw, 4.3rem); }
 .shop-hero .lede { margin-top: 26px; }
 .shop-hero .btn-row { margin-top: 34px; }
 .shop-hero__wall { position: relative; display: grid; grid-template-columns: 1fr 1.18fr 1fr; gap: clamp(10px, 2vw, 26px); align-items: center; }

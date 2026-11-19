@@ -92,6 +92,7 @@
         encodeURIComponent('Print order: ' + name) + '&body=' + encodeURIComponent(line);
     }
     order.addEventListener('change', update);
+    order.addEventListener('submit', function (e) { e.preventDefault(); });
     update();
 
     var zoom = document.getElementById('zoom');

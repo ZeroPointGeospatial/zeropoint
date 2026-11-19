@@ -132,4 +132,4 @@ For any work involving official land documents, work with a licensed surveyor wh
 
 ---
 
-*ZeroPoint Geospatial delivers all survey data in clearly documented coordinate systems, with datum transformation performed where required. We provide data in your preferred format and CRS. [Contact us](/contact) for survey and GIS services.*
+*ZeroPoint Geospatial delivers all survey data in clearly documented coordinate systems, with datum transformation performed where required. We provide data in your preferred format and CRS. [Contact us](../../#contact) for survey and GIS services.*

@@ -11,7 +11,7 @@ tone: dark
 facts:
   - [Scale, "1:2 400 000 at A2, 1:1 200 000 at A0"]
   - [Data, "OpenStreetMap contributors, via Overture Maps (ODbL)"]
-  - [Mapped length, "392 000 km, 1.59 million segments"]
+  - [Mapped length, "About 392 000 km inside Kenya"]
   - [Method, "Local roads as density, classified roads as lines"]
   - [Projection, "UTM zone 37S, WGS 84"]
 ---

@@ -133,4 +133,4 @@ That accuracy matters whenever the coordinates will be used to make decisions ab
 
 ---
 
-*ZeroPoint Geospatial uses multi-constellation RTK GNSS equipment for all survey work, delivering centimetre-accurate positioning tied to the national coordinate framework. [Get in touch](/contact) for a quote on your project.*
+*ZeroPoint Geospatial uses multi-constellation RTK GNSS equipment for all survey work, delivering centimetre-accurate positioning tied to the national coordinate framework. [Get in touch](../../#contact) for a quote on your project.*

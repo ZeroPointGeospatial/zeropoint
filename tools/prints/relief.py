@@ -59,7 +59,7 @@ PLATES = {
         scale=2_400_000, source="glo90", cell=250, zex=22.0, country=True,
         ticks=[0, 1000, 2000, 3000, 4000, 5199], vrange=(0, 5199),
         labels=[("Mount Kenya", "5 199 m", 37.3083, -0.1517, "right", 6000),
-                ("Mount Elgon", "4 321 m", 34.56, 1.12, "right", 8000),
+                ("Mount Elgon", None, 34.56, 1.12, "right", 8000),
                 ("Lake Turkana", None, 36.05, 3.55, "left", 0),
                 ("Lake Victoria", None, 34.2, -0.35, "right", 0)]),
     "kenya-forest": dict(

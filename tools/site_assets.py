@@ -172,22 +172,22 @@ def share_card(slug, im):
 
 
 def share_site():
+    """1200 x 630 social previews for the site and for the shop."""
     from common import draw_text, font
-    for name, slugs in (("og-prints", ["kenya-rivers", "kenya-population", "kenya-roads"]),
-                        ("og-image", ["kenya-relief", "kenya-rivers", "kenya-forest"])):
+    for name, slugs in (("og-prints", ["kenya-rivers", "kenya-population"]),
+                        ("og-image", ["kenya-relief", "kenya-rivers"])):
         card = Image.new("RGB", (1200, 630), INK)
-        x = 560
+        x = 612
         for i, s in enumerate(slugs):
-            x += hang(card, master(s), x, 96 + (0, -36, 0)[i], 440, frame=(40, 43, 41)) + 22
+            x += hang(card, master(s), x, 138 - 34 * i, 380, frame=(40, 43, 41)) + 20
         d = ImageDraw.Draw(card)
         draw_text(d, (64, 118), "ZEROPOINT GEOSPATIAL", font("Barlow-600", 22), (170, 181, 144), 0.16)
-        big = font("Barlow-300", 78)
-        lines = ("KENYA, MAPPED", "FOR THE WALL") if name == "og-prints" else ("PRECISION DATA.", "SMARTER DECISIONS.")
-        if name == "og-image":
-            big = font("Barlow-300", 58)
+        if name == "og-prints":
+            big, lines, sub = font("Barlow-300", 66), ("KENYA, MAPPED", "FOR THE WALL"), "Map prints from real data"
+        else:
+            big, lines, sub = font("Barlow-300", 54), ("PRECISION DATA.", "SMARTER DECISIONS."), "Land surveying and GIS, Kenya"
         for i, t in enumerate(lines):
-            draw_text(d, (62, 250 + i * (big.size + 4)), t, big, (244, 243, 238), -0.02)
-        sub = "Map prints from real data" if name == "og-prints" else "Land surveying and GIS, Kenya"
+            draw_text(d, (62, 290 + i * (big.size + 6)), t, big, (244, 243, 238), -0.02)
         draw_text(d, (64, 520), sub.upper(), font("Barlow-500", 20), (160, 163, 158), 0.14)
         card.save(IMG / f"{name}.jpg", quality=86, optimize=True)
 

@@ -102,4 +102,4 @@ Everything else in urban GIS depends on that.
 
 ---
 
-*ZeroPoint Geospatial provides RTK survey, drone mapping, and GIS data services to county governments, developers, and NGOs across Kenya. [Get in touch](/contact) to discuss your project.*
+*ZeroPoint Geospatial provides RTK survey, drone mapping, and GIS data services to county governments, developers, and NGOs across Kenya. [Get in touch](../../#contact) to discuss your project.*

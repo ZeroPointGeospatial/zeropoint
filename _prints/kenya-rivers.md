@@ -17,4 +17,4 @@ facts:
 ---
 We did not download this river network. We computed it. Fifty-one million elevation cells were flooded and routed downhill to find where water collects, with the Rift lakes, the Chalbi and the calderas kept as closed basins the way they are on the ground.
 
-Line weight follows the size of the catchment above each point. Colour shows which of Kenya's five drainage basins the water ends up in: Lake Victoria, the Rift Valley, the Athi, the Tana and the Ewaso Ng'iro North. The basin areas that fall out of the model sit within a few per cent of the official figures.
+Line weight follows the size of the catchment above each point. Colour shows which of Kenya's five drainage basins the water ends up in: Lake Victoria, the Rift Valley, the Athi, the Tana and the Ewaso Ng'iro North.

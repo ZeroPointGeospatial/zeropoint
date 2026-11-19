@@ -28,7 +28,7 @@ layout: default
 
       <div class="print__price"><strong>{{ shop.price }}</strong><span>{{ shop.price_note }}</span></div>
 
-      <form id="print-order" data-print="{{ fullname | escape }}" onsubmit="return false">
+      <form id="print-order" data-print="{{ fullname | escape }}">
         <fieldset class="options">
           <legend>Size</legend>
           <div class="options__row">

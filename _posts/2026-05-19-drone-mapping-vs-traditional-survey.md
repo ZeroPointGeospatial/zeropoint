@@ -117,4 +117,4 @@ The answers will tell you quickly whether you are dealing with a competent firm 
 
 ---
 
-*ZeroPoint Geospatial operates both drone mapping and RTK survey services across Kenya. We will always recommend the method that is right for your project, not the one that is easiest for us. [Request a quote](/contact).*
+*ZeroPoint Geospatial operates both drone mapping and RTK survey services across Kenya. We will always recommend the method that is right for your project, not the one that is easiest for us. [Request a quote](../../#contact).*

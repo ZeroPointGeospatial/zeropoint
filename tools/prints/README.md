@@ -61,9 +61,12 @@ repository root) rebuilds the web previews in `assets/prints/`.
 the sea, the sheet edge and the terminal lakes (Priority-Flood), routes flow
 by steepest descent and accumulates upstream area. Closed basins such as
 the Rift lakes, the Chalbi and the calderas are kept open rather than
-filled. Each stream is then labelled by the outlet it reaches. The basin
-areas this gives for Kenya are within a few per cent of the published
-figures for the five drainage basins.
+filled. Each stream is then labelled by the outlet it reaches and grouped
+into Kenya's five drainage basins. Areas inside Kenya from the current run:
+Lake Victoria 51 100 km2, Rift Valley 130 400 km2, Athi 67 300 km2, Tana
+116 300 km2, Ewaso Ng'iro North 224 600 km2. The Athi and Tana split along
+the coast is by river mouth, which is not how the official catchment
+boundary is drawn there, so check before quoting these.
 
 **Relief and population.** `render3d.py` builds a mesh and path-traces it
 with Mitsuba 3: one soft sun from the north-west, an even sky, a paper

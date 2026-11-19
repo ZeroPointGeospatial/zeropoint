@@ -123,4 +123,4 @@ The best agricultural remote sensing projects combine satellite analysis with ri
 
 ---
 
-*ZeroPoint Geospatial provides drone multispectral mapping, RTK ground control survey, and GIS analysis for agricultural projects in Kenya. [Contact us](/contact) to discuss how remote sensing can support your project.*
+*ZeroPoint Geospatial provides drone multispectral mapping, RTK ground control survey, and GIS analysis for agricultural projects in Kenya. [Contact us](../../#contact) to discuss how remote sensing can support your project.*
