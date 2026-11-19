@@ -1,6 +1,8 @@
 # Shop-wide settings for the map prints. Edit prices, sizes and frames here
 # and every print page updates.
 price: "KSh 9,000 – 15,500"
+price_low: 9000          # the same range as numbers, for search engines; keep in step with `price`
+price_high: 15500
 price_note: Depending on size and framing. We confirm the exact figure before you pay.
 sizes:
   - { id: A2, label: A2, dims: "420 × 594 mm" }

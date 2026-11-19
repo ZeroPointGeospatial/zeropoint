@@ -83,6 +83,25 @@ layout: default
   </div>
 </section>
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": {{ fullname | append: ', map print' | jsonify }},
+  "description": {{ page.summary | jsonify }},
+  "image": {{ 'assets/prints/' | append: page.slug | append: '-1280.webp' | absolute_url | jsonify }},
+  "brand": { "@type": "Organization", "name": "ZeroPoint Geospatial" },
+  "offers": {
+    "@type": "AggregateOffer",
+    "priceCurrency": "KES",
+    "lowPrice": {{ shop.price_low }},
+    "highPrice": {{ shop.price_high }},
+    "availability": "https://schema.org/InStock",
+    "url": {{ page.url | absolute_url | jsonify }}
+  }
+}
+</script>
+
 <dialog class="zoom" id="zoom" aria-label="{{ fullname }}, enlarged">
   <button class="btn btn--light btn--sm zoom__close" type="button">Close</button>
   <div class="zoom__inner"><img data-src="{{ root }}assets/prints/{{ page.slug }}-2000.webp" alt="{{ fullname }}, enlarged" width="{{ d.w2000 }}" height="{{ d.h2000 }}"></div>

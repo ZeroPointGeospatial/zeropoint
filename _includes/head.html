@@ -1,11 +1,17 @@
 {%- assign page_title = page.title | default: site.title -%}
+{%- assign desc = page.description | default: page.excerpt | default: site.description -%}
+{%- assign og_image = page.og_image | default: 'assets/img/og-image.jpg' -%}
+{%- if page.collection == 'prints' -%}
+  {%- assign page_title = page.short | default: page.title | append: ', map print' -%}
+  {%- assign desc = page.title | append: ': ' | append: page.theme | append: '. ' | append: page.summary | append: ' A map print by ZeroPoint Geospatial, A2 to A0, framed and delivered.' -%}
+  {%- assign og_image = 'assets/prints/' | append: page.slug | append: '-share.jpg' -%}
+{%- endif -%}
 {%- if page.url == '/' -%}
   {%- assign full_title = 'ZeroPoint Geospatial | Land Surveying and GIS in Kenya' -%}
 {%- else -%}
   {%- assign full_title = page_title | append: ' | ' | append: site.title -%}
 {%- endif -%}
-{%- assign desc = page.description | default: page.excerpt | default: site.description | strip_html | strip_newlines | truncate: 160 -%}
-{%- assign og_image = page.og_image | default: 'assets/img/og-image.jpg' -%}
+{%- assign desc = desc | strip_html | strip_newlines | truncate: 170 -%}
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{ full_title | escape }}</title>

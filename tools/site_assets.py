@@ -80,7 +80,7 @@ def logo():
     side = max(em.size) + 36
     sq = Image.new("RGB", (side, side), bg)
     sq.paste(em, ((side - em.width) // 2, (side - em.height) // 2))
-    sq.resize((160, 160), Image.LANCZOS).save(IMG / "logo-mark.png", optimize=True)
+    webp(sq.resize((160, 160), Image.LANCZOS), IMG / "logo-mark.webp", 88)
     sq.resize((96, 96), Image.LANCZOS).save(IMG / "favicon.png", optimize=True)
 
 

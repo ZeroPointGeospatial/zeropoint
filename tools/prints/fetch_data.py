@@ -40,7 +40,6 @@ LANDFORMS = {
     "mount-kenya": (36, -1, 38, 1),
     "kilimanjaro": (36, -4, 38, -2),
     "rift": (35, -2, 37, 1),
-    "nairobi": (36, -2, 38, 0),
 }
 
 
