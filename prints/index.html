@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Map Prints
-description: Map prints of Kenya made by geospatial engineers from real data. Rivers, relief, population, roads and forests, in A2 to A0, framed and delivered.
+description: Map prints of Kenya made by geospatial engineers from real data. Rivers, relief, population, roads, counties and city maps, in A2 to A0, framed and delivered.
 og_image: assets/img/og-prints.jpg
 wa_text: Hello ZeroPoint Geospatial, I would like to order a map print.
 ---
@@ -14,7 +14,7 @@ wa_text: Hello ZeroPoint Geospatial, I would like to order a map print.
 <section class="shop-hero band band--ink">
   <div class="wrap shop-hero__grid">
     <div>
-      <p class="label">Map prints <span class="sep">/</span> {{ prints.size }} plates</p>
+      <p class="label">Map prints <span class="sep">/</span> {{ prints.size }} prints</p>
       <h1 class="display">Kenya, mapped<br><strong>for the wall</strong></h1>
       <p class="lede">Prints made by geospatial engineers from real data: rivers traced from the terrain, relief ray-traced like a physical model, 55 million people as a landscape of columns. Framed and ready to hang.</p>
       <div class="btn-row">
@@ -44,8 +44,8 @@ wa_text: Hello ZeroPoint Geospatial, I would like to order a map print.
     <div class="sec-head">
       <p class="label"><span class="num">01</span>The collection</p>
       <div class="sec-head__body">
-        <h2 class="h2">{{ prints.size }} plates, <strong>three series</strong></h2>
-        <p class="lede">The Kenya atlas plates share one scale and projection, so they hang as a set. Prices are for A2 to A0 and depend on size and framing.</p>
+        <h2 class="h2">{{ prints.size }} prints, <strong>{{ shop.series.size }} series</strong></h2>
+        <p class="lede">The Kenya atlas plates share one scale and projection, so they hang as a set. County plates and city prints are made to order for any county or town. Prices are for A2 to A0 and depend on size and framing.</p>
       </div>
     </div>
     <div class="filters" role="group" aria-label="Filter by series">
@@ -75,12 +75,12 @@ wa_text: Hello ZeroPoint Geospatial, I would like to order a map print.
       <article class="card">
         <p class="label">Source</p>
         <h3 class="h3">Open, citable data</h3>
-        <p>Copernicus elevation models at 30 and 90 metres, OpenStreetMap roads, Kontur population and Hansen tree cover. The source and licence are printed on each atlas and landform plate.</p>
+        <p>Copernicus elevation models at 30 and 90 metres, OpenStreetMap roads and boundaries, Kontur population, CHIRPS rainfall and Hansen tree cover. The source and licence are printed on each atlas, landform and county plate.</p>
       </article>
       <article class="card">
         <p class="label">Processing</p>
         <h3 class="h3">Our own analysis</h3>
-        <p>The river network is computed from the terrain by flow accumulation rather than downloaded. Relief and population are built as 3D models and ray-traced so shadows fall the way they would on a physical model.</p>
+        <p>The river network is computed from the terrain rather than downloaded, and each river is weighted by the flow that thirty years of rainfall would give it. Relief and population are built as 3D models and ray-traced so shadows fall the way they would on a physical model.</p>
       </article>
       <article class="card">
         <p class="label">Sheet</p>
@@ -118,14 +118,14 @@ wa_text: Hello ZeroPoint Geospatial, I would like to order a map print.
     <div class="panel">
       <p class="label">Custom work</p>
       <h2 class="h2" style="margin-top:16px">Need a map of <strong>your own place</strong>?</h2>
-      <p class="lede">We can turn a survey deliverable, a GIS output or a site plan into a framed wall print, or make any plate in the collection for another county, mountain or town. Send us the area, the size and the frame finish and we will prepare a quote.</p>
+      <p class="lede">Any of the 47 counties can be made as a relief plate and any town as a city print, to the same design as the ones in the collection. We can also turn a survey deliverable, a GIS output or a site plan into a framed wall print. Send us the area, the size and the frame finish and we will prepare a quote.</p>
       <ul class="checklist">
-        <li>Relief or rivers for a county or region</li>
+        <li>Your county as a relief plate</li>
+        <li>Your town as a city print</li>
         <li>Framed boundary and parcel maps</li>
         <li>Corporate office map installations</li>
-        <li>Multi-panel map collections</li>
         <li>Your own survey plan as a wall print</li>
-        <li>Bulk orders for developments and offices</li>
+        <li>Sets and bulk orders for offices</li>
       </ul>
       <div class="btn-row">
         <a class="btn btn--dark" href="{{ root }}#contact">Request a custom quote</a>

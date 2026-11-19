@@ -5,10 +5,13 @@ kenya-rivers: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
 kenya-relief: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
 kenya-roads: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
 kenya-forest: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
-mount-kenya: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
-kilimanjaro: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
-rift-valley: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
+kenya-counties: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
 longonot-contours: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
+mount-kenya-summit: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
+mombasa-gold: { w: 640, h: 810, w2000: 2000, h2000: 2533 }
+kisumu-gold: { w: 640, h: 810, w2000: 2000, h2000: 2533 }
+nakuru-gold: { w: 640, h: 810, w2000: 2000, h2000: 2533 }
+eldoret-gold: { w: 640, h: 810, w2000: 2000, h2000: 2533 }
 nairobi-gold: { w: 640, h: 810, w2000: 2000, h2000: 2533 }
 nairobi-gold-centre: { w: 640, h: 812, w2000: 2000, h2000: 2538 }
 nairobi-county-population: { w: 640, h: 800, w2000: 2000, h2000: 2500 }

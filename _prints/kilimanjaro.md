@@ -1,20 +1,20 @@
 ---
 slug: kilimanjaro
-order: 7
+order: 11
 plate: "07"
 series: Landforms
 short: Kilimanjaro
 title: Kilimanjaro
 theme: Kibo, Mawenzi and the Shira plateau
-summary: Africa's highest mountain, from the plains to Uhuru Peak.
+summary: Africa's highest mountain, filling the sheet at 1:150 000.
 tone: light
 facts:
-  - [Scale, "1:200 000 at A2, 1:100 000 at A0"]
+  - [Scale, "1:150 000 at A2, 1:75 000 at A0"]
   - [Data, "Copernicus DEM GLO-30 (DLR / Airbus, EU and ESA)"]
-  - [Vertical exaggeration, "×2.6"]
-  - [Extent, "About 68 by 82 km"]
+  - [Vertical exaggeration, "×2.4"]
+  - [Extent, "About 51 by 62 km"]
   - [Projection, "UTM zone 37S, WGS 84"]
 ---
-The three volcanoes of Africa's highest mountain: the Shira plateau to the west, the cone of Kibo with Uhuru Peak at 5 895 metres, and the broken summit of Mawenzi. The plains around them sit almost five kilometres lower.
+The three volcanoes of Africa's highest mountain: the Shira plateau to the west, the cone of Kibo with Uhuru Peak at 5 895 metres, and the broken summit of Mawenzi. The gullies cut into the southern slopes run down towards Moshi.
 
-Lake Chala, the crater lake on the Kenya and Tanzania border, is at the lower right.
+It is drawn in true plan view, so the scale holds across the sheet.

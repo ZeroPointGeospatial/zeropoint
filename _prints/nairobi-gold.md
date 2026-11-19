@@ -1,8 +1,8 @@
 ---
 slug: nairobi-gold
-order: 10
+order: 29
 plate: "10"
-series: Nairobi
+series: Cities
 short: Nairobi in gold
 title: Nairobi
 theme: The city's roads in gold

@@ -1,6 +1,6 @@
 ---
 slug: mount-kenya
-order: 6
+order: 10
 plate: "06"
 series: Landforms
 short: Mount Kenya

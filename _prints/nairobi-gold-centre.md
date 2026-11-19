@@ -1,8 +1,8 @@
 ---
 slug: nairobi-gold-centre
-order: 11
+order: 30
 plate: "11"
-series: Nairobi
+series: Cities
 short: Nairobi centre in gold
 title: Nairobi
 theme: City centre, in gold

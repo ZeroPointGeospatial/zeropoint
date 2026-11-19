@@ -25,10 +25,17 @@ Pages: `index.html` (home), `projects.html`, `prints/index.html` (shop),
 
 1. Put the artwork in `originals/prints/<name>.png`, or render it with the
    pipeline in `tools/prints/`.
-2. Add `<name>` to `OWN_PRINTS` (or `PLATES`) in `tools/site_assets.py` and
-   run `python tools/site_assets.py prints`. That writes the previews to
+2. Add `<name>` to `OWN_PRINTS` (or to `PLATES` or `CITY_PRINTS` if the
+   pipeline rendered it) in `tools/site_assets.py` and run
+   `python tools/site_assets.py prints`. That writes the previews to
    `assets/prints/` and their sizes to `_data/print_images.yml`.
 3. Copy a file in `_prints/`, rename it `<name>.md` and edit the text.
+   `series` must be one of the series listed in `_data/shop.yml`; `order`
+   sets its place in the catalogue.
+
+A county relief plate or a city print for a customer is one command: see
+`tools/prints/README.md`. `tools/prints/PRINTING.md` has the notes for the
+print shop.
 
 ## Running it locally
 

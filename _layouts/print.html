@@ -21,7 +21,7 @@ layout: default
     </div>
 
     <div>
-      <p class="label"><a href="{{ root }}prints/">Map prints</a> <span class="sep">/</span> {{ page.series }} <span class="sep">/</span> Plate {{ page.plate }}</p>
+      <p class="label"><a href="{{ root }}prints/">Map prints</a> <span class="sep">/</span> {{ page.series }} <span class="sep">/</span> {{ page.plate_label | default: 'Plate' }} {{ page.plate }}</p>
       <h1 class="print__title">{{ page.title }}</h1>
       <p class="print__theme">{{ page.theme }}</p>
       <div class="print__body">{{ content }}</div>

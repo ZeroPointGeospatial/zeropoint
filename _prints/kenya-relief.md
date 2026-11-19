@@ -17,4 +17,4 @@ facts:
 ---
 The whole country as a relief model, lit from the north-west and ray-traced so that ridges throw real shadows. Heights are exaggerated 22 times, so the Rift Valley, the central highlands, Mount Elgon and the long slope down to the coast all read from across a room.
 
-It shares its scale and projection with the rivers and roads plates, so the three hang as a set.
+The main peaks, ranges and lakes are named. It shares its scale and projection with the rivers, roads and counties plates, so they hang as a set.

@@ -1,7 +1,7 @@
 {%- assign p = include.print -%}
 <a class="print-card" href="{{ root }}prints/{{ p.slug }}/" data-series="{{ p.series }}">
   <span class="print-card__wall"><span class="frame">{% include print-img.html print=p lazy=true %}</span></span>
-  <span class="print-card__meta"><span>Plate {{ p.plate }}</span><span>{{ p.series }}</span></span>
+  <span class="print-card__meta"><span>{{ p.plate_label | default: 'Plate' }} {{ p.plate }}</span><span>{{ p.series }}</span></span>
   <h3>{{ p.short | default: p.title }}</h3>
   <p>{{ p.theme }}</p>
   <span class="print-card__price">{{ site.data.shop.price }}</span>

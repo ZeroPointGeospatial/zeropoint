@@ -1,8 +1,8 @@
 ---
 slug: nairobi-county-population
-order: 12
+order: 25
 plate: "12"
-series: Nairobi
+series: Counties
 short: Nairobi County population
 title: Nairobi County
 theme: Population by sub-county, 2019 census
