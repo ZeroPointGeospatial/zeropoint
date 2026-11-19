@@ -33,7 +33,7 @@ customer wants a sharper A0 of a line plate (rivers, roads, counties,
 contours), render it again with `DPI=600 sh render_all.sh`. The relief and
 population plates gain little, because the elevation data is no finer.
 
-City prints at their native size are 571 × 723 mm at 300 ppi. At 40 cm wide
+City prints at their native size are about 560 × 708 mm. At 40 cm wide
 they are 50.7 cm tall, at 50 cm wide 63.3 cm, at 60 cm wide 76 cm. They do
 not fill an A-size frame; use a frame made to the print, or a mount.
 
