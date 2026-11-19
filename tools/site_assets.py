@@ -2,10 +2,10 @@
 
     python tools/site_assets.py            # photos, logo mark, textures, print previews
 
-Run from the repository root. Print masters are read from $ZP_OUT (the nine
-plates rendered by tools/prints) and from originals/prints/ (the three
-Nairobi prints); photos and the logo come from originals/. Nothing here is needed to build the site itself: the outputs in
-assets/ are committed.
+Run from the repository root. Print masters are read from $ZP_OUT (the plates
+and city prints rendered by tools/prints) and from originals/prints/ (the
+three Nairobi prints); photos and the logo come from originals/. Nothing here
+is needed to build the site itself: the outputs in assets/ are committed.
 """
 import os
 import sys
@@ -23,10 +23,15 @@ PRINTS = ROOT / "assets" / "prints"
 MASTERS = Path(os.environ.get("ZP_OUT", ROOT / "tools" / "prints" / "out"))
 ORIGINALS = ROOT / "originals"
 
+# A2 plates: their masters carry 3 mm of bleed, which is cut off for the web
 PLATES = ["kenya-population", "kenya-rivers", "kenya-relief", "kenya-roads", "kenya-forest",
-          "mount-kenya", "kilimanjaro", "rift-valley", "longonot-contours"]
+          "kenya-counties", "mount-kenya", "kilimanjaro", "rift-valley", "east-africa",
+          "longonot-contours", "mount-kenya-summit",
+          "county-kiambu", "county-nakuru", "county-nyeri", "county-kajiado"]
 MASTER_NAME = {"kenya-relief": "kenya"}                 # plate slug -> master file stem
+CITY_PRINTS = ["mombasa-gold", "kisumu-gold", "nakuru-gold", "eldoret-gold"]   # no bleed
 OWN_PRINTS = ["nairobi-gold", "nairobi-gold-centre", "nairobi-county-population"]
+BLEED_MM = 3.0                                          # as in tools/prints/common.py
 INK, PAPER, PAPER2 = (11, 13, 12), (241, 240, 235), (232, 231, 225)
 
 
@@ -57,7 +62,11 @@ def master(slug):
         if (MASTERS / name).exists():
             if name != f"{stem}.png":
                 print(f"  note: using proof {name} for {slug}")
-            return Image.open(MASTERS / name).convert("RGB")
+            im = Image.open(MASTERS / name)
+            if slug in PLATES:                           # trim the bleed: the web shows the cut sheet
+                b = round(BLEED_MM * im.info.get("dpi", (300, 300))[0] / 25.4)
+                im = im.crop((b, b, im.width - b, im.height - b))
+            return im.convert("RGB")
     raise FileNotFoundError(stem)
 
 
@@ -129,7 +138,7 @@ def print_previews():
     """640, 1280 and 2000 px wide previews of every print, plus their sizes."""
     lines = ["# Pixel sizes of the print previews in assets/prints/.",
              "# Written by tools/site_assets.py; do not edit by hand."]
-    for slug in PLATES + OWN_PRINTS:
+    for slug in PLATES + CITY_PRINTS + OWN_PRINTS:
         try:
             im = master(slug)
         except FileNotFoundError:

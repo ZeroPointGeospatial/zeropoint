@@ -15,6 +15,16 @@ Method
   3. D8 routing by steepest descent, flow accumulation in km2.
   4. Each cell is labelled with the outlet it reaches, and outlets are
      grouped into Kenya's five drainage basins.
+  5. Mean annual runoff is estimated cell by cell with the Budyko curve:
+     rainfall from CHIRPS (1991-2020) against potential evaporation from
+     Woodhead's elevation relation for Kenya, E0 = 2422 - 0.358 h mm a year.
+     Accumulated downstream it gives every reach an estimated mean flow in
+     m3/s, which sets the line weight on the plate: a channel crossing dry
+     country stays thin however large its catchment.
+
+The flows are estimates for drawing, not gauged discharges. Losses along
+the channel are not modelled, apart from ending the Ewaso Ng'iro at the
+Lorian Swamp, where it normally disappears.
 """
 import sys
 import time
@@ -24,11 +34,12 @@ from rasterio.transform import rowcol
 from scipy import ndimage
 
 import hydro
-from common import CACHE, DATA, kenya, load_dem, rasterize_geom, transformer
+from common import CACHE, DATA, kenya, load_dem, rasterize_geom, transformer, warp_to_map
 
 BBOX = (32, -6, 43, 7)          # w, s, e, n
 THRESHOLD_KM2 = float(sys.argv[1]) if len(sys.argv) > 1 else 12.0
 
+MAX_CRATER_KM2 = 1500.0          # a closed basin kept open automatically drains no more than this
 # Terminal lakes and dry pans: (name, lon, lat, basin, tolerance m)
 # basin: 1 Lake Victoria, 2 Rift Valley, 5 Ewaso Ng'iro North
 SINKS = [
@@ -46,6 +57,7 @@ SINKS = [
     ("Lotikipi Plain", 34.85, 4.45, 2, 1.5),
     ("Lake Amboseli", 37.13, -2.62, 3, 1.5),
     ("Chalbi Desert", 37.546, 2.916, 5, 1.5),
+    ("Lorian Swamp", 39.50, 0.90, 5, 0.5),
     ("Lake Eyasi", 35.00, -3.60, 0, 1.5),
     ("Lake Manyara", 35.82, -3.60, 0, 1.5),
 ]
@@ -71,13 +83,19 @@ def main():
     seeds[:, 0] = seeds[:, -1] = True
     sink_class = np.zeros(dem.shape, dtype="uint8")
     for name, lon, lat, basin, tol in SINKS:
-        r, c = rowcol(tr, lon, lat)
-        # start from the lowest cell within ~6 km so a dry pan is seeded at its floor
+        r0, c0 = rowcol(tr, lon, lat)
+        # Seed from the named point (a lake surface) and from the lowest cell
+        # within ~6 km (the floor of a dry pan), and keep whichever spreads
+        # further: a stray pit below a lake's surface must not stand in for it.
         w = 32
-        win = dem[r - w:r + w + 1, c - w:c + w + 1]
+        win = dem[r0 - w:r0 + w + 1, c0 - w:c0 + w + 1]
         dr, dc = np.unravel_index(np.argmin(win), win.shape)
-        r, c = r - w + dr, c - w + dc
-        m = hydro.flood_region(dem, r, c, tol, 12_000_000)
+        best = None
+        for r, c in ((r0, c0), (r0 - w + dr, c0 - w + dc)):
+            m = hydro.flood_region(dem, r, c, tol, 12_000_000)
+            if best is None or m.sum() > best[0].sum():
+                best = (m, r, c)
+        m, r, c = best
         seeds |= m
         sink_class[m] = 100 + basin
         print(f"  {name:16s} {dem[r, c]:7.1f} m  {m.sum() * (cell_deg * 111.2) ** 2:9.0f} km2")
@@ -118,13 +136,31 @@ def main():
     lab, n = ndimage.label(depth > 10)
     size = ndimage.sum(depth > 10, lab, np.arange(1, n + 1)) * (cell_deg * 111.32) ** 2
     keep = np.nonzero(size >= 10)[0]
+    floors = []
     for i in keep:
         r, c = ndimage.maximum_position(depth, lab, i + 1)
         seeds[r, c] = True
         sink_class[r, c] = 100 + basin[r, c]
+        floors.append((r, c))
     print(f"  {len(keep)} further closed basins kept open")
     recv, filled, basin = route()
     acc = hydro.flow_accumulation(filled, recv, weight)
+
+    # A crater or a pan gathers water from its own slopes only. A "closed
+    # basin" that swallows a whole river is a gorge the 90 m model does not
+    # resolve (the Kerio below Kolowa): let those spill. Every lake that does
+    # end a large river is named in SINKS.
+    for _ in range(4):
+        false = [(r, c) for r, c in floors if seeds[r, c] and acc[r, c] > MAX_CRATER_KM2]
+        if not false:
+            break
+        for r, c in false:
+            print(f"  reopened a false sink at {tr.c + tr.a * (c + 0.5):.3f}E "
+                  f"{tr.f + tr.e * (r + 0.5):.3f}N, catchment {acc[r, c]:.0f} km2")
+            seeds[r, c] = False
+            sink_class[r, c] = 0
+        recv, filled, basin = route()
+        acc = hydro.flow_accumulation(filled, recv, weight)
     print(f"second pass {time.time() - t0:.0f}s, largest catchment {acc.max():.0f} km2")
 
     ke = rasterize_geom(kenya(), dem.shape, tr)
@@ -141,8 +177,49 @@ def main():
     water = np.isin(lab, np.nonzero(sizes >= 2.0)[0] + 1)
     water = ndimage.binary_dilation(water, iterations=1)
 
-    stream = (acc >= THRESHOLD_KM2) & ke & ~water
+    # Runoff from the Budyko curve: E / P = sqrt(phi tanh(1 / phi) (1 - exp(-phi))),
+    # phi = E0 / P, with E0 from Woodhead (1968) as a function of elevation.
+    rain = np.load(CACHE / "chirps_annual_1991_2020.npz")
+    from rasterio.transform import Affine
+    p_mm, _ = warp_to_map(rain["mm"], Affine(*rain["transform"]),
+                          (BBOX[0], BBOX[1], BBOX[2], BBOX[3]), cell_deg,
+                          src_crs="EPSG:4326", dst_crs="EPSG:4326", nodata=0)
+    p_mm = np.maximum(p_mm[:nr, :nc], 1.0)
+    e0 = np.clip(2422.0 - 0.358 * np.clip(dem, 0, None), 600, None)
+    phi = e0 / p_mm
+    evap = p_mm * np.sqrt(phi * np.tanh(1 / phi) * (1 - np.exp(-phi)))
+    runoff = np.where(sea, 0, np.clip(p_mm - evap, 0, None)).astype("float32")   # mm a year
+    to_m3s = 1e3 / 3.156e7                                 # mm x km2 per year -> m3/s
+    flow = hydro.flow_accumulation(filled, recv, (runoff * weight * to_m3s).astype("float32"))
+    print(f"runoff: Kenya mean rainfall {p_mm[ke].mean():.0f} mm, runoff {runoff[ke].mean():.0f} mm; "
+          f"largest flow in Kenya {flow[ke].max():.0f} m3/s")
+    for name, lon, lat in (("Tana at Garissa", 39.64, -0.46), ("Tana at Garsen", 40.11, -2.27),
+                           ("Athi-Galana near Malindi", 40.05, -3.10), ("Nzoia at the lake", 34.09, 0.06),
+                           ("Mara at the border", 35.03, -1.55), ("Ewaso Ng'iro at Archer's Post", 37.68, 0.64),
+                           ("Turkwel at Lodwar", 35.60, 3.12)):
+        r, c = rowcol(tr, lon, lat)
+        k = 14                                             # take the main stem within ~2.5 km
+        print(f"  {name:32s} {flow[r - k:r + k + 1, c - k:c + k + 1].max():7.1f} m3/s")
+
+    # A river is drawn through a reservoir it flows out of (the Tana through
+    # Masinga and the dams below it), but stops at a lake it ends in. Lake
+    # Victoria also has an outflow, at Jinja, so large lakes are left alone.
+    wlab, wn = ndimage.label(water)
+    wflat = water.ravel()
+    wcells = np.nonzero(wflat)[0]
+    to = recv.ravel()[wcells]
+    spills = wcells[(to >= 0) & ~wflat[to]]                # water cells that drain onto land
+    ids = np.arange(wn + 1)
+    inside = ndimage.maximum(acc, wlab, ids)               # the most water gathered anywhere in it
+    leaving = np.zeros(wn + 1)
+    np.maximum.at(leaving, wlab.ravel()[spills], acc.ravel()[spills])
+    through = leaving >= 0.5 * inside                      # most of it leaves again
+    through &= ndimage.sum(weight * water, wlab, ids) < 300.0
+    through[0] = False
+    print(f"  {int(through.sum())} of {wn} water bodies are flowed through")
+    stream = (acc >= THRESHOLD_KM2) & ke & ~(water & ~through[wlab])
     rows, cols, offs, area = hydro.trace_streams(recv, acc, stream, dem.shape)
+    _, _, _, line_flow = hydro.trace_streams(recv, flow, stream, dem.shape)
     print(f"{len(area)} stream lines, {stream.sum()} cells, {time.time() - t0:.0f}s")
 
     tf = transformer()
@@ -152,7 +229,7 @@ def main():
     CACHE.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(
         CACHE / "kenya_hydro.npz", x=x.astype("float32"), y=y.astype("float32"),
-        offs=offs, area=area, basin=line_basin, water=np.packbits(water),
+        offs=offs, area=area, flow=line_flow, basin=line_basin, water=np.packbits(water),
         water_shape=np.array(water.shape), transform=np.array(tuple(tr)[:6]),
         basin_grid=basin[::4, ::4], threshold=THRESHOLD_KM2)
     print(f"saved, {time.time() - t0:.0f}s")

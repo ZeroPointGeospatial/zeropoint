@@ -12,9 +12,8 @@ import shapely
 from shapely.geometry import box
 
 import render3d as r3
-from common import (DATA, INK, MAP_CRS, OLIVE, PAPER, Plate, countries, draw_text, font,
-                    hex_rgb, kenya, lakes, linear_to_srgb, place_render, ramp,
-                    srgb_to_linear, transformer)
+from common import (DATA, INK, MAP_CRS, OLIVE, PAPER, Plate, annotate, cached_render, draw_text,
+                    font, hex_rgb, kenya, lakes, place_render, ramp, transformer)
 
 # sand -> ochre -> burnt orange -> red -> maroon
 RAMP = ramp([(0.0, "#e9e2cf"), (0.14, "#ecd29c"), (0.32, "#e9b062"), (0.52, "#dc7f40"),
@@ -25,7 +24,11 @@ LAKE = hex_rgb("#b9c8cc")
 PLATES = {
     "kenya": dict(
         number="01", title="Kenya", subtitle="Where 55 million people live",
-        tilt=62.0, max_height_km=440.0, model_width=0.90, drop=0.075),
+        tilt=62.0, max_height_km=440.0, model_width=0.90, drop=0.075,
+        # name, lon, lat, where the text sits relative to the place (mm right, mm down), side
+        towns=[("Nairobi", 36.817, -1.286, (9, 21), "right"),
+               ("Mombasa", 39.664, -4.043, (9, 7), "right"),
+               ("Kisumu", 34.754, -0.092, (-9, 13), "left")]),
 }
 # A plate can also be limited to one city by adding `bounds_lonlat=(w, s, e, n)`.
 # Mind that Kontur caps very dense hexagons: central Nairobi tops out at
@@ -131,12 +134,27 @@ def main(name, dpi=100, spp=32):
     my = (t + b) / 2 + (b - t) * cfg["drop"]            # sit the model low: columns rise above it
     cam_x = (plate.w / 2 - mx) * m_per_px
     cam_y = -(plate.h / 2 - my) * m_per_px / sin_t
-    rgb, mask = r3.render(
-        shapes, plate.w, plate.h, view_width=sheet_w, tilt=tilt, centre=(cam_x, cam_y, 0),
-        sun_az=305, sun_el=36, sun_size=8, spp=spp, floor=tuple(np.array(PAPER) / 255),
-        floor_z=-thickness, edge_height=thickness,
-        progress=lambda i, n: print(f"  tile {i}/{n} {time.time() - t0:.0f}s", flush=True))
+    def render():
+        return r3.render(
+            shapes, plate.w, plate.h, view_width=sheet_w, tilt=tilt, centre=(cam_x, cam_y, 0),
+            sun_az=305, sun_el=36, sun_size=8, spp=spp, floor=tuple(np.array(PAPER) / 255),
+            floor_z=-thickness, edge_height=thickness,
+            progress=lambda i, n: print(f"  tile {i}/{n} {time.time() - t0:.0f}s", flush=True))
+
+    key = dict(plate=f"{name}-population", size=(plate.w, plate.h), spp=spp, tilt=tilt,
+               height=cfg["max_height_km"], width=cfg["model_width"], drop=cfg["drop"],
+               hexagons=len(g), people=round(float(total)))
+    rgb, mask = cached_render(key, render)
     place_render(plate, rgb, mask)
+
+    # A few towns, named at the foot of their columns. In this tilted view a
+    # point (east, north, up) lands at x = east, y = north sin(tilt) + up cos(tilt).
+    tf = transformer()
+    for town, lon, lat, offset, side in cfg.get("towns", []):
+        x, y = tf.transform(lon, lat)
+        sx = mx + (x - cx) / m_per_px
+        sy = my - (y - cy) * sin_t / m_per_px
+        annotate(plate, (sx, sy), town, None, side, leader=offset, size_mm=2.9)
 
     def legend(d, right, top, pl):
         w, h = pl.px(96), pl.px(3.2)

@@ -22,6 +22,7 @@ CACHE = DATA / "cache"
 
 SHEET_MM = (420.0, 594.0)          # A2 portrait
 MARGIN_MM = 22.0
+BLEED_MM = 3.0                     # extra image on every side, trimmed off after printing
 
 # House colours, shared with the website.
 INK = (11, 13, 12)
@@ -221,19 +222,33 @@ def coord_label(lon, lat):
     return f"{dms(lat, 'N', 'S')}  {dms(lon, 'E', 'W')}"
 
 
+def srgb_profile():
+    """The sRGB colour profile, embedded in every file so a print shop's
+    software knows what the numbers mean."""
+    from PIL import ImageCms
+    return ImageCms.ImageCmsProfile(ImageCms.createProfile("sRGB")).tobytes()
+
+
 class Plate:
     """An A2 portrait sheet with the ZeroPoint title block along the foot.
+
+    The image is drawn 3 mm larger than the sheet on every side (bleed), so
+    a printer can trim to 420 x 594 mm without a white edge. `margin`,
+    `map_box` and the title block are all measured from the trim edge.
 
     The map goes in `self.map_box` (pixels). Call `title_block(...)` last.
     """
 
-    def __init__(self, dpi=150, bg=INK, fg=PAPER, accent=OLIVE_LIGHT, block_mm=92.0):
+    def __init__(self, dpi=150, bg=INK, fg=PAPER, accent=OLIVE_LIGHT, block_mm=92.0,
+                 sheet_mm=SHEET_MM, bleed_mm=BLEED_MM):
         self.dpi = dpi
         self.bg, self.fg, self.accent = bg, fg, accent
-        self.w = int(round(mm(SHEET_MM[0], dpi)))
-        self.h = int(round(mm(SHEET_MM[1], dpi)))
+        self.sheet_mm = sheet_mm
+        self.bleed = int(round(mm(bleed_mm, dpi)))
+        self.w = int(round(mm(sheet_mm[0], dpi))) + 2 * self.bleed
+        self.h = int(round(mm(sheet_mm[1], dpi))) + 2 * self.bleed
         self.img = Image.new("RGB", (self.w, self.h), bg)
-        m = mm(MARGIN_MM, dpi)
+        m = mm(MARGIN_MM, dpi) + self.bleed
         self.margin = m
         self.block_top = self.h - m - mm(block_mm, dpi)
         # left, top, right, bottom of the area available to the map
@@ -256,12 +271,12 @@ class Plate:
             self.img.paste(layer, box or (0, 0))
 
     def title_block(self, title, subtitle, number, facts, credit, centre=None,
-                    legend=None):
+                    legend=None, label="PLATE"):
         """Draw the foot of the sheet.
 
         title     e.g. "Kenya"
         subtitle  e.g. "Rivers and drainage basins"
-        number    plate number, e.g. "02"
+        number    plate number, e.g. "02" (`label` sets the word before it)
         facts     short (label, value) pairs set under the rule
         credit    data / method line
         centre    (lon, lat) printed as the sheet's reference coordinate
@@ -283,7 +298,7 @@ class Plate:
         # plate number and series, small caps over the title
         f_label = font("Barlow-500", px(3.0))
         y = top + px(11.0)
-        draw_text(d, (left, y), f"PLATE {number}", f_label, self.accent, 0.22)
+        draw_text(d, (left, y), f"{label} {number}", f_label, self.accent, 0.22)
         draw_text(d, (right, y), "ZEROPOINT GEOSPATIAL", f_label, soft, 0.22, anchor="rs")
 
         # title
@@ -302,8 +317,8 @@ class Plate:
         # lower rule and facts
         y_rule = y_sub + px(9.5)
         d.line([(left, y_rule), (right, y_rule)], fill=rule, width=max(1, int(px(0.18))))
-        f_k = font("Barlow-500", px(2.25))
-        f_v = font("IBMPlexMono-400", px(2.55))
+        f_k = font("Barlow-500", px(2.5))
+        f_v = font("IBMPlexMono-400", px(2.95))
         x = left
         cells = list(facts)
         if centre is not None:
@@ -311,21 +326,23 @@ class Plate:
         col = (right - left) / max(len(cells), 1)
         for k, v in cells:
             draw_text(d, (x, y_rule + px(7.0)), k.upper(), f_k, faint, 0.2)
-            draw_text(d, (x, y_rule + px(12.2)), v, f_v, soft, 0.0)
+            draw_text(d, (x, y_rule + px(12.6)), v, f_v, soft, 0.0)
             x += col
 
         # credit line at the very foot
-        f_c = font("Barlow-400", px(2.25))
+        f_c = font("Barlow-400", px(2.45))
         y_c = self.h - m
         draw_text(d, (left, y_c), credit, f_c, faint, 0.04)
         draw_text(d, (right, y_c), "© ZeroPoint Geospatial, Nairobi", f_c, faint,
                   0.04, anchor="rs")
         return self
 
-    def save(self, name, quality=92):
+    def save(self, name):
+        """Write the sheet, bleed included, as a PNG tagged sRGB."""
         OUT.mkdir(parents=True, exist_ok=True)
         path = OUT / f"{name}.png"
-        self.img.save(path, optimize=False, dpi=(self.dpi, self.dpi))
+        self.img.save(path, optimize=False, dpi=(self.dpi, self.dpi),
+                      icc_profile=srgb_profile())
         return path
 
 
@@ -417,35 +434,169 @@ def ramp_legend(stops, label, ticks, fmt=lambda v: f"{v:,.0f}".replace(",", " ")
     return draw
 
 
-def annotate(plate, xy, name, value=None, side="right", on_dark=False):
-    """A spot label: a dot, the name in caps and an optional figure in mono,
-    over a soft halo so it reads on any terrain colour."""
+def _soft_halo(plate, paint, xy, halo, reach_mm=60):
+    """Paint `paint(draw, colour)` as a blurred halo patch behind a label."""
     x, y = xy
-    ink = (250, 249, 244) if on_dark else (18, 20, 19)
-    halo = (14, 16, 15) if on_dark else (250, 249, 244)
-    f_n = font("Barlow-600", plate.px(2.9))
-    f_v = font("IBMPlexMono-500", plate.px(2.5))
-    r = plate.px(0.6)
-    off = plate.px(2.8) * (1 if side == "right" else -1)
-    anchor = "ls" if side == "right" else "rs"
-    ty = y + plate.px(1.0)
-    vy = ty + plate.px(3.7)
-
-    def paint(d, colour):
-        d.ellipse([x - r, y - r, x + r, y + r], fill=colour)
-        draw_text(d, (x + off, ty), name.upper(), f_n, colour, 0.14, anchor)
-        if value:
-            draw_text(d, (x + off, vy), value, f_v, colour, 0, anchor)
-
-    pad = int(plate.px(60))
-    x0, y0 = int(x) - pad, int(y) - pad
-    x0, y0 = max(x0, 0), max(y0, 0)
+    pad = int(plate.px(reach_mm))
+    x0, y0 = max(int(x) - pad, 0), max(int(y) - pad, 0)
     x1, y1 = min(int(x) + pad, plate.w), min(int(y) + pad, plate.h)
-    glow = Image.new("L", plate.img.size, 0)
-    paint(ImageDraw.Draw(glow), 255)
-    patch = glow.crop((x0, y0, x1, y1))
-    patch = patch.filter(ImageFilter.MaxFilter(2 * int(max(1, plate.px(0.35))) + 1))
-    patch = patch.filter(ImageFilter.GaussianBlur(plate.px(0.7)))
-    patch = patch.point(lambda v: min(255, int(v * 1.5 * 0.62)))
-    plate.img.paste(Image.new("RGB", patch.size, halo), (x0, y0), patch)
+    if x1 <= x0 or y1 <= y0:
+        return
+    glow = Image.new("L", (x1 - x0, y1 - y0), 0)
+    d = ImageDraw.Draw(glow)
+    paint(d, 255, (-x0, -y0))
+    glow = glow.filter(ImageFilter.MaxFilter(2 * int(max(1, plate.px(0.35))) + 1))
+    glow = glow.filter(ImageFilter.GaussianBlur(plate.px(0.7)))
+    glow = glow.point(lambda v: min(255, int(v * 0.93)))
+    plate.img.paste(Image.new("RGB", glow.size, halo), (x0, y0), glow)
+
+
+def annotate(plate, xy, name, value=None, side="right", on_dark=False, leader=None,
+             size_mm=2.9, ink=None, halo=None):
+    """A spot label: a dot, the name in caps and an optional figure in mono,
+    over a soft halo so it reads on any terrain colour.
+
+    leader  optional (dx_mm, dy_mm): put the text that far from the dot and
+            join the two with a hairline, for crowded places.
+    """
+    x, y = xy
+    ink = ink or ((250, 249, 244) if on_dark else (18, 20, 19))
+    halo = halo or ((14, 16, 15) if on_dark else (250, 249, 244))
+    f_n = font("Barlow-600", plate.px(size_mm))
+    f_v = font("IBMPlexMono-500", plate.px(size_mm * 0.86))
+    r = plate.px(0.6)
+    lx, ly = x, y
+    if leader:
+        lx, ly = x + plate.px(leader[0]), y + plate.px(leader[1])
+    off = plate.px(2.8 if not leader else 1.2) * (1 if side == "right" else -1)
+    anchor = "ls" if side == "right" else "rs"
+    ty = ly + plate.px(1.0)
+    vy = ty + plate.px(size_mm * 1.28)
+
+    def paint(d, colour, shift=(0, 0)):
+        sx, sy = shift
+        d.ellipse([x - r + sx, y - r + sy, x + r + sx, y + r + sy], fill=colour)
+        if leader:
+            d.line([(x + sx, y + sy), (lx + sx, ly + sy)], fill=colour,
+                   width=max(1, int(round(plate.px(0.18)))))
+        draw_text(d, (lx + off + sx, ty + sy), name.upper(), f_n, colour, 0.14, anchor)
+        if value:
+            draw_text(d, (lx + off + sx, vy + sy), value, f_v, colour, 0, anchor)
+
+    _soft_halo(plate, paint, ((x + lx) / 2, (y + ly) / 2), halo, 60 + (abs(leader[0]) if leader else 0))
     paint(ImageDraw.Draw(plate.img), ink)
+
+
+def name_label(plate, xy, text, colour, halo, size_mm=3.1, angle=0.0, italic=True,
+               tracking=0.1, anchor="m", caps=False, weight=400):
+    """A free-standing name (a river, a range, a lake), optionally rotated.
+    Water and landform names are set in italic, as on a topographic sheet."""
+    name = f"BarlowItalic-{weight if weight in (400, 500) else 400}" if italic else f"Barlow-{weight}"
+    fnt = font(name, plate.px(size_mm))
+    text = text.upper() if caps else text
+    w = int(text_width(text, fnt, tracking)) + int(plate.px(8))
+    h = int(plate.px(size_mm * 2.4))
+    def layer(col):
+        im = Image.new("L", (w, h), 0)
+        draw_text(ImageDraw.Draw(im), (w / 2, h * 0.68), text, fnt, col, tracking, "ms")
+        return im
+    mask = layer(255)
+    glow = mask.filter(ImageFilter.MaxFilter(2 * int(max(1, plate.px(0.35))) + 1))
+    glow = glow.filter(ImageFilter.GaussianBlur(plate.px(0.7))).point(lambda v: min(255, int(v * 0.9)))
+    if angle:
+        mask = mask.rotate(angle, resample=Image.BICUBIC, expand=True)
+        glow = glow.rotate(angle, resample=Image.BICUBIC, expand=True)
+    x, y = xy
+    dx = {"m": mask.width / 2, "l": 0, "r": mask.width}[anchor]
+    pos = (int(round(x - dx)), int(round(y - mask.height / 2)))
+    plate.img.paste(Image.new("RGB", glow.size, halo), pos, glow)
+    plate.img.paste(Image.new("RGB", mask.size, colour), pos, mask)
+
+
+def cached_render(key, render_fn):
+    """Reuse a finished 3D render when only labels or type have changed.
+
+    key        any dict describing the scene (plate, size, samples, model)
+    render_fn  called with no arguments, returns (rgb, mask)
+    Set ZP_FRESH=1 to ignore the cache.
+    """
+    import hashlib
+    import json
+    digest = hashlib.sha1(json.dumps(key, sort_keys=True, default=str).encode()).hexdigest()[:16]
+    base = CACHE / "renders" / f"{key.get('plate', 'render')}_{digest}"
+    rgb_f, mask_f = base.with_suffix(".rgb.npy"), base.with_suffix(".mask.npy")
+    if rgb_f.exists() and mask_f.exists() and not os.environ.get("ZP_FRESH"):
+        print(f"  reusing cached render {base.name}")
+        return np.load(rgb_f).astype("float32"), np.load(mask_f).astype("float32") / 255
+    rgb, mask = render_fn()
+    base.parent.mkdir(parents=True, exist_ok=True)
+    np.save(rgb_f, rgb.astype("float16"))
+    np.save(mask_f, (np.clip(mask, 0, 1) * 255).astype("uint8"))
+    return rgb, mask
+
+
+class KenyaFrame:
+    """Kenya drawn at a fixed scale in a plate's map box (UTM zone 37S).
+    The rivers, roads and counties plates all use it, so they register."""
+
+    def __init__(self, plate, scale_a2=2_400_000):
+        self.plate = plate
+        self.scale_a2 = scale_a2
+        self.geom = kenya(MAP_CRS)
+        self.x0, self.y0, self.x1, self.y1 = self.geom.bounds
+        self.k = plate.px(1000) / scale_a2                    # pixels per metre
+        l, t, r, b = plate.map_box
+        self.w, self.h = (self.x1 - self.x0) * self.k, (self.y1 - self.y0) * self.k
+        self.ox, self.oy = l + (r - l - self.w) / 2, t + (b - t - self.h) / 2
+        self._tf = transformer()
+        g = self.geom
+        self.polys = list(g.geoms) if g.geom_type == "MultiPolygon" else [g]
+
+    def to_px(self, x, y):
+        return (self.ox + (np.asarray(x) - self.x0) * self.k,
+                self.oy + (self.y1 - np.asarray(y)) * self.k)
+
+    def lonlat(self, lon, lat):
+        x, y = self._tf.transform(lon, lat)
+        px, py = self.to_px(x, y)
+        return float(px), float(py)
+
+    @property
+    def bounds(self):
+        return self.x0, self.y0, self.x1, self.y1
+
+    @property
+    def centre_lonlat(self):
+        return transformer(MAP_CRS, "EPSG:4326").transform((self.x0 + self.x1) / 2,
+                                                           (self.y0 + self.y1) / 2)
+
+    def mask(self, supersample=2):
+        """Anti-aliased land mask the size of the sheet, values 0..1."""
+        ss = supersample
+        m = Image.new("L", (self.plate.w * ss, self.plate.h * ss), 0)
+        d = ImageDraw.Draw(m)
+        for p in self.polys:
+            px, py = self.to_px(*p.exterior.xy)
+            d.polygon(list(zip(px * ss, py * ss)), fill=255)
+        return np.asarray(m.resize((self.plate.w, self.plate.h), Image.LANCZOS), dtype="float32") / 255
+
+    def outline(self, opacity=0.2, width_mm=0.12):
+        d = ImageDraw.Draw(self.plate.img)
+        for p in self.polys:
+            pts = list(zip(*self.to_px(*p.exterior.xy)))
+            d.line(pts + [pts[0]], fill=self.plate.mix(opacity),
+                   width=max(1, int(round(self.plate.px(width_mm)))))
+
+
+def line_key(rows, widest_of=None):
+    """Legend made of short line samples. rows: (name, rgb colour, width mm)."""
+    def draw(d, right, top, pl):
+        f_n = font("Barlow-500", pl.px(2.9))
+        widest = max(text_width(n.upper(), f_n, 0.14) for n, _, _ in rows)
+        x = right - widest
+        for i, (name, colour, wd) in enumerate(rows):
+            y = top + i * pl.px(5.6)
+            d.line([(x - pl.px(13), y - pl.px(1.0)), (x - pl.px(4), y - pl.px(1.0))],
+                   fill=colour, width=max(1, int(round(pl.px(wd)))))
+            draw_text(d, (x, y), name.upper(), f_n, pl.mix(0.72), 0.14)
+    return draw

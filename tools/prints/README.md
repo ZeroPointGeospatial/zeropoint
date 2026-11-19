@@ -1,25 +1,42 @@
 # Print pipeline
 
-The scripts that draw the nine ZeroPoint map plates from open data. Nothing
-in this folder is published with the website; it is here so every plate can
-be re-rendered, changed or made for another area.
+The scripts that draw the ZeroPoint map plates from open data. Nothing in
+this folder is published with the website; it is here so every plate can be
+re-rendered, changed or made for another area. `PRINTING.md` has the notes
+for sending the files to a print shop.
 
 ## Plates
 
 | No. | Plate | Script | Source data |
 | --- | --- | --- | --- |
 | 01 | Kenya, population | `population.py kenya` | Kontur Population 2023 |
-| 02 | Kenya, rivers and basins | `kenya_hydro.py`, then `kenya_rivers.py` | Copernicus DEM GLO-90 |
+| 02 | Kenya, rivers and basins | `kenya_hydro.py`, then `kenya_rivers.py` | Copernicus DEM GLO-90, CHIRPS rainfall |
 | 03 | Kenya, relief | `relief.py kenya` | Copernicus DEM GLO-90 |
-| 04 | Kenya, roads | `fetch_roads.py`, then `kenya_roads.py` | OpenStreetMap via Overture Maps |
+| 04 | Kenya, roads | `kenya_roads.py` | OpenStreetMap via Overture Maps |
 | 05 | Kenya, tree cover | `relief.py kenya-forest` | Hansen Global Forest Change, GLO-90 |
 | 06 | Mount Kenya | `relief.py mount-kenya` | Copernicus DEM GLO-30 |
 | 07 | Kilimanjaro | `relief.py kilimanjaro` | Copernicus DEM GLO-30 |
 | 08 | The Rift Valley | `relief.py rift-valley` | Copernicus DEM GLO-30 |
-| 09 | Longonot contours | `contours.py` | Copernicus DEM GLO-30 |
+| 09 | Longonot contours | `contours.py longonot` | Copernicus DEM GLO-30 |
+| 13 | Kenya, the 47 counties | `counties.py` | OpenStreetMap via Overture Maps, GLO-90 |
+| 14 | East Africa, relief | `relief.py east-africa` | Copernicus DEM GLO-90 |
+| 15 | Mount Kenya summit contours | `contours.py mount-kenya-summit` | Copernicus DEM GLO-30 |
+| County | Relief of one county | `relief.py county:Kiambu` | Copernicus DEM, Overture Maps boundary |
+| City | Roads of a town in gold | `cities.py mombasa` | OpenStreetMap via Overture Maps |
 
 Plates 10 to 12 (the Nairobi prints) were made separately; their files are
-in `originals/prints/`.
+in `originals/prints/`. The city prints copy the layout of the Nairobi gold
+print so they hang as a set.
+
+**A county to order.** `python relief.py county:Machakos` draws any of the
+47 counties: it fetches the elevation tiles it needs, picks a tidy scale
+that fills the sheet, sets the colour breaks to the county's own range of
+heights and numbers the plate with the official county code. Names and
+spot heights for a county go in `COUNTY_LABELS` in `relief.py`; without an
+entry the plate is drawn unlabelled.
+
+**Another town.** Add a line to `CITIES` in `cities.py` with the centre and
+the radius in kilometres.
 
 ## Setting up
 
@@ -31,20 +48,32 @@ Python 3.11 or newer.
     export ZP_DATA=/path/with/space     # about 3 GB of downloads and caches
     export ZP_OUT=/path/for/output
 
-    python fetch_data.py all            # elevation, population, boundaries, forest, fonts
+    python fetch_data.py all            # elevation, population, boundaries, forest, rainfall, fonts
     for n in mount-kenya kilimanjaro rift; do python fetch_data.py dem30 $n; done
-    python fetch_roads.py               # Kenya's roads, about a minute
-    python kenya_hydro.py               # drainage analysis, about a minute
+    python fetch_overture.py roads      # Kenya's roads, about a minute
+    python fetch_overture.py counties   # county boundaries
+    python kenya_hydro.py               # drainage analysis, about two minutes
 
 ## Rendering
 
     python relief.py mount-kenya 100    # a quick proof at 100 dpi
-    sh render_all.sh                    # every plate at A2, 300 dpi (4961 x 7016 px)
+    sh render_all.sh                    # every plate at A2, 300 dpi
+    python export_print.py              # print-ready JPEGs in $ZP_OUT/print
 
 Every plate is designed at A2 portrait. The second argument is the dpi and
-the third, for the 3D plates, the samples per pixel (48 is plenty with the
+the third, for the 3D plates, the samples per pixel (40 is plenty with the
 denoiser). On a four-core machine a 3D plate takes about ten minutes at
 300 dpi; the line plates take seconds.
+
+A master is the A2 sheet plus 3 mm of bleed on every side (5031 x 7086 px
+at 300 dpi), saved as a PNG with the sRGB profile embedded. `export_print.py`
+turns the masters into the two JPEGs a print shop may ask for, with and
+without the bleed.
+
+The ray-traced image of a 3D plate is cached in `$ZP_DATA/cache/renders`,
+keyed by everything that affects it. Changing a label, a colour in the
+title block or the type and running the plate again takes seconds, not
+minutes. Set `ZP_FRESH=1` to ignore the cache.
 
 For A0, the 300 dpi A2 file prints at 150 dpi, which is fine at viewing
 distance. For a sharper A0, render the line plates at 600 dpi
@@ -61,8 +90,22 @@ repository root) rebuilds the web previews in `assets/prints/`.
 the sea, the sheet edge and the terminal lakes (Priority-Flood), routes flow
 by steepest descent and accumulates upstream area. Closed basins such as
 the Rift lakes, the Chalbi and the calderas are kept open rather than
-filled. Each stream is then labelled by the outlet it reaches and grouped
-into Kenya's five drainage basins. Areas inside Kenya from the current run:
+filled; a "closed basin" that swallows more than 1 500 km2 of catchment and
+is not a named lake is treated as a gorge the 90 m model fails to resolve,
+and is allowed to spill (this is what carries the Kerio through to Lake
+Turkana). A river is drawn through a reservoir it flows out of and stops
+at a lake it ends in. Each stream is then labelled by the outlet it
+reaches and grouped into Kenya's five drainage basins.
+
+Line weight is estimated mean flow, not catchment area. Mean annual
+rainfall (CHIRPS, 1991 to 2020) is turned into runoff with the Budyko
+curve, using Woodhead's potential evaporation for Kenya as a function of
+altitude, and accumulated downstream. It is an estimate for drawing with:
+it puts the Tana at Garissa at about 135 m3/s against a gauged mean of
+roughly 150 m3/s or a little more,
+but it has no losses to the river bed, so dryland rivers such as the lower
+Turkwel are drawn heavier than they run. The Ewaso Ng'iro is ended at the
+Lorian Swamp. Areas inside Kenya from the current run:
 Lake Victoria 51 100 km2, Rift Valley 130 400 km2, Athi 67 300 km2, Tana
 116 300 km2, Ewaso Ng'iro North 224 600 km2. The Athi and Tana split along
 the coast is by river mouth, which is not how the official catchment
@@ -77,9 +120,17 @@ view so the stated scale holds.
 **Roads.** Local roads are accumulated into a density layer (road length
 per pixel); trunk to tertiary roads are drawn over it as lines.
 
+**Counties.** Boundaries are the OpenStreetMap county relations as
+published by Overture Maps. The Ilemi Triangle is drawn as part of Turkana.
+Neighbouring counties are given different tints by a greedy colouring.
+
+**Contours.** Interpolated from the 30 m surface model after light
+smoothing, with labelled index contours and UTM grid ticks on the neat
+line.
+
 **Sheet.** `common.py` holds the plate layout: title block, plate number,
-facts row, credit line, legends and labels. All dimensions are in
-millimetres on A2.
+facts row, credit line, legends, place labels and the bleed. All dimensions
+are in millimetres on A2.
 
 ## Licences of the data
 
@@ -92,8 +143,12 @@ Each plate prints its own credit line. If you sell prints, keep it.
 - OpenStreetMap, via Overture Maps: ODbL 1.0. Printed maps are a "produced
   work"; attribution to OpenStreetMap contributors is required.
 - Hansen/UMD/Google/USGS/NASA Global Forest Change v1.11: CC BY 4.0.
+- CHIRPS rainfall (Climate Hazards Center, UC Santa Barbara): public
+  domain.
 - Natural Earth boundaries and lakes: public domain.
-- Barlow and IBM Plex Mono typefaces: SIL Open Font License 1.1.
+- Barlow, IBM Plex Mono and Playfair Display typefaces: SIL Open Font
+  License 1.1.
 
-Country outlines come from Natural Earth at 1:10 million. They are fine
-for a wall print and not a statement about any boundary.
+Country outlines come from Natural Earth at 1:10 million and county
+boundaries from OpenStreetMap. They are fine for a wall print and not a
+statement about any boundary.

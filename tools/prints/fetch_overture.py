@@ -1,15 +1,17 @@
-"""Fetch road centre lines for Kenya from Overture Maps (transportation /
-segment), which is built from OpenStreetMap.
+"""Fetch vector data for Kenya from Overture Maps: road centre lines
+(built from OpenStreetMap) and county boundaries.
 
-    python fetch_roads.py
+    python fetch_overture.py roads
+    python fetch_overture.py counties
 
 Overture publishes GeoParquet on S3. The files are spatially sorted and
 every row group carries bounding-box statistics, so this script reads only
 the file footers plus the few row groups that touch Kenya (a few hundred MB
-out of ~70 GB), over plain HTTPS range requests.
+out of tens of GB), over plain HTTPS range requests.
 
-Output: $ZP_DATA/cache/kenya_roads.npz (line vertices in lon/lat, line
-offsets and a road-class code per line).
+Outputs, in $ZP_DATA/cache:
+  kenya_roads.npz      line vertices in lon/lat, line offsets, class per line
+  kenya_counties.gpkg  the 47 counties as polygons with their names
 
 Licence: OpenStreetMap contributors, Overture Maps Foundation, ODbL 1.0.
 """
@@ -47,7 +49,11 @@ class RangeFile(io.RawIOBase):
     def __init__(self, url, session=None):
         self.url, self.pos = url, 0
         self.s = session or requests.Session()
-        self.size = int(self.s.head(url, timeout=60).headers["Content-Length"])
+        # A one-byte ranged GET gives the size reliably ("bytes 0-0/12345");
+        # HEAD does not always carry Content-Length through a proxy.
+        r = self.s.get(url, headers={"Range": "bytes=0-0"}, timeout=60)
+        r.raise_for_status()
+        self.size = int(r.headers["Content-Range"].split("/")[1])
         self.blocks = {}
 
     def seekable(self):
@@ -103,8 +109,8 @@ def latest_release():
     return sorted(re.findall(r"<Prefix>release/([^/<]+)/</Prefix>", xml))[-1]
 
 
-def list_files(release):
-    prefix = f"release/{release}/theme=transportation/type=segment/"
+def list_files(release, theme="transportation", kind="segment"):
+    prefix = f"release/{release}/theme={theme}/type={kind}/"
     xml = requests.get(BUCKET, params={"list-type": 2, "prefix": prefix, "max-keys": 1000},
                        timeout=60).text
     return [BUCKET + k for k in re.findall(r"<Key>([^<]+\.parquet)</Key>", xml)]
@@ -147,8 +153,7 @@ def read_group(job):
     return geoms, code[keep]
 
 
-def main():
-    release = sys.argv[1] if len(sys.argv) > 1 else latest_release()
+def roads(release):
     files = list_files(release)
     print(f"Overture {release}: {len(files)} segment files")
     with cf.ThreadPoolExecutor(12) as ex:
@@ -168,10 +173,46 @@ def main():
     CACHE.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(CACHE / "kenya_roads.npz", xy=xy.astype("float32"), offs=offs,
                         code=codes.astype("int8"), release=release)
-    for name, k in sorted({(n, v) for n, v in CLASSES.items()}, key=lambda kv: kv[1]):
-        pass
     print(f"saved {len(geoms):,} roads, {len(xy):,} vertices; "
           f"per class: {np.bincount(codes).tolist()}")
+
+
+def read_counties(job):
+    url, g = job
+    t = pq.ParquetFile(RangeFile(url)).read_row_group(
+        g, columns=["geometry", "subtype", "country", "class", "names", "region"])
+    sub = np.array(t.column("subtype").to_pylist(), dtype=object)
+    cty = np.array(t.column("country").to_pylist(), dtype=object)
+    cls = np.array(t.column("class").to_pylist(), dtype=object)
+    keep = (sub == "region") & (cty == "KE") & (cls == "land")
+    if not keep.any():
+        return []
+    rows = t.filter(keep).to_pylist()
+    return [(r["names"]["primary"], r["region"], shapely.from_wkb(r["geometry"])) for r in rows]
+
+
+def counties(release):
+    import geopandas as gpd
+    files = list_files(release, "divisions", "division_area")
+    with cf.ThreadPoolExecutor(12) as ex:
+        hits = [(u, g) for u, gs in ex.map(touching_row_groups, files) for g in gs]
+    print(f"Overture {release}: {len(hits)} division row groups touch Kenya")
+    rows = []
+    with cf.ThreadPoolExecutor(6) as ex:
+        for part in ex.map(read_counties, hits):
+            rows += part
+    g = gpd.GeoDataFrame({"name": [r[0] for r in rows], "code": [r[1] for r in rows]},
+                         geometry=[r[2] for r in rows], crs="EPSG:4326")
+    g = g.drop_duplicates("code").sort_values("name").reset_index(drop=True)
+    CACHE.mkdir(parents=True, exist_ok=True)
+    g.to_file(CACHE / "kenya_counties.gpkg", driver="GPKG")
+    print(f"saved {len(g)} counties: " + ", ".join(g["name"].head(8)) + " ...")
+
+
+def main():
+    what = sys.argv[1] if len(sys.argv) > 1 else "roads"
+    release = sys.argv[2] if len(sys.argv) > 2 else latest_release()
+    {"roads": roads, "counties": counties}[what](release)
 
 
 if __name__ == "__main__":

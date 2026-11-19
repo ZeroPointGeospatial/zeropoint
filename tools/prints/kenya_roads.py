@@ -4,7 +4,7 @@ Minor roads and tracks are accumulated into a density layer (brightness =
 length of road per pixel), so towns glow and empty country stays dark. The
 classified network, trunk to tertiary, is drawn over it as crisp lines.
 
-    python fetch_roads.py          # once
+    python fetch_overture.py roads   # once
     python kenya_roads.py [dpi]
 """
 import sys
@@ -17,8 +17,8 @@ from matplotlib.collections import LineCollection
 from numba import njit, prange
 from PIL import Image, ImageDraw, ImageFilter
 
-from common import (CACHE, MAP_CRS, Plate, apply_ramp, draw_text, font, hex_rgb, kenya,
-                    ramp, transformer)
+from common import (CACHE, KenyaFrame, Plate, annotate, apply_ramp, hex_rgb, line_key, ramp,
+                    transformer)
 
 BG = hex_rgb("#0b1f14")             # the deep green of the Nairobi Gold prints
 GOLD = "#d3b795"
@@ -34,6 +34,22 @@ MAJOR = {
 }
 DENSITY_RAMP = ramp([(0.0, "#0b1f14"), (0.25, "#2b3a26"), (0.55, "#6f6a4a"),
                      (0.82, "#b89c76"), (1.0, "#e9d6b3")])
+
+# name, lon, lat, side of the dot the name sits on
+TOWNS = [
+    ("Nairobi", 36.817, -1.286, "right"), ("Mombasa", 39.664, -4.043, "right"),
+    ("Kisumu", 34.754, -0.092, "left"), ("Nakuru", 36.070, -0.283, "left"),
+    ("Eldoret", 35.270, 0.520, "left"), ("Kitale", 35.006, 1.016, "left"),
+    ("Nanyuki", 37.073, 0.017, "left"), ("Meru", 37.650, 0.047, "right"),
+    ("Garissa", 39.646, -0.456, "right"), ("Malindi", 40.117, -3.218, "right"),
+    ("Lamu", 40.902, -2.271, "right"), ("Voi", 38.567, -3.396, "left"),
+    ("Namanga", 36.787, -2.545, "left"), ("Marsabit", 37.990, 2.335, "right"),
+    ("Moyale", 39.056, 3.521, "right"), ("Mandera", 41.855, 3.937, "left"),
+    ("Wajir", 40.057, 1.747, "right"), ("Lodwar", 35.597, 3.119, "left"),
+    ("Narok", 35.871, -1.078, "left"), ("Kisii", 34.767, -0.681, "left"),
+    ("Kitui", 38.012, -1.367, "right"), ("Isiolo", 37.582, 0.354, "right"),
+    ("Kakuma", 34.852, 3.713, "left"), ("Busia", 34.111, 0.460, "left"),
+]
 
 
 @njit(cache=True, parallel=False)
@@ -63,27 +79,11 @@ def main(dpi=150):
     z = np.load(CACHE / "kenya_roads.npz")
     xy, offs, code = z["xy"], z["offs"], z["code"]
     plate = Plate(dpi=dpi, bg=BG, fg=hex_rgb("#efe6d2"), accent=hex_rgb(GOLD), block_mm=90)
-    ke = kenya(MAP_CRS)
-    x0, y0, x1, y1 = ke.bounds
-    scale = plate.px(1000) / SCALE_A2
-    mw, mh = (x1 - x0) * scale, (y1 - y0) * scale
-    l, t, r, b = plate.map_box
-    ox, oy = l + (r - l - mw) / 2, t + (b - t - mh) / 2
+    f = KenyaFrame(plate, SCALE_A2)
     X, Y = transformer().transform(xy[:, 0].astype("float64"), xy[:, 1].astype("float64"))
-    px = (ox + (X - x0) * scale).astype("float32")
-    py = (oy + (y1 - Y) * scale).astype("float32")
-
-    # land mask (anti-aliased) in sheet pixels
-    ss = 2
-    mask = Image.new("L", (plate.w * ss, plate.h * ss), 0)
-    dm = ImageDraw.Draw(mask)
-    polys = list(ke.geoms) if ke.geom_type == "MultiPolygon" else [ke]
-    for p in polys:
-        ex, ey = p.exterior.xy
-        dm.polygon(list(zip((ox + (np.asarray(ex) - x0) * scale) * ss,
-                            (oy + (y1 - np.asarray(ey)) * scale) * ss)), fill=255)
-    mask = mask.resize((plate.w, plate.h), Image.LANCZOS)
-    m = np.asarray(mask, dtype="float32") / 255
+    px, py = f.to_px(X, Y)
+    px, py = px.astype("float32"), py.astype("float32")
+    m = f.mask()
 
     # --- density of minor roads and tracks -------------------------------
     dens = np.zeros((plate.h, plate.w), dtype="float32")
@@ -91,7 +91,7 @@ def main(dpi=150):
     accumulate(px, py, offs, np.nonzero(code == 5)[0], dens, 0.7)
     total = np.zeros_like(dens)
     accumulate(px, py, offs, np.arange(len(code)), total, 1.0)
-    km = float((total * m).sum() / scale / 1000)
+    km = float((total * m).sum() / f.k / 1000)
     print(f"mapped length inside Kenya: {km:,.0f} km")
     # road length per pixel is resolution dependent; normalise to the 150 dpi proof
     dens *= 150.0 / dpi
@@ -129,39 +129,26 @@ def main(dpi=150):
     base.alpha_composite(Image.fromarray(ba.astype("uint8"), "RGBA"))
     base.alpha_composite(lines)
     plate.img = base.convert("RGB")
+    f.outline(0.22)
 
-    d = ImageDraw.Draw(plate.img)
-    for p in polys:
-        ex, ey = p.exterior.xy
-        pts = list(zip(ox + (np.asarray(ex) - x0) * scale, oy + (y1 - np.asarray(ey)) * scale))
-        d.line(pts + [pts[0]], fill=plate.mix(0.22), width=max(1, int(round(plate.px(0.12)))))
+    for name, lon, lat, side in TOWNS:
+        annotate(plate, f.lonlat(lon, lat), name, None, side, size_mm=2.6,
+                 ink=hex_rgb("#f6ead2"), halo=BG)
 
-    def legend(d, right, top, pl):
-        f_n = font("Barlow-500", pl.px(2.9))
-        rows = [("Trunk and motorway", 0), ("Primary", 1), ("Secondary", 2), ("Tertiary", 3),
-                ("Local roads and tracks", None)]
-        widest = max(f_n.getlength(n.upper()) + 0.14 * f_n.size * (len(n) - 1) for n, _ in rows)
-        x = right - widest
-        for i, (name, c) in enumerate(rows):
-            y = top + i * pl.px(5.6)
-            if c is None:
-                colour, wd = hex_rgb("#6f6a4a"), 0.5
-            else:
-                colour, wd = hex_rgb(MAJOR[c][1]), MAJOR[c][0] * 2.2
-            d.line([(x - pl.px(13), y - pl.px(1.0)), (x - pl.px(4), y - pl.px(1.0))],
-                   fill=colour, width=max(1, int(round(pl.px(wd)))))
-            draw_text(d, (x, y), name.upper(), f_n, pl.mix(0.72), 0.14)
-
-    lon, lat = transformer(MAP_CRS, "EPSG:4326").transform((x0 + x1) / 2, (y0 + y1) / 2)
+    rows = [("Trunk and motorway", hex_rgb(MAJOR[0][1]), MAJOR[0][0] * 2.2),
+            ("Primary", hex_rgb(MAJOR[1][1]), MAJOR[1][0] * 2.2),
+            ("Secondary", hex_rgb(MAJOR[2][1]), MAJOR[2][0] * 2.2),
+            ("Tertiary", hex_rgb(MAJOR[3][1]), MAJOR[3][0] * 2.2),
+            ("Local roads and tracks", hex_rgb("#6f6a4a"), 0.5)]
     plate.title_block(
         "Kenya", "Every mapped road and track", "04",
         facts=[("Scale at A2", f"1:{SCALE_A2:,}".replace(",", " ")),
                ("Mapped length", f"{round(km, -3):,.0f} km".replace(",", " ")),
                ("Projection", "UTM zone 37S, WGS 84")],
-        credit="Roads: © OpenStreetMap contributors, via Overture Maps "
+        credit="Roads: \u00a9 OpenStreetMap contributors, via Overture Maps "
                f"{str(z['release'])} (ODbL). Boundaries: Natural Earth. "
                "Cartography by ZeroPoint Geospatial.",
-        centre=(lon, lat), legend=legend)
+        centre=f.centre_lonlat, legend=line_key(rows))
     path = plate.save("kenya-roads" if dpi >= 250 else f"kenya-roads_{dpi}")
     print(path)
 

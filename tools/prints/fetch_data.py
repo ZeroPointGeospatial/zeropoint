@@ -6,6 +6,7 @@
     python fetch_data.py naturalearth # country outline, lakes, ocean, places
     python fetch_data.py forest       # Hansen Global Forest Change tiles
     python fetch_data.py fonts        # typefaces used on the plates
+    python fetch_data.py rainfall     # CHIRPS mean annual rainfall, 1991-2020
 
 Everything lands in $ZP_DATA (default: ./data next to this file). Nothing
 here is committed to the site repo: the files are large and all of them are
@@ -19,7 +20,9 @@ Sources and licences
   Natural Earth                   public domain.
   Hansen/UMD/Google/USGS/NASA     Global Forest Change 2000-2023 v1.11,
       CC BY 4.0 (Hansen et al., Science 342, 2013).
-  Barlow, IBM Plex Mono           SIL Open Font License 1.1.
+  CHIRPS v2.0 rainfall            Climate Hazards Center, UC Santa Barbara,
+      public domain; read from Digital Earth Africa's copy on AWS.
+  Barlow, IBM Plex Mono, Playfair Display   SIL Open Font License 1.1.
 """
 import concurrent.futures as cf
 import gzip
@@ -121,18 +124,51 @@ def forest():
 def fonts():
     """Static TTFs straight from Google Fonts (an old UA gets TTF, not WOFF2)."""
     wanted = {
-        "Barlow": "300;400;500;600;700",
-        "Barlow Condensed": "400;500;600",
-        "IBM Plex Mono": "400;500",
+        "Barlow": "wght@300;400;500;600;700",
+        "Barlow:ital": "ital,wght@1,400;1,500",
+        "IBM Plex Mono": "wght@400;500",
+        "Playfair Display": "wght@400;500;600",
     }
-    for family, weights in wanted.items():
+    for family, axes in wanted.items():
+        name, italic = family.split(":")[0], family.endswith(":ital")
         css = requests.get(
             "https://fonts.googleapis.com/css2",
-            params={"family": f"{family}:wght@{weights}"},
+            params={"family": f"{name}:{axes}"},
             headers={"User-Agent": "Mozilla/4.0"}, timeout=60).text
         for weight, url in re.findall(
                 r"font-weight:\s*(\d+);.*?url\((https://[^)]+\.ttf)\)", css, re.S):
-            fetch(url, DATA / "fonts" / f"{family.replace(' ', '')}-{weight}.ttf")
+            stem = f"{name.replace(' ', '')}{'Italic' if italic else ''}-{weight}"
+            fetch(url, DATA / "fonts" / f"{stem}.ttf")
+
+
+def rainfall(first=1991, last=2020):
+    """Mean annual rainfall over Kenya and its catchments, in mm, from the
+    CHIRPS monthly grids. Each month is read as a small window straight from
+    the cloud-optimised GeoTIFF, so only a few hundred kB are transferred."""
+    import numpy as np
+    import rasterio
+    from rasterio.windows import from_bounds
+
+    base = "https://deafrica-input-datasets.s3.af-south-1.amazonaws.com/rainfall_chirps_monthly/"
+    w, s, e, n = KENYA_MARGIN
+    jobs = [f"{base}chirps-v2.0_{y}.{m:02d}.tif" for y in range(first, last + 1) for m in range(1, 13)]
+    env = dict(GDAL_HTTP_PROXY=os.environ.get("HTTPS_PROXY", ""),
+               CURL_CA_BUNDLE=os.environ.get("CURL_CA_BUNDLE", ""),
+               GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR", GDAL_HTTP_MAX_RETRY="4")
+
+    def month(url):
+        with rasterio.Env(**env), rasterio.open("/vsicurl/" + url) as ds:
+            win = from_bounds(w, s, e, n, ds.transform).round_offsets().round_lengths()
+            return ds.read(1, window=win), ds.window_transform(win)
+
+    with cf.ThreadPoolExecutor(8) as ex:
+        parts = list(ex.map(month, jobs))
+    stack = np.stack([np.where(a < 0, 0, a) for a, _ in parts])
+    mean = stack.sum(0) / (last - first + 1)
+    out = DATA / "cache" / f"chirps_annual_{first}_{last}.npz"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(out, mm=mean.astype("float32"), transform=np.array(tuple(parts[0][1])[:6]))
+    print(f"rainfall {first}-{last}: {mean.shape}, {mean.min():.0f} to {mean.max():.0f} mm a year")
 
 
 if __name__ == "__main__":
@@ -149,3 +185,5 @@ if __name__ == "__main__":
         forest()
     if what in ("fonts", "all"):
         fonts()
+    if what in ("rainfall", "all"):
+        rainfall()
