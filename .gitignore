@@ -1,3 +1,9 @@
 _site
 .bundle
 vendor
+__pycache__/
+*.pyc
+tools/prints/data/
+tools/prints/out/
+Gemfile.lock
+.jekyll-cache
