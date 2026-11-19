@@ -1,0 +1,7 @@
+# Settings for the copy of the site hosted on Cloudflare Pages.
+# Build command there:
+#   bundle exec jekyll build --config _config.yml,_config.cloudflare.yml
+# The site sits at the root of its address, so there is no base path. Change
+# `url` if the Cloudflare project gets a different name or a domain of its own.
+baseurl: ""
+url: "https://zeropointgeospatial.pages.dev"

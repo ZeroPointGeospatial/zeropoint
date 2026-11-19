@@ -28,5 +28,6 @@ exclude:
   - Gemfile
   - Gemfile.lock
   - vercel.json
+  - _config.cloudflare.yml
   - README.md
   - vendor
