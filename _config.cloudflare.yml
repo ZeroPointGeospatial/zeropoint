@@ -17,5 +17,5 @@ include: [_headers, _redirects]
 # cloudflare_analytics_token: only needed if Web Analytics is not switched on
 #   from the Pages project itself (Metrics > Web Analytics), which adds the
 #   script without any code. Cloudflare Web Analytics sets no cookies.
-google_site_verification: ""
+google_site_verification: "HhrBWXUyDyZE5oJ2HyJhuQSIhYvADI2NJek6O36ZMsU"
 cloudflare_analytics_token: ""
