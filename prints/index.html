@@ -9,7 +9,7 @@ wa_text: Hello ZeroPoint Geospatial, I would like to order a map print.
 {%- assign c = site.data.contact -%}
 {%- assign shop = site.data.shop -%}
 {%- assign prints = site.prints | where_exp: 'p', 'p.catalogue != false' | sort: 'order' -%}
-{%- assign counties = site.prints | where: 'series', 'Counties' -%}
+{%- assign counties = site.prints | where: 'plate_label', 'County' -%}
 {%- assign wa = 'https://wa.me/' | append: c.whatsapp | append: '?text=' -%}
 
 <section class="shop-hero band band--ink">

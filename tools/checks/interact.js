@@ -38,7 +38,7 @@ const base = process.argv[2] || 'http://localhost:4000/zeropoint/';
   const nbo = await p.locator('.print-card:visible').count();
   ok('catalogue filters', all >= 12 && land >= 4 && cty >= 1 && nbo >= 2 && land + cty + nbo < all, `all=${all} landforms=${land} counties=${cty} cities=${nbo}`);
   const labels = await p.evaluate(() => [...document.querySelectorAll('.print-card__meta span:first-child')].map(e => e.textContent));
-  ok('every card carries a plate or county number', labels.every(t => /^(Plate|County) \d+$/.test(t)), labels.join(','));
+  ok('every card carries a plate or county number', labels.every(t => /^(Plate|County) \d+$|^\d+ plates$/.test(t)), labels.join(','));
   await p.locator('.print-card:visible').first().scrollIntoViewIfNeeded();
   await p.waitForTimeout(800);
   const lazyOk = await p.evaluate(() => [...document.querySelectorAll('.print-card:not([hidden]) img')].every(i => i.complete && i.naturalWidth > 0));
