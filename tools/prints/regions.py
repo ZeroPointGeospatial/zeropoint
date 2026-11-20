@@ -268,18 +268,34 @@ def population_hexagons(iso_codes, res, outline_ll=None):
     return c, p
 
 
+def _six_corners(ring):
+    """H3 cells that cross an edge of the grid's icosahedron come back with 7 to 10
+    corners, the extra ones lying almost on a straight edge, and the 12 pentagons
+    with 5. The prism builder takes exactly six: drop the flattest extra corners,
+    or repeat a corner of a pentagon."""
+    ring = list(ring)
+    while len(ring) > 6:
+        n = len(ring)
+        def bend(i):
+            a, b, c = np.array(ring[i - 1]), np.array(ring[i]), np.array(ring[(i + 1) % n])
+            u, v = b - a, c - b
+            return abs(u[0] * v[1] - u[1] * v[0]) / (np.hypot(*u) * np.hypot(*v) + 1e-12)
+        ring.pop(min(range(n), key=bend))
+    while len(ring) < 6:
+        ring.append(ring[-1])
+    return ring
+
+
 def hexagon_rings(cells, crs):
-    """(n, 6, 2) projected corner coordinates, counter-clockwise; pentagons dropped."""
+    """(n, 6, 2) projected corner coordinates, counter-clockwise, one per cell."""
     import h3
     t = transformer("EPSG:4326", crs)
     rings, keep = [], []
     for i, x in enumerate(cells):
         b = h3.cell_to_boundary(x)
-        if len(b) != 6:
-            continue
         lat, lon = zip(*b)
         X, Y = t.transform(lon, lat)
-        rings.append(np.column_stack([X, Y]))
+        rings.append(np.array(_six_corners(zip(X, Y))))
         keep.append(i)
     xy = np.array(rings)
     a2 = np.sum(xy[:, :, 0] * np.roll(xy[:, :, 1], -1, 1) - np.roll(xy[:, :, 0], -1, 1) * xy[:, :, 1], 1)

@@ -26,7 +26,7 @@ ORIGINALS = ROOT / "originals"
 # A2 plates: their masters carry 3 mm of bleed, which is cut off for the web
 PLATES = ["kenya-population", "kenya-rivers", "kenya-relief", "kenya-roads", "kenya-forest",
           "kenya-counties", "mount-kenya", "kilimanjaro", "rift-valley", "east-africa",
-          "longonot-contours", "mount-kenya-summit",
+          "longonot-contours", "mount-kenya-summit", "africa-relief", "africa-population",
           "county-kiambu", "county-nakuru", "county-nyeri", "county-kajiado"]
 MASTER_NAME = {"kenya-relief": "kenya"}                 # plate slug -> master file stem
 # every county plate the renderer has written facts for (tools/prints/render_counties.sh)

@@ -1,9 +1,9 @@
-# Africa as one relief model, cut to the coast.
+# Africa as one relief model, cut to the coast. Plate 20 of the collection.
 slug: africa-relief
 title: Africa
 subtitle: Relief, from the Danakil to Kilimanjaro
-label: CUSTOM
-number: "A1"
+label: PLATE
+number: "20"
 region: { continent: Africa }
 labels:
   - { name: Kilimanjaro, value: "5 895 m", lon: 37.3556, lat: -3.0758, side: right, snap: 20000 }
