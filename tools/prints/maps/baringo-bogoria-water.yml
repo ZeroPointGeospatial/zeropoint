@@ -1,0 +1,37 @@
+# Plate 18: Lake Baringo and Lake Bogoria, the rising Rift lakes.
+# The GLO-30 terrain painted with the JRC Global Surface Water transitions
+# (surfacewater.py): water at the start of the Landsat record and in 2021 in
+# deep blue, land that had become water by 2021 in coral.
+#
+#   python relief.py spec:maps/baringo-bogoria-water.yml 100 16    # proof
+#   python relief.py spec:maps/baringo-bogoria-water.yml 300 40    # master
+#
+# The lake areas in the facts row are measured by surfacewater.py from the
+# data on every run. Names and positions: OpenStreetMap, read through Overture
+# Maps (release 2026-11-18): towns and villages from the divisions theme, the
+# lakes and Ol Kokwe from the base theme; the Tugen Hills name sits at OSM's
+# point for the range.
+slug: baringo-bogoria-water
+title: Baringo & Bogoria
+subtitle: The rising Rift lakes, 1984 to 2021
+label: PLATE
+number: "18"
+region: { bbox: [35.78, 0.12, 36.32, 0.79] }       # centre 36.05 E, 0.455 N; a block
+scale: 175000
+zex: 3
+drape: water
+drape_options:
+  lakes:
+    - { name: Lake Baringo, lon: 36.1183, lat: 0.6185 }
+    - { name: Lake Bogoria, lon: 36.1018, lat: 0.2710 }
+  zex: 3                     # printed in the facts row; keep equal to zex above
+credit: "Names: OpenStreetMap contributors, via Overture Maps (ODbL)."
+labels:
+  - { name: Kampi ya Samaki, lon: 36.0260, lat: 0.6196, side: left }
+  - { name: Marigat, lon: 35.9802, lat: 0.4690, side: left }
+  - { name: Loboi, lon: 36.0645, lat: 0.3548, side: right }
+names:
+  - { text: Lake Baringo, lon: 36.078, lat: 0.672, size: 3.2 }
+  - { text: Ol Kokwe, lon: 36.0714, lat: 0.6115, size: 2.3 }
+  - { text: Lake Bogoria, lon: 36.094, lat: 0.262, angle: 74, size: 3.0 }
+  - { text: Tugen Hills, lon: 35.835, lat: 0.640, angle: 88, size: 3.2 }
