@@ -2,7 +2,7 @@
 slug: mau-forest-loss
 order: 16
 plate: "23"
-series: Landforms
+series: Regions
 short: The Mau Forest, forest loss
 title: The Mau Forest
 theme: Forest loss mapped year by year, 2001 to 2023

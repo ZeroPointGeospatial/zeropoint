@@ -162,7 +162,7 @@ description: Professional land surveying, topographic mapping, RTK/GNSS control 
       {%- for slug in featured -%}
         {%- assign p = site.prints | where: "slug", slug | first %}
       <a href="{{ root }}prints/{{ p.slug }}/">
-        <span class="frame"><img src="{{ root }}assets/prints/{{ p.slug }}-640.webp" alt="{{ p.title }}: {{ p.theme | downcase }}, map print" width="640" height="905" loading="lazy"></span>
+        <span class="frame"><img src="{{ root }}assets/prints/{{ p.slug }}-640.webp" alt="{{ p.title }}: {{ p.theme }}, map print" width="640" height="905" loading="lazy"></span>
         <span class="mono">{{ p.plate_label | default: 'Plate' }} {{ p.plate }}</span>
         <strong>{{ p.short | default: p.title }}</strong>
       </a>

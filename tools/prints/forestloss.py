@@ -186,6 +186,10 @@ def legend_for(stats):
     with swatches for standing forest and land that was not forest."""
     loss = np.array(stats["loss_km2"])
     peak = float(loss.max()) or 1.0
+    # a round scale value at or below the tallest bar (1, 2 or 5 x 10^k): the bars keep a scale, but
+    # no one year carries a figure (the years either side of 2011 were mapped differently)
+    mag = 10 ** math.floor(math.log10(peak))
+    ref = max(v * mag for v in (1, 2, 5) if v * mag <= peak)
     table = colour_table()
 
     def draw(d, right, top, pl):
@@ -201,14 +205,15 @@ def legend_for(stats):
         draw_text(d, (x0, top), "FOREST LOSS MAPPED EACH YEAR, KM²", f_k, pl.mix(0.55), 0.2)
         base = top + pl.px(14.0)                          # foot of the bars
         hmax = pl.px(8.6)
+        if loss.max() > 0:                                # the scale line, behind the bars
+            yr = base - ref / peak * hmax
+            d.line([(x0, yr), (right, yr)], fill=pl.mix(0.30), width=max(1, int(pl.px(0.12))))
+            draw_text(d, (x0 - pl.px(1.2), yr + pl.px(0.7)), f"{ref:g}", f_n, pl.mix(0.55), 0, "rs")
         for i in range(n):
             col = tuple(int(v) for v in table[1 + FIRST - 2000 + i])
             xa, xb = x0 + i * slot + gap / 2, x0 + (i + 1) * slot - gap / 2
             hb = max(pl.px(0.25), loss[i] / peak * hmax)
             d.rectangle([xa, base - hb, xb, base], fill=col)
-            if loss[i] == peak:                           # the tallest bar carries its figure
-                draw_text(d, ((xa + xb) / 2, base - hb - pl.px(0.9)), f"{peak:.0f}", f_n,
-                          pl.mix(0.55), 0, "ms")
         # the year ramp, one step a year, under the bars
         ys = base + pl.px(0.7)
         hs = pl.px(2.4)

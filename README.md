@@ -39,9 +39,10 @@ Pages: `index.html` (home), `projects.html` (served at /projects/), `prints/inde
 Prices are set in `_data/shop.yml` under `pricing`: one table per series,
 by size (A2, A1, A0) and frame (none, black, natural wood, silver, gold).
 The Kenya atlas runs from KSh 18 000 to 23 000, the counties from 9 000 to
-20 000, the gold city prints from 10 000 to 16 500, and the landforms (with
-the regional theme plates: the Mau, Baringo and Bogoria, Lake Victoria and
-Lake Magadi) from 14 000 to 19 000. The paper (matte or satin)
+20 000, the gold city prints from 10 000 to 16 500, and the landforms from
+14 000 to 19 000. The regional theme plates (the Mau, Baringo and Bogoria,
+Lake Victoria and Lake Magadi) are a Regions series at the same prices: its
+table in `shop.yml` is the landforms' own, so the two cannot drift apart. The paper (matte or satin)
 does not change the price. Custom sizes are quoted by hand.
 
 Prints from the collection can be paid for on the site by M-Pesa or card

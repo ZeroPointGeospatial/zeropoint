@@ -6,7 +6,7 @@
     python first_look.py "my farm near Limuru" --style contours --notes "-1.112, 36.650"
     python first_look.py --request request.txt     # the proof-request email, pasted into a file
     python first_look.py --request export.csv      # a Formspree CSV or JSON export: the newest row
-    python first_look.py "Lake Naivasha" --style "Lakes and water, then and now"   # land cover, forest loss,
+    python first_look.py "Lake Naivasha" --style "Lakes and water, 1984 to 2021"   # land cover, forest loss,
                                                    # water and true colour are relief with a drape (drapes.py)
     python first_look.py ... --no-render           # write the spec and notes only
 
@@ -42,10 +42,16 @@ it is marked so it cannot be mistaken for a proof.
 maps/drafts/ is left out of git, because requests carry customers' details.
 OpenStreetMap's search is sent only the parts of the area that may be place
 names: never numbers, e-mail addresses, links, possessives, the customer's own
-name, or a part with a kinship word or title (Mzee, grandfather, Mr) or a name
-just before "farm" or "plot". A bare name given for the land with none of these
-("Kamau Njoroge, Kiambu") cannot be told from a place name and may be searched
-for. Run from tools/prints with ZP_DATA and ZP_OUT set, as for every other
+name, the sender of a pasted WhatsApp chat, or a part with a kinship word or
+title (Mzee, grandfather, Mr), a first name and surname just before "farm" or
+"plot" ("Jane Wanjiku farm"), or a Swahili possessive ("shamba la Wanjiku",
+"kwa Mama Wanjiru"). One word before "farm" is taken as where the land is
+("Juja farm"), so a lone surname there ("Kamau plot") may be searched for, as
+may a bare name given for the land ("Kamau Njoroge, Kiambu"): neither can be
+told from a place name. A style written into the area ("Kenya land cover",
+"Magadi true colour") is used when the request gives none, and a request for
+one of the shop's own plates (a county, or plate 22 to 26) says so in the notes
+with the master's command. Run from tools/prints with ZP_DATA and ZP_OUT set, as for every other
 script. A southern point typed on the command line without a space
 ("-1.112,36.650") is read as a value, not an option.
 """
@@ -107,7 +113,7 @@ FORM_TAIL = ("request", "website")                           # the form's own fi
 QUOTED = re.compile(r"^(?:>(?=[ \t>]|$)[ \t]?)+")
 CHAT = re.compile("^(?:\\[[\\d/.,:\\- \u00a0\u202fAPMapm]{8,30}\\]"
                   "|\\d{1,4}[/.-]\\d{1,2}[/.-]\\d{2,4},? \\d{1,2}:\\d{2}(?::\\d{2})?(?:[ \u202f]?[APap]\\.?[Mm]\\.?)? -)"
-                  "[ \u00a0\u202f]*[^:\\[\\]]{1,60}?:[ \t]+")
+                  "[ \u00a0\u202f]*(?P<who>[^:\\[\\]]{1,60}?):[ \t]+")
 BULLET = re.compile("^[\u2022\u00b7\u25aa\u25e6\u2023\u25cf\u25cb\u25a0\u27a2\u27a4*+\\-\u2013\u2014][ \t]+")
 BOLD = re.compile(r"^(\*{1,2})([^*\n]+?)\1(?=[\s:]|$)")
 
@@ -141,7 +147,15 @@ def _ends_notes(line, out):
     if SUBJECT_LINE.match(line) or FOOTER.match(line):
         return True
     key, _ = _label(line)
+    if key == "style" and _print_page(out.get("subject")):
+        return False                       # a print page's form has no Style field: the customer's own line
     return bool(key) and (key in FORM_TAIL or (key not in out and key != "notes"))
+
+
+def _print_page(subject):
+    """A shop print page's form ('Proof request: <title>: <theme>') has no Style field; the custom
+    page's subject is 'Proof request: custom map print'."""
+    return bool(subject) and theme_of(subject).lower() != "custom map print"
 
 
 def parse_request_text(text):
@@ -185,7 +199,21 @@ def parse_request_text(text):
         i += 1
     for k in FORM_TAIL:
         out.pop(k, None)
+    senders = _chat_senders(text)
+    if senders and not out.get("name"):      # a WhatsApp paste: its sender is the customer
+        out["name"] = ", ".join(senders)
     return out
+
+
+def _chat_senders(text):
+    """The senders of a WhatsApp paste, in order of their first message: the customer, and the
+    owner when their own messages were copied too."""
+    who = []
+    for line in text.splitlines():
+        m = CHAT.match(QUOTED.sub("", line.strip()))
+        if m and m.group("who").strip() and m.group("who").strip() not in who:
+            who.append(m.group("who").strip())
+    return who
 
 
 DATE_KEYS = ("_date", "date", "submitted at", "submitted_at", "created_at", "created at", "timestamp")
@@ -316,6 +344,36 @@ def theme_of(subject, area=""):
     return s.rsplit(":", 1)[-1].strip()
 
 
+# a style written into the area itself ('Kenya land cover', 'land cover of Kenya', 'Kampala in gold'):
+# only at the end, or at the start before 'of' or 'for', and never a bare 'forest', 'water' or
+# 'satellite' ('Riruta Satellite' is a Nairobi estate)
+AREA_STYLES = [
+    ("landcover", r"land\s*cover|land\s+use|vegetation"),
+    ("forestloss", r"forest\s+loss|deforestation|tree\s+cover(?:\s+loss)?"),
+    ("truecolour", r"(?:in\s+)?true\s+colou?r|from\s+(?:the\s+)?satellite|satellite\s+(?:image(?:ry)?|view|photo)"),
+    ("water", r"surface\s+water|water\s+levels?|lake\s+levels?|lakes?\s+and\s+water|floods?|flooding"),
+    ("population", r"population(?:\s+density)?"),
+    ("contours", r"contours?|topographic(?:al)?"),
+    ("gold", r"(?:in\s+)?gold|roads|streets"),
+    ("rivers", r"rivers|drainage"),
+    ("relief", r"relief|terrain|3d"),
+]
+
+
+def style_in_area(area):
+    """'Kenya land cover' -> ('Kenya', 'landcover', 'land cover'); (area, None, None) when the
+    area names no style, or nothing but one."""
+    for key, pat in AREA_STYLES:
+        for rx in (rf"(?i)[\s,;:-]+(?P<s>{pat})(?:\s+(?:map|print))?\s*$",
+                   rf"(?i)^\s*(?:(?:a|the)\s+)?(?P<s>{pat})(?:\s+(?:map|print))?\s+(?:of|for)\s+"):
+            m = re.search(rx, area)
+            if m:
+                rest = re.sub(r"\s+", " ", area[:m.start()] + " " + area[m.end():]).strip(" ,;:-")
+                if unfill(rest):
+                    return rest, key, m.group("s")
+    return area, None, None
+
+
 def style_of(text, subject="", area=""):
     """The style from the form's Style field; a print page's form has none, so the theme of
     its subject is used instead."""
@@ -398,7 +456,12 @@ _PREFIX = re.compile(r"(?<![A-Za-z])([NSEW])(?:orth|outh|ast|est)?\.?\s*" + _ANG
 _MIN = r"(\d{1,2}(?![.\d])|\d{2}\.\d+|(?<=°)\d\.\d+|(?<=°\s)\d\.\d+)"
 _SEC = r"\s*'?(?:\s+(\d{1,2}(?:\.\d+)?)\s*(?:\"|'')?)?"
 _SPACED = re.compile(r"(?<![\d.])(\d{1,3})(?:\s*°\s*|\s+)" + _MIN + _SEC + r"\s*([NSEW])(?![A-Za-z])", re.I)
-_SPACED_PRE = re.compile(r"(?<![A-Za-z])([NSEW])(?:orth|outh|ast|est)?\.?\s*(\d{1,3})(?:\s*°\s*|\s+)" + _MIN + _SEC
+# after a leading letter one-digit decimal minutes are plain: 'S1 6.72' is 1°6.72'
+_MIN_PRE = r"(\d{1,2}(?![.\d])|\d{1,2}\.\d+)"
+# degrees, one-digit decimal minutes, then a letter ('1 6.72 S'): 1°6.72'S, or 6.72°S after a stray
+# number. Not after / or - (the 123 of 'LR 209/123 1.112S'): ask, never guess
+_AMBIG_MIN = re.compile(r"(?<![\w./\-])\d{1,3}\s+\d\.\d+\s*[NSEW](?![A-Za-z])", re.I)
+_SPACED_PRE = re.compile(r"(?<![A-Za-z])([NSEW])(?:orth|outh|ast|est)?\.?\s*(\d{1,3})(?:\s*°\s*|\s+)" + _MIN_PRE + _SEC
                          + r"(?![\d.'\"°])", re.I)
 # marks that say 'these are coordinates': a degree mark on a decimal or before minutes, minutes or
 # seconds marks, a hemisphere letter on a decimal ('a 15° slope' is not one)
@@ -417,11 +480,30 @@ _NAMED = re.compile(rf"(?i){_LAT}\W{{0,4}}\s*(?:and\s+)?{_LON}|{_LON}\W{{0,4}}\s
 # a point or two corners joined by '/', 'and' or 'to'
 _PAIRS = re.compile(rf"(?i)(?<![\w.])({NUM}(?:\s*[,;]?\s*{NUM})?)\s*(?:/|\band\b|\bto\b)\s*({NUM}(?:\s*[,;]?\s*{NUM})?)"
                     r"(?!\w|\.\d)")
+# a box written as one range per axis, lat and lon in either order, labelled or not
+_AXIS = r"(?:\b(lat\w*|l(?:o?ng|on)\w*)\.?\s*[:=]?\s*)?(?:(?:between|from)\s+)?"
+_SPAN = rf"({NUM})\s*(?:/|\band\b|\bto\b)\s*({NUM})"
+_RANGES = re.compile(rf"(?i)(?<![\w.]){_AXIS}{_SPAN}\s*[,;]?\s*(?:and\s+)?{_AXIS}{_SPAN}(?!\w|\.\d)")
+# one end of a range: a decimal joined to the run by 'to', 'and' or '/'
+_RANGE_BEFORE = re.compile(r"(?i)(-?\d+\.\d+)\s*(?:/|\band\b|\bto\b)\s*$")
+_RANGE_AFTER = re.compile(r"(?i)\s*(?:/|\band\b|\bto\b)\s*(-?\d+\.\d+)")
+# a hemisphere letter written once for a range: '1.10 to 1.12S', 'S 1.10 to 1.12'
+_SHARED_SUFFIX = re.compile(r"(?i)(?<![\w.])-?(\d{1,3}\.\d+)\s*(?:\bto\b|/|\band\b|-)\s*-?(\d{1,3}\.\d+)\s*([NSEW])"
+                            r"(?:orth|outh|ast|est)?(?![A-Za-z])")
+_SHARED_PREFIX = re.compile(r"(?i)(?<![A-Za-z])([NSEW])\.?\s*(\d{1,3}\.\d+)\s*(?:\bto\b|/|\band\b|-)\s*(\d{1,3}\.\d+)"
+                            r"(?![\d.]|\s*[NSEW](?![A-Za-z]))")
 # UTM as survey plans give it: zone 36 or 37 (band letter optional), six-figure easting, northing
 _UTM = re.compile(
     r"(?i)(?:\butm\b|\bzone\b)\D{0,12}?(3[67])\s*[C-X]?\b\D{0,24}?(?<![\d.])(\d{6}(?:\.\d+)?)(?![\d.])"
     r"\D{0,12}?(?<![\d.])(\d{6,7}(?:\.\d+)?)(?![\d.])")
 _UTM_WORD = re.compile(r"(?i)\butm\b|\bzone\s*3[67]")
+# the zone alone, before or after the numbers: 'UTM 37M', 'zone 36 North', 'UTM zone 37S'
+_UTM_ZONE = re.compile(r"(?i)\b(?:utm|zone)\b\D{0,12}?(?<![\d.])(3[67])(?!\d)\s*(?:[C-X](?![A-Za-z])|north\b|south\b)?")
+# an easting or northing: 6 or 7 figures (a GPS unit pads the easting to 7: 0256123), labelled
+# before it ('E 256123', 'Easting: 256123', 'N=9876543') or after it ('256123E', '9876543 N')
+_UTM_FIG = r"(?<![\d.])(\d{6,7}(?:\.\d+)?)(?![\d.])"
+_UTM_PRE = re.compile(r"(?i)(?<![A-Za-z0-9])([EN])(?:ast|orth)?(?:ings?)?\b\.?\s*[:=]?\s*" + _UTM_FIG)
+_UTM_SUF = re.compile(_UTM_FIG + r"\s*([EN])(?![A-Za-z])", re.I)
 # links: a map link carries its coordinates in the URL, a short link does not
 URL = re.compile(r"(?i)(?:\bhttps?://|\bwww\.)\S+|\b(?:maps\.app\.goo\.gl|goo\.gl|g\.co|osm\.org)/\S*")
 # Google Maps plus codes: full ('6GCRPR6C+24') or short ('PR6C+24 Nairobi')
@@ -482,11 +564,30 @@ def plus_code(text, near=None):
 
 
 def utm_point(t):
-    """(lon, lat) from 'UTM 37S 256123E 9876543N' or 'Zone 37M, E 256123, N 9876543', as WGS 84."""
-    m = _UTM.search(t)
-    if not m:
+    """(lon, lat), as WGS 84, from UTM as survey plans and GPS units give it: 'UTM 37S 256123E 9876543N',
+    'Zone 37M, E 256123, N 9876543', 'Easting 256123 Northing 9876543 (UTM 37S)', labelled northing
+    first, a padded easting (0256123); the zone before or after the numbers."""
+    z = _UTM_ZONE.search(t)
+    if not z:
         return None
-    zone, e, n = int(m.group(1)), float(m.group(2)), float(m.group(3))
+    zone, e, n = int(z.group(1)), None, None
+    for rx, lab, fig in ((_UTM_PRE, 1, 2), (_UTM_SUF, 2, 1)):     # labelled: E and N, in either order
+        got = [(g.group(lab).upper(), float(g.group(fig))) for g in rx.finditer(t)]
+        es, ns = [v for k, v in got if k == "E"], [v for k, v in got if k == "N"]
+        if len(es) == len(ns) == 1:
+            e, n = es[0], ns[0]
+            break
+    else:
+        m = _UTM.search(t)
+        if m:                                                      # unlabelled, easting first
+            zone, e, n = int(m.group(1)), float(m.group(2)), float(m.group(3))
+        else:
+            figs = [float(v) for v in re.findall(_UTM_FIG, t)]
+            if len(figs) != 2:
+                return None
+            e, n = figs if not figs[0] >= 1_000_000 > figs[1] else figs[::-1]   # only a southern northing has 7 figures
+    if not (100_000 <= e <= 900_000 and (n <= 1_000_000 or 9_000_000 <= n <= 10_000_000)):
+        return None
     from pyproj import Transformer
     epsg = (32700 if n >= 5_000_000 else 32600) + zone   # southern northings start from 10 000 km
     return Transformer.from_crs(f"EPSG:{epsg}", "EPSG:4326", always_xy=True).transform(e, n)
@@ -498,6 +599,8 @@ def _hemispheres(t):
     has no such marks, False when it has marks that do not make one point or two corners (ask,
     never guess)."""
     for rx, suffix in ((_SPACED, True), (_SPACED_PRE, False), (_SUFFIX, True), (_PREFIX, False)):
+        if rx is _SUFFIX and _AMBIG_MIN.search(t):
+            return False                # '1 6.72 S' and the spaced readings made no point: ask
         lats, lons, used = [], [], []
         for m in rx.finditer(t):
             h, d, mi, se = (m.group(4), *m.group(1, 2, 3)) if suffix else m.group(1, 2, 3, 4)
@@ -526,6 +629,50 @@ def _hemispheres(t):
 def _lat_first_kenya(a, b):
     """True when (a, b) reads as a Kenyan lat, lon pair, as Google Maps copies it."""
     return abs(a) <= 5.5 and 33 <= abs(b) <= 42
+
+
+def _axis_ranges(t):
+    """(w, s, e, n, decimals) for a box written as one range per axis; None when there is none or
+    which range is the latitude is not clear (labels, else Kenya's latitudes and longitudes)."""
+    for m in _RANGES.finditer(t):
+        l1, a1, a2, l2, b1, b2 = m.groups()
+        toks = (a1, a2, b1, b2)
+        if not all("." in v for v in toks):
+            continue
+        p, q = (float(a1), float(a2)), (float(b1), float(b2))
+        k1 = l1 and ("lat" if l1.lower().startswith("lat") else "lon")
+        k2 = l2 and ("lat" if l2.lower().startswith("lat") else "lon")
+        if k1 or k2:
+            if k1 == k2 or not (k1 and k2):
+                continue                       # both lat, or only one labelled: ask
+            lats, lons = (p, q) if k1 == "lat" else (q, p)
+        elif all(abs(v) <= 5.5 for v in p) and all(33 <= abs(v) <= 42 for v in q):
+            lats, lons = p, q
+        elif all(abs(v) <= 5.5 for v in q) and all(33 <= abs(v) <= 42 for v in p):
+            lats, lons = q, p
+        else:
+            continue
+        w, e, s, n = min(lons), max(lons), min(lats), max(lats)
+        if w < e and s < n and abs(s) <= 90 and abs(n) <= 90 and abs(w) <= 180 and abs(e) <= 180:
+            return w, s, e, n, min(len(v.split(".")[1]) for v in toks)
+    return None
+
+
+def _range_end(clean, run, vals):
+    """True when a run of two numbers is one end of a one-axis range ('-1.12, 36.64' in
+    '-1.10 to -1.12, 36.64')."""
+    def same_axis(x, y):
+        return not (_lat_first_kenya(x, y) or _lat_first_kenya(y, x))
+    before = _RANGE_BEFORE.search(clean[:run.start()])
+    after = _RANGE_AFTER.match(clean, run.end())
+    return bool(before and same_axis(float(before.group(1)), vals[0])
+                or after and same_axis(float(after.group(1)), vals[-1]))
+
+
+def _shared_hemisphere(t):
+    """'1.10 to 1.12S' -> '1.10S to 1.12S', 'S 1.10 to 1.12' -> 'S 1.10 to S 1.12'."""
+    t = _SHARED_SUFFIX.sub(lambda m: f"{m.group(1)}{m.group(3)} to {m.group(2)}{m.group(3)}", t)
+    return _SHARED_PREFIX.sub(lambda m: f"{m.group(1)} {m.group(2)} to {m.group(1)} {m.group(3)}", t)
 
 
 def _signed_degrees(t):
@@ -597,19 +744,22 @@ def coordinates(text, rough=None):
             return _checked(Place(name="Custom area", kind="point", centre=(lon, lat), source=src), precise=True)
     if _UTM_WORD.search(t):
         u = utm_point(t)
-        if not u:
-            return None            # UTM written some other way: ask for latitude and longitude
-        p = Place(name="Custom area", kind="point", centre=u, source="UTM coordinates in the request")
-        p["warn"] = (f"The request gave UTM coordinates, read as WGS 84 ({u[1]:.5f}, {u[0]:.5f}); a survey "
-                     "plan in Arc 1960 sits a few hundred metres from that: check the point.")
-        return _checked(p, precise=True)
+        if u:
+            p = Place(name="Custom area", kind="point", centre=u, source="UTM coordinates in the request")
+            p["warn"] = (f"The request gave UTM coordinates, read as WGS 84 ({u[1]:.5f}, {u[0]:.5f}); a survey "
+                         "plan in Arc 1960 sits a few hundred metres from that: check the point.")
+            return _checked(p, precise=True)
+        # UTM only named, or written some other way: read the rest ('-1.112, 36.650 (UTM 37M)'), with the
+        # zone taken out so its letter is not read as a hemisphere; 6- and 7-figure numbers are never
+        # degrees, so unread UTM still ends in None and the ask
+        t = _UTM_ZONE.sub(" | ", t)
     bounds = {k[0].lower(): float(v) for k, v in
               re.findall(r"(?i)\b(north|south|east|west)\b\s*[:=]?\s*(-?\d+(?:\.\d+)?)", t)}
     if len(bounds) == 4 and bounds["w"] < bounds["e"] and bounds["s"] < bounds["n"]:   # 'North -1.30 South ...'
         w, s, e, n = bounds["w"], bounds["s"], bounds["e"], bounds["n"]
         return _checked(Place(name="Custom area", kind="box", bbox=(w, s, e, n), centre=((w + e) / 2, (s + n) / 2),
                               source=src), precise=True)
-    hemi = _hemispheres(ADDRESS.sub(" | ", t))
+    hemi = _hemispheres(_shared_hemisphere(ADDRESS.sub(" | ", t)))
     if hemi and len(hemi) == 4:
         w, s, e, n = hemi
         return _checked(Place(name="Custom area", kind="box", bbox=hemi, centre=((w + e) / 2, (s + n) / 2),
@@ -618,10 +768,20 @@ def coordinates(text, rough=None):
         return _checked(Place(name="Custom area", kind="point", centre=hemi, source=src), precise=True)
     if hemi is False:                   # degrees or N/S/E/W that do not make a point: ask, never guess
         return None
-    clean = _joined(NOT_COORDS.sub(" | ", t))
+    clean = NOT_COORDS.sub(" | ", t)
+    box = _axis_ranges(clean)
+    if box:                                      # '-1.10 to -1.12, 36.64 to 36.66'
+        w, s, e, n, dec = box
+        got = _checked(Place(name="Custom area", kind="box", bbox=(w, s, e, n), centre=((w + e) / 2, (s + n) / 2),
+                             source=src), precise=dec >= 3, rough=rough)
+        if got:
+            return got
+    clean = _joined(clean)
     for run in RUN.finditer(clean):
         toks = re.findall(NUM, run.group(0))
         vals = [float(v) for v in toks]
+        if len(vals) == 2 and _range_end(clean, run, vals):
+            continue        # the end of a range ('-1.10 to -1.12, 36.64'): not a point, ask
         decimals = [len(v.split(".")[1]) if "." in v else 0 for v in toks]
         if len(vals) == 4:
             a, b, c, d = vals
@@ -825,12 +985,17 @@ _WHERE = (r"(?:on|along|off)\s+(?:the\s+)?(?:road|way|highway)\s+to|"
 SETTING = rf"(?i)\s+(?:{_WHERE})\s+"
 SEPARATORS = r"(?i)\s*(?:[,;/&+]|\band\b)\s*"
 LEADING_SETTING = rf"(?i)^(?:{_WHERE})(?:\s+|$)"
+# setting words that only ever lead to a place: what follows a person's land 'in' or 'near' is searched
+# as the place; what follows 'from', 'by', 'next to' or 'with' may be another person
+AT_PLACE = (r"(?i)in|near|at|around|outside|close to|past|beyond|"
+            r"(?:north|south|east|west)(?:[\s-]*(?:north|south|east|west))?\s+of|"
+            r"(?:on|along|off)\s+(?:the\s+)?(?:road|way|highway)\s+to")
 # a comma part with one of these is near the place, not the county it is in ('Thika, near Nairobi')
 NOT_IN = r"(?i)\b(?:near|around|at|by|outside|from|off|behind|opposite|along|next to|close to|past|beyond)\b"
 # words that say what kind of map or land it is, never which place; a filler word after an
 # apostrophe inside a word is part of a name (the 'a' of Murang'a)
 FILLER = (r"(?i)(?<!\w['’])\b(just|right|about|my|our|the|a|an|all|whole|entire|entirety|full|complete|extent|"
-          r"family|farm|land|plot|plots|shamba|home|house|estate|area|town|city|county|"
+          r"family|farms?|lands?|plots?|shambas?|homes?|house|estates?|area|town|city|county|it|them|there|"
           r"region|centre|center|cbd|downtown|old|forest|reserve|map|print|poster|plate|relief|contours?|"
           r"surroundings|place|village|country|acres?|ac|ha|hectares?|kms?|lr|no|"
           r"wall|big|large|huge|topographic(?:al)?|topo|elevation|aerial\s+view|satellite\s+view|"
@@ -853,6 +1018,8 @@ THEME = (r"(?i)\b(population|people|density|roads?|streets?|rivers?|drainage|bas
 # 'Mlima Kenya' -> 'Mount Kenya', 'Ziwa Victoria' -> 'Lake Victoria', 'Kaunti ya Nyeri' -> 'Nyeri County'.
 # Never 'kwa' or a bare 'ya / la / wa': they are parts of names ('Kwa Njenga', 'Mto wa Mbu', 'La Paz').
 SWAHILI = [
+    # a relative with no name ('shamba ya baba yangu'): the family's land, a filler word
+    (r"(?i)\b(?:ya|la|wa|kwa)\s+(?:baba|mama|babu|bibi|cucu|shosho|guka|nyanya|mzee)\b(?!\s+(?-i:[A-Z]))", " family"),
     (r"(?i)\bkaunti\s+ya\s+([^,;/()&]+?)\s*(?=[,;/()&]|$)", r"\1 County"),
     (r"(?i)\bmilima\s+ya\s+([\w']+)", r"\1 Hills"),
     (r"(?i)\bmlima\s+", "Mount "),
@@ -875,12 +1042,19 @@ PERSONAL = re.compile(
     r"late|mr|mrs|ms|dr|rev|pastor|shop|kiosk|duka|left|gave|bought|lives?|lived|"
     r"us|we|me|him|her|his|their|who|where|for)\b")
 NAME_WORD = r"[A-Z][\w'’-]*"
+KIN = r"(?i:mama|baba|mzee|cucu|shosho|guka|nyanya|babu|bibi)"
 PEOPLE = (                                 # people's names written in tell-tale patterns
     rf"(?i:\b(?:farm|land|plots?|home|house|shamba|property|homestead)\s+of)\s+(?:(?i:the)\s+)?(?:{NAME_WORD}\s*){{1,3}}",
     rf"(?:\b(?i:the)\s+)?(?:{NAME_WORD}\s+){{1,2}}(?i:family)\b",
     rf"(?i:\b(?:mr|mrs|ms|miss|dr|mzee)\b\.?)\s+(?:{NAME_WORD}\s*){{1,3}}",
-    # 'Jane Wanjiku farm', 'Kamau plot': a name just before the land it owns
-    rf"(?:{NAME_WORD}\s+){{1,3}}(?=(?i:farm|land|plots?|shamba|home|house|homestead|property)\b)",
+    # 'Jane Wanjiku farm': a first name and surname just before the land they own. Not one word:
+    # 'Juja farm', 'Ruai plot' and 'Mwea farm' are where the land is, written the Kenyan way
+    rf"(?:(?!(?i:my|our|the|their|his|her|this|that|an?)\b){NAME_WORD}\s+){{2,3}}"
+    r"(?=(?i:farm|land|plots?|shamba|home|house|homestead|property)\b)",
+    # 'shamba la Wanjiku', 'plot ya Kamau', 'nyumbani kwa Mama Wanjiru': a Swahili possessive
+    rf"(?i:\b(?:farm|land|plots?|home|house|homestead|property)\s+(?:la|ya|wa|cha|kwa))\s+(?:{KIN}\s+)?(?:{NAME_WORD}\s*){{1,3}}",
+    # 'kwa Mama Wanjiru': at Mama Wanjiru's (a bare 'Kwa Njenga' is a place and is kept)
+    rf"(?i:\bkwa)\s+{KIN}\s+(?:{NAME_WORD}\s*){{1,2}}",
 )
 
 
@@ -894,10 +1068,18 @@ def english(area):
     return out if unfill(out) else area
 
 
+# a home's own number, and whose land it is or what grows on it, are never part of a place name
+DWELLING = re.compile(r"(?i)\b(?:plots?|parcel|blo?c?k|house|hse|flat|apartment|apt|unit|room|door)\b\.?\s*"
+                      r"(?:no\.?\s*)?[A-Z]?[\d/\-]*\d[A-Z]?\b")
+LAND_OF = (r"(?i)\b(?:[\w-]+['’]s|tea|coffee|dairy|maize|avocado|flower|fruit|sugar(?:cane)?|wheat|cattle)\s+"
+           r"(?=(?:farm|land|plot|shamba|home|house)s?\b)")
+
+
 def unfill(s):
     """A place-name part without filler words ('my farm', 'CBD', 'county'), numbers or units."""
     out = []
     for part in re.split(r"\s*[,;/]\s*", s or ""):
+        part = re.sub(LAND_OF, " ", DWELLING.sub(" ", part))
         part = re.sub(r"\S*\d\S*", " ", re.sub(FILLER, " ", part))
         part = re.sub(LEADING_SETTING, "", part.strip())    # 'near Limuru' -> 'Limuru'
         part = re.sub(r"\s+", " ", part).strip(" .-'–—:")
@@ -936,7 +1118,19 @@ def without_people(area, private=()):
         s = re.sub(rf"(?i)\b{re.escape(w)}\b", " ", s)
     s = re.sub(r"(?i)\bfor\s*(?=,|$)", "", re.sub(r"\s+", " ", s))
     s = re.sub(r"\s*,\s*(?=,|$)|^\s*,\s*", "", s).strip(" ,")
+    # a Swahili connector left alone once its name is gone ('kwa, Bondo'): never a place
+    s2 = re.sub(r"\s+", " ", re.sub(r"(?i)(?:^|(?<=[\s,]))(?:la|ya|wa|cha|kwa)\s*(?=,|$)", " ", s)).strip(" ,")
+    s = s2 if unfill(s2) else s
     return s if unfill(s) else area
+
+
+def people_in(area, private=()):
+    """The parts of the area that without_people() leaves out, as written ('Jane Wanjiku')."""
+    found = [m.group(0).strip(" ,") for pat in PEOPLE for m in re.finditer(pat, area)]
+    for w in private:
+        found += [m.group(0) for m in re.finditer(rf"(?i)\b{re.escape(w)}\b", area)
+                  if not any(m.group(0).lower() in f.lower() for f in found)]
+    return list(dict.fromkeys(f for f in found if f))
 
 
 def candidates(area):
@@ -1089,7 +1283,7 @@ def own_land_only(area):
     """'our farm in Kenya', 'my plot, Kenya': the customer's own land, and no place named but the
     wider one ('a map of Kenya' and 'Kenya land cover' are not)."""
     head, _ = split_setting(re.split(r"\s*[,;/]\s*", area.strip())[0])
-    return bool(re.search(OWN_LAND, head)) and not unfill(head)
+    return bool(re.search(OWN_LAND, head) or DWELLING.search(head)) and not unfill(head)
 
 
 def theme_only(text):
@@ -1153,6 +1347,16 @@ def resolve(area, style, online=True, subject="", private=()):
         if not re.sub(r"[\d\s.,;+\-°]", "", area):         # nothing but the numbers: no name to look for
             raise SystemExit(rough[0])
         notes.insert(0, rough[0])
+    unsigned = None
+    deg = _DEG_PAIR.search(area)
+    if deg and "-" not in deg.group(1) + deg.group(2) and "." in deg.group(1) and "." in deg.group(2):
+        a, b = deg.group(1), deg.group(2)                  # '1.112°, 36.650°': coordinates() will not guess
+        unsigned = (f'The area gives "{deg.group(0).strip()}": degrees with no minus sign or N/S, so north or '
+                    f"south of the equator would be a guess. Ask the customer, then give it as '-{a}, {b}' or "
+                    f"'{a} S, {b} E' (or '{a} N, {b} E').")
+        if not re.sub(r"[\d\s.,;/+\-°]", "", area):       # nothing but the numbers: no name to look for
+            raise SystemExit(unsigned)                     # main() still falls back to coordinates in the notes
+        notes.insert(0, unsigned)
     area = english(area)
     import shapely
     from common import county_boundaries
@@ -1165,6 +1369,9 @@ def resolve(area, style, online=True, subject="", private=()):
     wants_town = style == "gold" or bool(re.search(r"(?i)\b(town|city|centre|center|cbd|downtown)\b", area))
     area_n = norm(area)
     quals = qualifiers(area, counties)
+    # the county a request puts its place in ('Mwea, Kirinyaga', 'my farm in Kirinyaga') is that county,
+    # not a landmark that shares its name (Kirinyaga is also Mount Kenya)
+    named_county = {k for k, n, _, _ in quals if n in counties}
 
     def options(key, key_text, fuzzy):
         """Every place whose name matches `key`, as (preference, Place)."""
@@ -1181,7 +1388,8 @@ def resolve(area, style, online=True, subject="", private=()):
         for c in counties:
             first = norm(re.split(r"[\s-]+", c)[0])
             if hit(norm(c)) or hit(norm(c + " county")) or hit(norm(c + " city county")):
-                found.append((0 if wants_county else 2, Place(name=c, kind="county", region={"county": c},
+                found.append((0 if wants_county else 0.5 if key in named_county else 2,
+                              Place(name=c, kind="county", region={"county": c},
                                                                country="Kenya", source="the county boundaries")))
             elif not fuzzy and first != norm(c) and first not in ("west", "trans") and key == first:
                 found.append((2.2, Place(name=c, kind="county", region={"county": c}, country="Kenya",
@@ -1254,7 +1462,7 @@ def resolve(area, style, online=True, subject="", private=()):
         p = f[1]
         return f[0], p.get("source") != "places.yml", abroad(p), -(p.get("pop") or 0)
 
-    def search(fuzzy, roles, text=None):
+    def search(fuzzy, roles, text=None, accept=None):
         for cand, role in candidates(text or area):
             if role not in roles:
                 continue
@@ -1262,19 +1470,35 @@ def resolve(area, style, online=True, subject="", private=()):
             found = options(norm(cand), cand, fuzzy)
             if found:
                 found.sort(key=rank)
+                if accept and not accept(found):
+                    continue                                 # 'Nakuru' of 'Nakuru Athletic Club, Mombasa'
                 lost = left_out(asked, cand)
                 if role == "first words" or lost:
                     why = f' ("{", ".join(lost)}" was left out)' if lost else ""
                     notes.append(f'Only "{cand}" of "{asked}" was found{why}; check the draft is the place meant, '
                                  "or give the coordinates of the place they named.")
+                    for _, p in found:
+                        p["inside_of"] = True                # the place named may be only part of this one
                 return cand, found
         return None
+
+    def inside_named(found):
+        """The best match lies inside the county or country the request names: 'Kitengela' of
+        'Kitengela Hot Glass, Kajiado'; not 'Nakuru' of 'Nakuru Athletic Club, Mombasa'."""
+        r, p = found[0]
+        if r >= 10 or p.get("outside_named") or p["kind"] in BROAD or (abroad(p) and not country_named(p)):
+            return False
+        pt = point_of(p)
+        if pt is None:                                       # a county: options() checked it lies there
+            return p["kind"] == "county"
+        shapes = [county_shape(n) if n in counties else g for _, n, g, _ in quals]
+        return any(s is not None and shapely.contains_xy(s, *pt) for s in shapes)
 
     def country_named(p):
         c = norm(p.get("country") or "")
         return bool(c) and (c in area_n or any(norm(n) == c or k == c for k, n, _, _ in quals))
 
-    def pick(hit, fuzzy=False):
+    def pick(hit, fuzzy=False, flag_abroad=True):
         cand, found = hit
         best = found[0][1]
         others = list(dict.fromkeys(label(p) for _, p in found[1:] if label(p) != label(best)
@@ -1283,7 +1507,7 @@ def resolve(area, style, online=True, subject="", private=()):
             notes.append(f'"{cand}" was read as {best["name"]} (a close spelling); check that is right.')
         if others:
             notes.append("Also matched: " + "; ".join(others) + ". Change the spec if one of these was meant.")
-        if abroad(best) and not country_named(best) and best.get("source") != "places.yml":
+        if flag_abroad and abroad(best) and not country_named(best) and best.get("source") != "places.yml":
             notes.insert(0, f"Outside Kenya: {label(best)}. Check that is the place meant.")
         if best.pop("outside_named", False):
             notes.append(outside_named_note(best))
@@ -1334,8 +1558,9 @@ def resolve(area, style, online=True, subject="", private=()):
     if not exact and clean != area:             # the place as written was not found: try it without the names
         exact = search(False, {"named"}, clean)
         if exact:
-            notes.append(f'"{asked}" was read as {exact[0]}: the rest looks like a person\'s name, so it was not '
-                         "searched for. If it is a place, give its coordinates and draft again.")
+            skipped = " and ".join(f'"{p}"' for p in people_in(area, private)) or "the rest"
+            notes.append(f'"{asked}" was read as {exact[0]}: {skipped} was not searched for, in case it is a '
+                         "person's name. If it is a place, give its coordinates and draft again.")
     if exact and exact[1][0][1]["kind"] in BROAD and own_land_only(area):
         raise SystemExit(f'"{asked}" places their land only in {exact[1][0][1]["name"]}. Ask for its coordinates '
                          "(a point as 'lat, lon' from Google Maps, or a box as 'west, south, east, north') "
@@ -1366,8 +1591,13 @@ def resolve(area, style, online=True, subject="", private=()):
     if close:
         place = pick(close, fuzzy=True)
         return place, tried, notes + also_named(clean, place, close[0], quals)
+    if quals:                                    # 'Kitengela Hot Glass, Kajiado': Kitengela, not all of Kajiado
+        part = search(False, {"first words"}, accept=inside_named)
+        if part:
+            place = pick(part)
+            return place, tried, notes + also_named(clean, place, part[0], quals)
     wider = search(False, {"context"})
-    missing = [unfill(c) for c, r in candidates(clean) if r == "named" and unfill(c) and norm(c) != norm(clean)]
+    missing = [c.strip(" ,;:.-") for c, r in candidates(clean) if r == "named" and unfill(c) and norm(c) != norm(clean)]
     what = missing[0] if missing else asked
     if wider and wider[1][0][1]["kind"] in BROAD:
         if theme_only(what):                                 # 'population of Kenya': the theme, not a place
@@ -1383,13 +1613,20 @@ def resolve(area, style, online=True, subject="", private=()):
             notes.append(f'"{what}" was not found, and the only {best["name"]} found is in {best["country"]}.')
         else:
             place = pick(wider)
-            notes.insert(0, f'"{what}" was not found, so the draft is all of {label(place)}, the wider place the '
-                            "request names. Give the place's coordinates (or add it to places.yml) and draft again.")
+            place["inside_of"] = True
+            if (re.search(r"(?i)['’]s\b", what) or PERSONAL.search(what)
+                    or {norm(w) for w in what.split()} & set(private)):     # 'dad's farm near Limuru'
+                notes.insert(0, f'"{asked}" was read as {label(place)}; the rest is about a person, so the draft is '
+                                "all of it. Ask for the coordinates of the place itself to centre the draft on it.")
+            else:
+                notes.insert(0, f'"{what}" was not found, so the draft is all of {label(place)}, the wider place the '
+                                "request names. Give the place's coordinates (or add it to places.yml) and draft "
+                                "again.")
             return place, tried, notes
     if doubtful:
         best = doubtful[1][0][1]
         if best.get("country") in NEAR_KENYA:
-            place = pick(doubtful)
+            place = pick(doubtful, flag_abroad=False)       # the note below says it is abroad
             notes.insert(0, f"OUTSIDE KENYA: {place['name']}, {place['country']}. No Kenyan place of that name "
                             "was found; if the customer meant one, give its coordinates or add it to places.yml.")
             return place, tried, notes
@@ -1413,6 +1650,12 @@ def resolve(area, style, online=True, subject="", private=()):
         abroad_hint = (f"\nThe only {b['name']} found is in {b['country']}; if that is the place, ask for "
                        f"\"{b['name']}, {b['country']}\".")
     road = any(re.match(ROAD_WORDS, w) for w in unfill(asked).split())
+    if unsigned:
+        abroad_hint = "\n" + unsigned + abroad_hint
+    elif _MARKED.search(asked):                            # e.g. unsigned DMS 1°06'43", 36°39'00"
+        abroad_hint = ("\nIt looks like coordinates that could not be read as one point or box (degree marks with "
+                       "no N/S/E/W or minus sign, or an unusual layout): ask the customer, or write them as "
+                       "'-1.112, 36.650' or '1.112 S, 36.650 E'." + abroad_hint)
     raise SystemExit(
         f'Could not find "{asked}" in Kenya. Tried: {", ".join(chr(34) + c + chr(34) for c in dict.fromkeys(tried))}.'
         f'{abroad_hint}\n' + ("It names a road: give a point on it as 'lat, lon'.\n" if road else "") +
@@ -1458,12 +1701,14 @@ def search_terms(area, limit=3, private=()):
     area = URL.sub(" ", english(area))
     terms, seen = [], set()
 
+    def personal(part):
+        words = {norm(w) for w in re.split(r"[\s,]+", part)}
+        return bool(re.search(r"(?i)['’]s\b", part) or PERSONAL.search(part) or words & set(private))
+
     def add(part, role="named"):
         part = re.sub(r"\s+", " ", part).strip(" .-,")
-        words = {norm(w) for w in re.split(r"[\s,]+", part)}
         if (not part or re.search(r"\d|@|://|[#?=&~%]", part) or re.search(r"(?i)\.(?:com|org|net|gl|app)\b", part)
-                or re.search(r"(?i)['’]s\b", part) or PERSONAL.search(part) or words & set(private)
-                or len(part.split()) > 5 or norm(part) in seen):
+                or personal(part) or len(part.split()) > 5 or norm(part) in seen):
             return
         seen.add(norm(part))
         terms.append((part, role))
@@ -1482,7 +1727,10 @@ def search_terms(area, limit=3, private=()):
     for n, p in enumerate(chunks):
         head, tail = split_setting(p.strip())
         h, tl = unfill(head), unfill(tail or "")
-        if h and tl:                              # 'Majengo in Nyeri' -> 'Majengo, Nyeri'
+        word = (re.findall(SETTING, f" {p.strip()} ") or [""])[-1]
+        if n == 0 and h and tl and personal(head) and re.fullmatch(AT_PLACE, word.strip()):
+            named.append(tl)          # 'my mother's shamba in Kiserian': as for 'our land in Kiserian'
+        elif h and tl:                            # 'Majengo in Nyeri' -> 'Majengo, Nyeri'
             add(f"{h}, {tl}")
             (bare if n == 0 else context).append(h)
             context.append(tl)
@@ -1596,6 +1844,29 @@ DRAPE_STYLES = {"landcover": ("landcover", "Land cover"),
                 "truecolour": ("true-colour", "In true colour")}
 
 
+# The shop's plates of a place a request can name, other than the counties: (place found, drape
+# or style drawn) -> (plate number, plate name, the master's command, the plate's spec to start from)
+SHOP_PLATES = {
+    ("Kenya", "landcover"): ("22", "Kenya, land cover", "relief.py kenya-landcover 300 40", None),
+    ("Mau Forest", "forest-loss"): ("23", "The Mau Forest, forest loss",
+                                    "relief.py spec:maps/mau-forest-loss.yml 300 40", "maps/mau-forest-loss.yml"),
+    ("Lake Baringo", "water"): ("24", "Baringo & Bogoria", "relief.py spec:maps/baringo-bogoria-water.yml 300 40",
+                                None),
+    ("Lake Bogoria", "water"): ("24", "Baringo & Bogoria", "relief.py spec:maps/baringo-bogoria-water.yml 300 40",
+                                None),
+    ("Lake Victoria", "population"): ("25", "Lake Victoria, where people live",
+                                      "population.py spec:maps/lake-victoria-population.yml 300 40",
+                                      "maps/lake-victoria-population.yml"),
+    ("Lake Magadi", "true-colour"): ("26", "Lake Magadi in true colour",
+                                     "relief.py spec:maps/magadi-true-colour.yml 300 40", "maps/magadi-true-colour.yml"),
+}
+# what a draft takes from the plate's spec when it starts from it
+PLATE_KEYS = ("region", "scale", "zex", "h3_res", "model_width", "drape_options", "labels", "names", "towns", "credit")
+# the drape's name in the notes
+DRAPE_NAMES = {"landcover": "land cover", "forest-loss": "forest loss", "water": "surface water",
+               "true-colour": "true colour"}
+
+
 def extent(place):
     """The box a block region draws for a place, in the map box's shape."""
     if place.get("bbox") and place["kind"] not in ("town", "point"):
@@ -1661,12 +1932,32 @@ def contour_sheet(centre, scale):
                   (BOX_MM[1] - 2 * CONTOUR_INSET_MM) * scale / 1e6)
 
 
+def truecolour_tiles(place):
+    """The Sentinel-2 tiles the true colour drape would read for the place, counted offline."""
+    import truecolour
+    if place.get("region"):
+        import regions
+        w, s, e, n = regions.region_outline(place["region"])[0].bounds
+    else:
+        w, s, e, n = extent(place)
+    pad = 0.05                 # relief.py's margin round the outline and the drape's own 0.01
+    return truecolour.tiles_needed((w - pad, s - pad, e + pad, n + pad))
+
+
+def plate_for(place_name, drawn, area):
+    """The shop plate a request is simply asking for: the place itself, not land in or near it."""
+    if re.search(OWN_LAND, area or "") or re.search(NOT_IN, area or ""):
+        return None
+    return SHOP_PLATES.get((place_name, drawn))
+
+
 def build_spec(place, style, request):
     """Returns (spec dict, style actually drawn, notes)."""
     notes = []
     name = place["name"]
     number = "01"
     asked = style
+    part_of = place.pop("inside_of", False)                  # only part of the request was found (resolve)
     if style == "rivers":
         notes.append("Rivers are drawn for the whole of Kenya only (kenya_rivers.py); a river map of one area is "
                      "custom work. The draft is relief instead.")
@@ -1677,7 +1968,9 @@ def build_spec(place, style, request):
         style = "relief"
     if style == "unsure":
         style = "gold" if place["kind"] == "town" else "relief"
-        notes.append(f"The customer was not sure: the draft is {'roads in gold' if style == 'gold' else 'relief'}, "
+        given = request.get("style") or theme_of(request.get("subject"), request.get("area", ""))
+        notes.append(f"{'The customer was not sure' if given else 'No style was given'}: the draft is "
+                     f"{'roads in gold' if style == 'gold' else 'relief'}, "
                      "the usual choice for " + ("a town." if style == "gold" else
                                                 {"county": "a county.", "country": "a country.",
                                                  "countries": "a group of countries.",
@@ -1692,10 +1985,15 @@ def build_spec(place, style, request):
         style = "relief"
     drape = drape_sub = None
     if style in DRAPE_STYLES:
-        if style == "truecolour" and place["kind"] in BROAD:
-            notes.append(f"True colour is for areas up to about 100 km across (a district, a lake, a mountain); "
-                         f"{name} {is_kind(place)}, so the draft is land cover instead.")
-            style = "landcover"
+        if style == "truecolour":
+            import truecolour
+            tiles = None if place["kind"] in BROAD else truecolour_tiles(place)
+            if tiles is None or tiles > truecolour.MAX_TILES:
+                notes.append("True colour is for areas up to a few hundred kilometres across (at most "
+                             f"{truecolour.MAX_TILES} Sentinel-2 tiles of about 110 km); {name} {is_kind(place)}"
+                             + (f" and needs {tiles}" if tiles else "") + ", so the draft is land cover instead. "
+                             "For true colour, ask which part they mean and draft that.")
+                style = "landcover"
         drape, drape_sub = DRAPE_STYLES[style]
         style = "relief"
     if place["kind"] in ("point", "box") and name == "Custom area":
@@ -1782,7 +2080,7 @@ def build_spec(place, style, request):
             else:
                 notes.append("Name the lakes to measure in drape_options.lakes ({name, lon, lat} on the water); "
                              "without them the facts row gives the sheet's own water totals.")
-        elif drape == "true-colour":
+        elif drape == "true-colour" and not (plate_for(name, drape, request.get("area")) or (0, 0, 0, None))[3]:
             notes.append("The draft takes the most recent clear Sentinel-2 day; once the scene suits, pin it with "
                          "drape_options: {date: YYYY-MM-DD} so the master matches the proof.")
         elif drape == "forest-loss":
@@ -1795,8 +2093,13 @@ def build_spec(place, style, request):
         if name in COUNTY_NUMBERS:
             spec["label"], spec["number"] = "COUNTY", f"{COUNTY_NUMBERS[name]:03d}"
         if style == "relief" and not drape and asked in ("relief", "unsure"):
-            notes.append(f"This is the shop's {name} County plate. Unless they asked for changes, the print master "
-                         f"can be the plate itself: python relief.py \"county:{name}\" 300 40.")
+            if part_of:                                      # 'Kakamega forest', 'Isecheno, Kakamega'
+                notes.append(f"The shop has a {name} County plate, but the request names a place in it: print "
+                             f"the plate (python relief.py \"county:{name}\" 300 40) only if they want the whole "
+                             "county.")
+            else:
+                notes.append(f"This is the shop's {name} County plate. Unless they asked for changes, the print "
+                             f"master can be the plate itself: python relief.py \"county:{name}\" 300 40.")
     if style == "relief":
         labels = list(place.get("labels", []))
         if place["kind"] == "county":
@@ -1807,10 +2110,10 @@ def build_spec(place, style, request):
             spec["names"] = [dict(text=x[0], lon=x[1], lat=x[2], angle=x[3], size=x[4]) for x in cl.get("names", [])]
             if not labels:
                 labels = county_towns(name)
-                it = "them" if len(labels) > 1 else "it"
+                it, they = ("them", "they") if len(labels) > 1 else ("it", "it")
                 notes.append(f"No towns are set up for {name} County's plate yet"
                              + (f"; the draft labels {', '.join(x['name'] for x in labels)} from Natural Earth: check "
-                                f"{it}, and add {it} to COUNTY_LABELS in relief.py if {it} should stay." if labels
+                                f"{it}, and add {it} to COUNTY_LABELS in relief.py if {they} should stay." if labels
                                 else "; add the main towns as labels."))
         elif place.get("elevation") and place.get("centre"):
             lon, lat = place["centre"]
@@ -1837,6 +2140,16 @@ def build_spec(place, style, request):
             near = []
         spec["towns"] = [dict(name=t["name"], lon=round(float(t["centre"][0]), 4), lat=round(float(t["centre"][1]), 4))
                          for t in near]
+    plate = None if part_of else plate_for(name, drape or style, request.get("area"))
+    if plate:
+        number, plate_name, command, source = plate
+        if source:                    # start from the plate: its box, scale, names, credit and scene
+            import yaml
+            ps = yaml.safe_load((HERE / source).read_text(encoding="utf-8"))
+            spec.update({k: ps[k] for k in PLATE_KEYS if ps.get(k) is not None})
+        notes.append(f"This is the shop's plate {number}, {plate_name}"
+                     + (" (the draft starts from its spec)" if source else "")
+                     + f". Unless they asked for changes, the print master can be the plate itself: python {command}.")
     return spec, style, notes
 
 
@@ -1942,8 +2255,10 @@ def write_spec(spec, head, key, replace=False):
     import yaml
     DRAFTS.mkdir(parents=True, exist_ok=True)
     first = spec["slug"]
-    gold = first.endswith("-gold")
-    stem, kind = (first.removesuffix("-gold"), "gold") if gold else first.rsplit("-", 1)
+    # the style suffix build_spec put on the slug ('-forest-loss', '-true-colour', '-gold'): the number goes before it
+    kinds = sorted({*SCRIPT, *(d for d, _ in DRAPE_STYLES.values())}, key=len, reverse=True)
+    kind = next((k for k in kinds if first.endswith("-" + k)), first.rsplit("-", 1)[-1])
+    stem = first[:-len(kind) - 1]
     others, mine = [], []
     for n in range(1, 1000):
         spec["slug"] = first if n == 1 else f"{stem}-{n}-{kind}"
@@ -1992,6 +2307,12 @@ def output_name(slug, style, dpi):
     return OUT / (f"{slug}.png" if dpi >= 250 else f"{slug}_{dpi}.png")
 
 
+# the drapes' own headline figures in a render log: the scene used, the shares, the totals
+DRAPE_FACT = re.compile(r"  (true colour: (\d{4}-\d{2}-\d{2}|clearest)|land cover shares:|"
+                        r"forest loss: forest in|transitions on the sheet|[^:]+: water at the start)")
+SCENE = re.compile(r"^  true colour: (\d{4}-\d{2}-\d{2})((?:, \d{4}-\d{2}-\d{2})*) \(", re.M)
+
+
 def render(spec_path, style, slug, dpi, spp, log_path):
     """Returns (image, facts, None), or (None, facts, (last line, hint)) when the render fails."""
     rel = spec_path.relative_to(HERE)
@@ -2007,7 +2328,8 @@ def render(spec_path, style, slug, dpi, spp, log_path):
     log_path.parent.mkdir(parents=True, exist_ok=True)
     log_path.write_text(" ".join(cmd[1:]) + "\n\n" + log, encoding="utf-8")
     facts = [l.strip().replace(f"spec:{rel}", slug) for l in proc.stdout.splitlines()
-             if l.startswith((slug, f"spec:{rel}")) or "left out" in l or l.startswith("  WARNING")]
+             if l.startswith((slug, f"spec:{rel}")) or DRAPE_FACT.match(l)
+             or "left out" in l or l.startswith("  WARNING")]
     if proc.returncode != 0 or not out.exists() or out.stat().st_mtime < t0 - 1:
         return None, facts, why_failed(log)
     return out, facts, None
@@ -2070,8 +2392,9 @@ def write_notes(path, request, place, style, spec_path, spec, notes, facts, imag
     order = ", ".join(v for v in (request.get("size"), request.get("frame"), request.get("paper")) if v)
     asked = request.get("style") or theme_of(request.get("subject"), request.get("area", "")) or "not given"
     country = place.get("country")
+    drawn = f"relief with the {DRAPE_NAMES.get(spec['drape'], spec['drape'])} drape" if spec.get("drape") else style
     lines = [
-        f"# First look: {spec.get('title') or spec['city']['name']}, {style}",
+        f"# First look: {spec.get('title') or spec['city']['name']}, {drawn}",
         "",
         f"Made {dt.datetime.now():%Y-%m-%d %H:%M}. For ZeroPoint only: do not send this draft to the customer.",
         "",
@@ -2094,7 +2417,7 @@ def write_notes(path, request, place, style, spec_path, spec, notes, facts, imag
         f"- Place: {place['name']} ({place['kind']}{', ' + country if country and country != place['name'] else ''}),"
         f" from {place['source']}.",
         f"- Drawn: {where}",
-        f"- Style: {style}.",
+        f"- Style: {drawn}.",
     ]
     lines += [f"- {n}" for n in notes]
     if facts:
@@ -2187,11 +2510,21 @@ def main():
     if not area:
         raise SystemExit("No area: give it as the first argument or in the request file.")
     style = style_of(request.get("style"), request.get("subject"), area)
+    where, in_area, phrase = style_in_area(area)     # 'Kenya land cover': Kenya, in land cover
+    forests = {norm(n) for p in gazetteer() if p.get("kind") == "forest" for n in [p["name"], *p.get("aliases", [])]}
+    if in_area == "forestloss" and norm(where + " forest") in forests:
+        where += " Forest"                           # 'Mau forest loss': the Mau Forest, not the escarpment
+    early = []
+    if in_area and style == "unsure":
+        style = in_area
+        early.append(f'{"They were not sure of the style" if request.get("style") else "No style was given"}; '
+                     f'the style is read from the area ("{phrase}"). Check that is what they meant.')
     print(f"Request: \"{area}\", style {style}")
 
     try:
-        place, _, notes = resolve(area, style, online=not args.offline, subject=request.get("subject", ""),
+        place, _, notes = resolve(where, style, online=not args.offline, subject=request.get("subject", ""),
                                   private=private_words(request.get("name"), request.get("email")))
+        notes = early + notes
     except SystemExit as missing:
         pt = coordinates(request.get("notes", ""))
         if not pt:
@@ -2243,6 +2576,16 @@ def main():
         if not failed:
             image = stamp(src, folder / f"{spec['slug']}_FIRST-LOOK.jpg", f"{dt.date.today():%d %b %Y}".upper())
             print(f"  draft: {image}")
+        m = SCENE.search(log.read_text(encoding="utf-8")) if spec.get("drape") == "true-colour" and not failed else None
+        if m and not (spec.get("drape_options") or {}).get("date"):
+            notes = [n for n in notes if not n.startswith("The draft takes the most recent clear Sentinel-2 day")]
+            if not m.group(2):
+                notes.append(f"Scene used: {m.group(1)}. Before the proof, pin it: add "
+                             f"`drape_options: {{date: '{m.group(1)}'}}` to {spec_path.name}, so the proof and the "
+                             "master use this day and not a newer one.")
+            else:
+                notes.append(f"No single day was clear: the draft is {m.group(1)} filled from {m.group(2)[2:]}. "
+                             f"Pinning `date` takes {m.group(1)} alone, clouds included.")
     path = write_notes(folder / f"{spec['slug']}_notes.md", request, place, style, spec_path, spec, notes,
                        facts, image, args.dpi, args.spp, failed, log)
     print(f"  notes: {path}")
