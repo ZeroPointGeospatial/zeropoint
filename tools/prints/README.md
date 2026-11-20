@@ -112,7 +112,9 @@ customer's proof with `proof_jpeg.py`. A relief draft takes about half a
 minute. `maps/drafts/` is not committed; an existing draft there is never
 written over (the new one gets the next number) unless you pass `--replace`.
 For a Formspree export, `--row` picks a row (0 is the oldest; the newest by
-date is the default).
+date is the default; when the dates can't be read it asks for `--row`). The
+form's land cover, forest loss, water and true colour styles become relief
+drafts with a `drape:`.
 
 ## Rendering
 

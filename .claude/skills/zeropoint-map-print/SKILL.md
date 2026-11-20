@@ -40,6 +40,10 @@ extent, the title and subtitle, and the labels the customer asked for, and
 render again. The FIRST-LOOK file is for the owner only; the customer gets the
 watermarked proof from step 6 once the draft is right.
 
+The form's styles land cover, forest and forest loss, lakes and water, and true
+colour become relief drafts with a `drape:` (see references/styles.md); a true
+colour request for a whole country becomes land cover, with a note.
+
 Read the notes before trusting the draft. They say when a place was read from
 a close spelling, when only the wider place was found ("Juja, Kiambu" drawn as
 all of Kiambu), when the place found is outside Kenya, when the customer's
@@ -53,8 +57,11 @@ or add the place to `tools/prints/places.yml`. It never takes a foreign town
 of the same name for a Kenyan one without saying so: offline, "Juja" or
 "Bondo" stop with that message rather than draw Peru or Congo. When the
 computer is online it asks OpenStreetMap's search, in Kenya first, sending
-only the place-name part of the request (never plot numbers, phone numbers or
-people's names). If a render fails, the notes still get written, with the
+only the place-name parts of the request: never plot or phone numbers, links,
+the customer's own name, or a name with a kinship word or title (Mzee,
+grandfather, Mr) or just before "farm" or "plot". A bare name given for the
+land can't be told from a place name, so read the request before running it
+online if it holds other people's names. If a render fails, the notes still get written, with the
 likely cause and the full log beside them.
 
 ## 1. Pin down the brief
