@@ -121,6 +121,7 @@
     var payBtn = document.getElementById('pay-now');
     var payNote = document.querySelector('[data-pay-note]');
     var paperNote = document.querySelector('[data-paper-note]');
+    var paid = false;                       /* once paid, the Pay button does not come back */
     function ksh(n) { return 'KSh ' + n.toLocaleString('en-KE'); }
     /* the price of the current size and frame in KSh, or null when it is quoted by hand */
     function price() {
@@ -146,10 +147,10 @@
       var pa = picked('paper');
       if (paperNote && pa) paperNote.textContent = pa.parentNode.title.charAt(0).toUpperCase() + pa.parentNode.title.slice(1) + '.';
       if (payBtn) {
-        payBtn.hidden = !amount;
+        payBtn.hidden = paid || !amount;
         payBtn.querySelector('[data-pay-amount]').textContent = amount ? ksh(amount) : '';
       }
-      if (payNote) payNote.hidden = !amount;
+      if (payNote) payNote.hidden = paid || !amount;
       var pap = picked('paper');
       var line = 'Hello ZeroPoint, I would like to order the print "' + name + '"' +
         (size ? ', size ' + size.dataset.label : '') +
@@ -225,6 +226,9 @@
               })
             },
             onSuccess: function (t) {
+              paid = true;
+              payBtn.hidden = true;
+              if (payNote) payNote.hidden = true;
               payStatus.dataset.state = 'ok';
               payStatus.textContent = 'Paid. Thank you. Your reference is ' + t.reference +
                 '. We will call ' + d.phone + ' to arrange delivery.';
@@ -236,6 +240,7 @@
               data.append('paystack_reference', t.reference);
               send(checkout.dataset.form, data).catch(function () {});   /* the payment is in Paystack either way */
               cform.reset();
+              payStatus.scrollIntoView({ behavior: 'smooth', block: 'center' });
             },
             onCancel: function () {
               payStatus.dataset.state = 'error';

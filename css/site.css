@@ -571,6 +571,7 @@ button.frame { font: inherit; text-align: inherit; }
 .print__proof { margin-top: 26px; padding: 18px 20px; border-left: 2px solid var(--olive); background: var(--paper-2); font-size: 0.98rem; }
 .print__proof strong { font-weight: 600; }
 .print__paid { margin-top: 18px; }
+.print__paid[data-state="ok"] { padding: 16px 18px; border-left: 2px solid #2e5d2c; background: #e6ece0; color: #1f3d1e; }
 .print__photos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 28px; }
 .print__photos figcaption, .wall-photos figcaption { margin-top: 8px; color: var(--fg-faint); font-size: 0.85rem; }
 .wall-photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(14px, 2vw, 28px); }
