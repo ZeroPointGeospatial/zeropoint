@@ -370,15 +370,17 @@ def main(name, dpi=100, spp=32):
         dr = drapes.get(cfg["drape"])(dict(
             bounds=bounds, cell=cell, crs=crs, shape=z.shape, z=z, valid=valid,
             ll=(min(lons), min(lats), max(lons), max(lats)), outline_ll=outline_ll,
-            options=dict(cfg.get("drape_options") or {}), slug=slug))
+            options=dict(cfg.get("drape_options") or {}), slug=slug, zex=zex))
         tex = dr["tex"]
         legend = dr.get("legend")
         facts_extra = (dr.get("facts") or [])[:3] or None
         paint_water = dr.get("water", False)
         src_name = "GLO-30" if cfg["source"] == "glo30" else "GLO-90"
-        credit = (dr["credit"] + f" Elevation: Copernicus DEM {src_name} (© DLR / Airbus, EU and ESA). "
+        credit = (dr["credit"] + f" Elevation: Copernicus DEM {src_name} (© DLR / Airbus, provided under "
+                  "Copernicus by the EU and ESA). "
                   + cfg.get("boundary", "") + " Modelled and ray-traced by ZeroPoint Geospatial.").replace("  ", " ")
         drape_key = dict(name=cfg["drape"], options=cfg.get("drape_options"), extra=dr.get("key"),
+                         water=paint_water,
                          tex=hashlib.sha1(np.ascontiguousarray(tex[::5, ::5]).astype("float16").tobytes()).hexdigest())
     elif cfg.get("texture") == "forest":
         import forest

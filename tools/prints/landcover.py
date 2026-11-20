@@ -8,6 +8,8 @@ the two colours, as the land looks from the air.
 
 Used by plate 16 (Kenya, land cover) and by any custom area.
 """
+import hashlib
+
 import numpy as np
 
 import drapes
@@ -81,7 +83,7 @@ def shares_fine(bbox, outline_ll=None, year=2021, factor=4):
     from shapely.geometry import box
     from common import rasterize_geom
     key = drapes.cache_path("worldcover-shares", [round(v, 4) for v in bbox], year, factor,
-                            outline_ll.wkb_hex[:4000] if outline_ll is not None else None)
+                            hashlib.sha1(outline_ll.wkb).hexdigest() if outline_ll is not None else None)
     f = key.with_suffix(".json")
     if f.exists():
         return {int(k): v for k, v in json.loads(f.read_text()).items()}

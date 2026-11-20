@@ -25,6 +25,7 @@ Each drape is a module with a function `drape(ctx)` that returns a dict:
     ll          (w, s, e, n) in degrees, a box that covers the grid
     outline_ll  the outline in WGS 84 (a country, county or region) or None
     options     the spec's drape_options, a dict
+    zex         the vertical exaggeration the model is drawn with
     slug        the plate's name, for cache files
 
 The helpers below read cloud-optimised GeoTIFFs a window at a time, through

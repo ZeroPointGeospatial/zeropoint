@@ -118,3 +118,37 @@ over it. The Overture fetch takes any bounding box (`fetch_overture.py
 roads-bbox`), but the plate's frame, scale and towns are Kenya's. Adapting it
 to another country means copying the script and setting its frame and town
 list.
+
+## Drapes: land cover, forest loss, water, true colour
+
+A drape paints the relief model with a data layer instead of the elevation
+colours. Add `drape:` (and `drape_options:`) to a relief spec; everything else
+in the spec works as for plain relief. The modules are in `tools/prints`
+(`drapes.py` explains the contract); plates 22 to 26 are the examples.
+
+- **Land cover** (`landcover`, plate 22): ESA WorldCover 2021, eleven classes,
+  blended into the model cells. The legend lists the classes on the sheet.
+  `drape_options: {facts: [Tree cover, Cropland, Built-up]}` chooses the
+  classes stated in the title block; the shares are measured at 40 m (the
+  coarser overviews inflate the dominant class). Say "as the satellite
+  classification sees it" for cropland: smallholdings often read as tree
+  cover or grassland.
+- **Forest loss** (`forest-loss`, plate 23): Hansen Global Forest Change.
+  Forest is canopy of 30 % or more in 2000; loss is coloured by year. Say
+  "loss mapped", never "deforestation": it includes plantation harvest and
+  fire and ignores regrowth. Don't rank single years: the makers warn that
+  years before 2011 were mapped with an earlier method. The facts are for the
+  whole sheet; say "on the sheet".
+- **Water** (`water`, plate 24): JRC Global Surface Water transitions. Deep
+  blue is water at the start of each place's record (from 1984) and in 2021,
+  coral is new water. Name the lakes in `drape_options.lakes` to measure them
+  (start and 2021 areas). The data compares two ends, not the years between.
+- **True colour** (`true-colour`, plate 26): one Sentinel-2 scene (or a few,
+  when none is clear), red, green and blue at 10 m with a gentle tone curve.
+  For a shop plate pin `date:` so it renders the same next year. Large areas
+  mean many tiles: keep custom true-colour areas to a district, a lake or a
+  mountain.
+
+Credit lines are built from each drape's credit plus the elevation credit; a
+long credit breaks onto two lines on its own.
+

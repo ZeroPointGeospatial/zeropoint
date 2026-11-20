@@ -27,6 +27,8 @@ ORIGINALS = ROOT / "originals"
 PLATES = ["kenya-population", "kenya-rivers", "kenya-relief", "kenya-roads", "kenya-forest",
           "kenya-counties", "mount-kenya", "kilimanjaro", "rift-valley", "east-africa",
           "longonot-contours", "mount-kenya-summit", "africa-relief", "africa-population",
+          "kenya-landcover", "mau-forest-loss", "baringo-bogoria-water", "lake-victoria-population",
+          "magadi-true-colour",
           "county-kiambu", "county-nakuru", "county-nyeri", "county-kajiado"]
 MASTER_NAME = {"kenya-relief": "kenya"}                 # plate slug -> master file stem
 # every county plate the renderer has written facts for (tools/prints/render_counties.sh)
