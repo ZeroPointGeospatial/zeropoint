@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Custom map prints
-description: A map print of your own place, made to order in Kenya. Any county, town, mountain or your own land as relief, rivers, roads in gold, contours or population. You approve a proof before anything is printed.
+description: A map print of your own place, made to order in Kenya. Any county, town, mountain or your own land as relief, rivers, roads in gold, contours, population, land cover, forest loss, lakes and water, or true colour from satellite. You approve a proof before anything is printed.
 og_image: assets/img/og-prints.jpg
 styles:
   - { print: county-kiambu, name: Relief, text: "A ray-traced model of the terrain, cut to the boundary of a county or drawn as a block for a mountain or region." }
@@ -9,6 +9,10 @@ styles:
   - { print: mombasa-gold, name: Roads in gold, text: "The road network of a town or estate inside a circle, gold on deep green, with its coordinates." }
   - { print: longonot-contours, name: Contours, text: "A contour study of a crater, a hill or a farm, framed like a topographic sheet." }
   - { print: kenya-population, name: Population, text: "Where people live, as columns rising from the land, ray-traced like a physical model." }
+  - { print: kenya-landcover, name: Land cover, text: "Forest, farmland, towns and dryland from 10 metre satellite mapping, painted on the relief." }
+  - { print: mau-forest-loss, name: Forest and forest loss, text: "Forest standing in green and every patch of loss since 2001 in the colour of its year." }
+  - { print: baringo-bogoria-water, name: Lakes and water, text: "Where water stood when the satellite record began, from 1984, and where it stands now." }
+  - { print: magadi-true-colour, name: True colour, text: "The ground as the Sentinel-2 satellite sees it, at 10 metres, over the terrain model." }
 ---
 {%- include root.html -%}
 {%- assign c = site.data.contact -%}
@@ -31,7 +35,7 @@ styles:
     <div class="sec-head">
       <p class="label"><span class="num">01</span>What we can make</p>
       <div class="sec-head__body">
-        <h2 class="h2">Five styles, <strong>any area</strong></h2>
+        <h2 class="h2">Nine styles, <strong>any area</strong></h2>
         <p class="lede">Each style below exists in the collection, so you can see exactly what you are ordering. Click through to look at one full size.</p>
       </div>
     </div>

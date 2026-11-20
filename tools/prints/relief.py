@@ -5,12 +5,14 @@ in plan view, so the sheet keeps an exact map scale.
     python relief.py kilimanjaro | rift-valley | east-africa
     python relief.py kenya              # the country, cut to its outline
     python relief.py kenya-forest       # the same model, bone white, with tree cover
+    python relief.py kenya-landcover    # the same model with land cover (drapes.py)
     python relief.py county:Kiambu      # any of the 47 counties, scale chosen to fit
     python relief.py spec:maps/africa-relief.yml   # any area, from a map spec (maps/README.md)
 
 A finished render is cached, so changing labels or type and running again
 takes seconds. Set ZP_FRESH=1 to force a new render.
 """
+import hashlib
 import sys
 from pathlib import Path
 import time
@@ -95,6 +97,17 @@ PLATES = {
                ("Aberdare Range", 36.48, -0.62, 0, 2.7), ("Mau Escarpment", 35.35, -0.95, 0, 2.7),
                ("Cherangani Hills", 35.42, 1.42, 0, 2.7), ("Chyulu Hills", 37.75, -2.72, 0, 2.7),
                ("Taita Hills", 38.28, -3.62, 0, 2.7), ("Rift Valley", 36.05, 1.55, -78, 3.2)]),
+    "kenya-landcover": dict(
+        number="22", title="Kenya", subtitle="Land cover, from forest to desert",
+        scale=2_400_000, source="glo90", cell=250, zex=22.0, shape="kenya", drape="landcover",
+        drape_options=dict(facts=["Tree cover", "Cropland", "Built-up"]),
+        labels=[("Nairobi", None, 36.817, -1.286, "right", 0),
+                ("Mombasa", None, 39.664, -4.043, "left", 0),
+                ("Kisumu", None, 34.768, -0.092, "left", 0),
+                ("Nakuru", None, 36.080, -0.303, "right", 0),
+                ("Eldoret", None, 35.270, 0.514, "right", 0),
+                ("Mount Kenya", None, 37.3083, -0.1517, "right", 6000)],
+        names=[("Lake Turkana", 36.62, 3.60, 0, 3.0), ("Lake Victoria", 34.38, -0.42, 0, 3.0)]),
     "kenya-forest": dict(
         number="05", title="Kenya", subtitle="Tree cover and the water towers",
         scale=2_400_000, source="glo90", cell=250, zex=22.0, shape="kenya", texture="forest",
@@ -239,6 +252,7 @@ def spec_config(path, box_mm):
         centre=((w + e) / 2, (s_ + n) / 2), source=spec.get("source") or ("glo30" if scale <= 400_000 else "glo90"),
         coarse=cell >= 300, zex=spec.get("zex"), sun_el=spec.get("sun_el", 30), spec=True,
         local=spec.get("local", True if "county" in spec["region"] else None),
+        drape=spec.get("drape"), drape_options=spec.get("drape_options") or {},
         stops=[(z, c) for z, c in spec["stops"]] if spec.get("stops") else None,
         min_water_km2=spec.get("min_water_km2", max(0.4, (cell / 1000) ** 2 * 25)),
         boundary=spec.get("credit", boundary),
@@ -338,7 +352,37 @@ def main(name, dpi=100, spp=32):
                                                        else zhi - zlo < 1500))
     stops = cfg.get("stops") or (local_stops(zlo, zhi) if local else HYPSO)
     facts_extra, legend, credit = None, None, None
-    if cfg.get("texture") == "forest":
+    drape_key, paint_water = None, True
+    if cfg.get("drape"):
+        # a colour layer over the model: land cover, forest loss, water, true colour (drapes.py)
+        import drapes
+        xs = [bounds[0], bounds[2], bounds[0], bounds[2], cx, cx, bounds[0], bounds[2]]
+        ys = [bounds[1], bounds[1], bounds[3], bounds[3], bounds[1], bounds[3], cy, cy]
+        lons, lats = back.transform(xs, ys)
+        outline_ll = cfg.get("geom_ll")
+        if outline_ll is None and shape == "kenya":
+            outline_ll = kenya()
+        elif outline_ll is None and shape == "county":
+            from shapely.ops import transform as reproject
+            outline_ll = reproject(lambda x, y: back.transform(x, y), outline)
+        if shape == "block" and cfg.get("spec"):
+            outline_ll = None                            # a block: the shares are of the whole sheet
+        dr = drapes.get(cfg["drape"])(dict(
+            bounds=bounds, cell=cell, crs=crs, shape=z.shape, z=z, valid=valid,
+            ll=(min(lons), min(lats), max(lons), max(lats)), outline_ll=outline_ll,
+            options=dict(cfg.get("drape_options") or {}), slug=slug, zex=zex))
+        tex = dr["tex"]
+        legend = dr.get("legend")
+        facts_extra = (dr.get("facts") or [])[:3] or None
+        paint_water = dr.get("water", False)
+        src_name = "GLO-30" if cfg["source"] == "glo30" else "GLO-90"
+        credit = (dr["credit"] + f" Elevation: Copernicus DEM {src_name} (© DLR / Airbus, provided under "
+                  "Copernicus by the EU and ESA). "
+                  + cfg.get("boundary", "") + " Modelled and ray-traced by ZeroPoint Geospatial.").replace("  ", " ")
+        drape_key = dict(name=cfg["drape"], options=cfg.get("drape_options"), extra=dr.get("key"),
+                         water=paint_water,
+                         tex=hashlib.sha1(np.ascontiguousarray(tex[::5, ::5]).astype("float16").tobytes()).hexdigest())
+    elif cfg.get("texture") == "forest":
         import forest
         cover, dense, ctr = forest.canopy_grid()
         cmap, _ = warp_to_map(cover, ctr, bounds, cell, nodata=-1)
@@ -352,12 +396,13 @@ def main(name, dpi=100, spp=32):
                   "Modelled by ZeroPoint Geospatial.")
     else:
         tex = hypso_rgb(z, stops)
-    min_water = cfg.get("min_water_km2", 6.0 if shape == "kenya" else 0.4)
-    wm = water_mask(z, cell, min_water)
-    if valid is not None:
-        wm &= valid
-    soft = ndimage.gaussian_filter(wm.astype("float32"), 0.7)[..., None]
-    tex = tex * (1 - soft) + WATER * soft
+    if paint_water:
+        min_water = cfg.get("min_water_km2", 6.0 if shape == "kenya" else 0.4)
+        wm = water_mask(z, cell, min_water)
+        if valid is not None:
+            wm &= valid
+        soft = ndimage.gaussian_filter(wm.astype("float32"), 0.7)[..., None]
+        tex = tex * (1 - soft) + WATER * soft
 
     # --- model and render -------------------------------------------------------
     sheet_w = plate.w / plate.px(1) / 1000 * scale       # ground metres across the sheet
@@ -384,6 +429,7 @@ def main(name, dpi=100, spp=32):
 
     key = dict(plate=slug, size=(plate.w, plate.h), spp=spp, scale=scale, cell=cell, zex=zex,
                sun=sun_el, stops=stops, texture=cfg.get("texture"), bounds=[round(v) for v in bounds],
+               drape=drape_key,
                zsum=round(float(z.sum()), 1))
     rgb, mask = cached_render(key, render)
     place_render(plate, rgb, mask)

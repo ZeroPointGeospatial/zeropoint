@@ -37,6 +37,8 @@ for the shop.
 | `zex` | relief | force the vertical exaggeration; normally from the area's width and relief |
 | `stops` | relief | colour stops `[[metres, "#hex"], ...]`; normally the shared ramp, or the area's own range when it has less than 1 500 m of relief |
 | `local` | relief | `true` colours the area across its own heights, as the county plates are (a `county` region does this by default); `false` forces the shared ramp |
+| `drape` | relief | paint the terrain with a data layer instead of the elevation colours: `landcover` (ESA WorldCover), `forest-loss` (Hansen tree cover and loss by year), `water` (JRC surface water, then and now) or `true-colour` (Sentinel-2); see `drapes.py` |
+| `drape_options` | relief | settings for the drape, e.g. `{year: 2021}` for land cover, or `{facts: [Tree cover, Cropland, Built-up]}` to choose the classes stated in the title block |
 | `cut` | relief | `false` draws a rectangle around the area instead of cutting to its outline |
 | `h3_res` | population | force the hexagon size (H3 resolution 4 to 8; 8 is 400 m) |
 | `max_height_km` | population | height of the tallest column; normally half the width of the area |

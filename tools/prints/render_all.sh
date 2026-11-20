@@ -33,4 +33,12 @@ done
 $PY relief.py spec:maps/africa-relief.yml "$DPI" "$SPP"
 $PY population.py spec:maps/africa-population.yml "$DPI" "$SPP"
 
+# the drape plates (22 to 26): land cover, forest loss, water, true colour, and
+# Lake Victoria's population. They read their data from the cloud (drapes.py).
+$PY relief.py kenya-landcover "$DPI" "$SPP"
+for spec in mau-forest-loss baringo-bogoria-water magadi-true-colour; do
+  $PY relief.py "spec:maps/$spec.yml" "$DPI" "$SPP"
+done
+$PY population.py spec:maps/lake-victoria-population.yml "$DPI" "$SPP"
+
 # The other 43 county plates are made to order: render_counties.sh.

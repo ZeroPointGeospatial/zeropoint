@@ -1,0 +1,25 @@
+# Where people live around Lake Victoria: plate 25 of the collection.
+# The sheet is a block from 31.3 to 35.2 E and 3.3 S to 0.8 N, centred on the
+# lake, with Kenya, Uganda and Tanzania's shores. Figures from the hexagons
+# inside it (Kontur 2023, 400 m H3 cells whose centre lies in the box):
+# 126 359 hexagons, 43 354 859 people; tallest column 19 428 people, in Mwanza
+# (2.523 S, 32.908 E), with Kisumu (18 498) and Kampala (18 048) next.
+# Town positions are Natural Earth 1:10 m populated places.
+slug: lake-victoria-population
+title: Lake Victoria
+subtitle: Where people live around the lake
+label: PLATE
+number: "25"
+region: { bbox: [31.3, -3.3, 35.2, 0.8] }
+h3_res: 8
+model_width: 0.90
+credit: "Lake outline and town positions: Natural Earth (public domain)."
+towns:
+  - { name: Kampala, lon: 32.581, lat: 0.319, offset: [-22, -12], side: left }
+  - { name: Entebbe, lon: 32.460, lat: 0.060, offset: [-14, 9], side: left }
+  - { name: Jinja, lon: 33.200, lat: 0.440, offset: [10, 11], side: right }
+  - { name: Kisumu, lon: 34.750, lat: -0.090, offset: [-12, 11], side: left }
+  - { name: Busia, lon: 34.0758, lat: 0.4544, offset: [10, 9], side: right }
+  - { name: Musoma, lon: 33.800, lat: -1.490, offset: [-12, 9], side: left }
+  - { name: Bukoba, lon: 31.800, lat: -1.320, offset: [12, 9], side: right }
+  - { name: Mwanza, lon: 32.930, lat: -2.520, offset: [12, 14], side: right }

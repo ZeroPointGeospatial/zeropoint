@@ -40,6 +40,10 @@ extent, the title and subtitle, and the labels the customer asked for, and
 render again. The FIRST-LOOK file is for the owner only; the customer gets the
 watermarked proof from step 6 once the draft is right.
 
+The form's styles land cover, forest and forest loss, lakes and water, and true
+colour become relief drafts with a `drape:` (see references/styles.md); a true
+colour request for a whole country becomes land cover, with a note.
+
 Read the notes before trusting the draft. They say when a place was read from
 a close spelling, when only the wider place was found ("Juja, Kiambu" drawn as
 all of Kiambu), when the place found is outside Kenya, when the customer's
@@ -53,8 +57,11 @@ or add the place to `tools/prints/places.yml`. It never takes a foreign town
 of the same name for a Kenyan one without saying so: offline, "Juja" or
 "Bondo" stop with that message rather than draw Peru or Congo. When the
 computer is online it asks OpenStreetMap's search, in Kenya first, sending
-only the place-name part of the request (never plot numbers, phone numbers or
-people's names). If a render fails, the notes still get written, with the
+only the place-name parts of the request: never plot or phone numbers, links,
+the customer's own name, or a name with a kinship word or title (Mzee,
+grandfather, Mr) or just before "farm" or "plot". A bare name given for the
+land can't be told from a place name, so read the request before running it
+online if it holds other people's names. If a render fails, the notes still get written, with the
 likely cause and the full log beside them.
 
 ## 1. Pin down the brief
@@ -88,6 +95,10 @@ scales up to A1 and A0.
 | Rivers and drainage basins | Rivers | `kenya_rivers.py` | Kenya only (see styles.md) |
 | Every road and track, as density | Roads | `kenya_roads.py` | Kenya only (see styles.md) |
 | One of Kenya's 47 counties | Relief | `relief.py county:<Name>` | already set up; add labels in `COUNTY_LABELS` |
+| Land cover, land use, "forest and farms" | Relief + `drape: landcover` | `relief.py spec:` | anywhere (ESA WorldCover 2021, 10 m) |
+| Forest, deforestation, forest loss | Relief + `drape: forest-loss` | `relief.py spec:` | anywhere; Kenya's tiles are on disk, elsewhere up to about 4 square degrees unless `allow_download` |
+| Lakes, floods, "how the lake has changed" | Relief + `drape: water` | `relief.py spec:` | anywhere (JRC Global Surface Water, 1984 to 2021); name the lakes to measure |
+| Satellite view, "real colours", true colour | Relief + `drape: true-colour` | `relief.py spec:` | areas up to a few Sentinel-2 tiles (about 100 km each); pin `date` for a shop plate |
 
 Rivers and national roads for other countries are not built yet. Say so
 plainly and offer relief or population for that area, or quote the extra work.

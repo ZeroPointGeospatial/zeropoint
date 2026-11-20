@@ -1,0 +1,18 @@
+# Plate 23: the Mau Forest Complex, forest loss mapped year by year, 2001 to 2023.
+# The box is where the forest of 2000 and the loss since concentrate, west of
+# Nakuru, read from the Hansen data itself (35.15 to 36.05 E, 1.03 S to 0.09 N);
+# at 1:300 000 the model fills it with 50 m cells.
+slug: mau-forest-loss
+title: The Mau Forest
+subtitle: Forest loss mapped year by year, 2001 to 2023
+label: PLATE
+number: "23"
+region: { bbox: [35.15, -1.03, 36.05, 0.09] }
+scale: 300000
+drape: forest-loss
+drape_options: { threshold: 30 }
+# Town positions: Natural Earth populated places (public domain).
+credit: "Towns: Natural Earth (public domain)."
+labels:
+  - { name: Kericho, lon: 35.2800, lat: -0.3596, side: left }
+  - { name: Eldama Ravine, lon: 35.7200, lat: 0.0504, side: right }
