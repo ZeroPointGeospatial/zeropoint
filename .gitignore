@@ -7,3 +7,6 @@ tools/prints/data/
 tools/prints/out/
 Gemfile.lock
 .jekyll-cache
+
+# screenshots written by local browser tests
+shots/
