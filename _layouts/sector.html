@@ -1,0 +1,151 @@
+---
+layout: default
+---
+{%- include root.html -%}
+{%- assign c = site.data.contact -%}
+{%- assign wa = 'https://wa.me/' | append: c.whatsapp | append: '?text=' -%}
+{%- assign pack = site.data.packs | where: 'title', page.pack | first -%}
+<header class="page-head band band--ink">
+  <img class="page-head__texture" src="{{ root }}assets/img/contours.webp" alt="" width="1280" height="784">
+  <div class="wrap">
+    <p class="label"><a href="{{ root }}#clients">Who we work with</a> <span class="sep">/</span> {{ page.who }}</p>
+    <h1 class="page-head__title">{{ page.headline }}</h1>
+    <p class="lede">{{ page.lede }}</p>
+    <div class="btn-row">
+      <a class="btn btn--light" href="#quote">Request a quote</a>
+      <a class="btn btn--ghost" href="{{ wa }}{{ page.quote | url_encode | replace: '+', '%20' }}" target="_blank" rel="noopener">{% include wa-icon.html %} WhatsApp us</a>
+    </div>
+  </div>
+</header>
+
+<section class="band band--paper">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="label"><span class="num">01</span>Where we come in</p>
+      <div class="sec-head__body"><h2 class="h2">When {{ page.who | downcase }} <strong>call us</strong></h2></div>
+    </div>
+    <div class="rule-grid cols-4">
+      {%- for n in page.needs %}
+      <article class="card">
+        <p class="label">{{ forloop.index | prepend: '0' }}</p>
+        <h3 class="h3">{{ n.title }}</h3>
+        <p>{{ n.text }}</p>
+      </article>
+      {%- endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="band band--white">
+  <div class="wrap split">
+    <div>
+      <p class="label"><span class="num">02</span>How we work</p>
+      <div class="prose" style="margin-top:28px">{{ content }}</div>
+    </div>
+    <div>
+      <p class="label">What you receive</p>
+      <dl class="deflist">
+        {%- for d in page.deliverables %}
+        <div><dt>{{ d[0] }}</dt><dd>{{ d[1] }}</dd></div>
+        {%- endfor %}
+      </dl>
+      {%- if pack %}
+      <div class="panel" style="margin-top:36px">
+        <p class="label">{{ pack.kicker }}</p>
+        <h3 class="h3" style="margin-top:14px">{{ pack.title }}</h3>
+        <p style="margin-top:10px;color:var(--fg-soft)">{{ pack.text }}</p>
+        <ul class="checklist" style="grid-template-columns:1fr">
+          {%- for i in pack.items %}<li>{{ i }}</li>{% endfor %}
+        </ul>
+      </div>
+      {%- endif %}
+    </div>
+  </div>
+</section>
+
+<section class="band band--paper">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="label"><span class="num">03</span>Services</p>
+      <div class="sec-head__body"><h2 class="h2">The services <strong>this usually takes</strong></h2></div>
+    </div>
+    <ol class="svc">
+      {%- for name in page.services %}
+      {%- assign s = site.data.services | where: 'name', name | first %}
+      {%- if s %}
+      <li class="svc__row">
+        <span class="svc__num">{{ forloop.index | prepend: '0' }}</span>
+        <h3 class="svc__name">{{ s.name }}</h3>
+        <p class="svc__desc">{{ s.desc }}</p>
+        <p class="svc__time"><span>Turnaround</span>{{ s.turnaround }}</p>
+        <a class="text-link" href="{{ wa }}{{ s.quote | url_encode | replace: '+', '%20' }}" target="_blank" rel="noopener" aria-label="Get a quote for {{ s.name | downcase }}">Get a quote</a>
+      </li>
+      {%- endif %}
+      {%- endfor %}
+    </ol>
+  </div>
+</section>
+
+<section class="band band--white">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="label"><span class="num">04</span>Questions</p>
+      <div class="sec-head__body"><h2 class="h2">What {{ page.who | downcase }} <strong>ask us</strong></h2></div>
+    </div>
+    <div class="faq">
+      {%- for f in page.faq %}
+      <details{% if forloop.first %} open{% endif %}>
+        <summary>{{ f.q }}</summary>
+        <p>{{ f.a }}</p>
+      </details>
+      {%- endfor %}
+    </div>
+    {%- assign notes = '' | split: '' -%}
+    {%- for slug in page.posts -%}
+      {%- assign post = site.posts | where: 'slug', slug | first -%}
+      {%- if post -%}{%- assign notes = notes | push: post -%}{%- endif -%}
+    {%- endfor -%}
+    {%- if notes.size > 0 %}
+    <p class="label" style="margin-top:clamp(56px,7vw,96px)">Further reading</p>
+    <ul class="notes" style="margin-top:20px">
+      {%- for post in notes %}
+      <li><a href="{{ root }}{{ post.url | remove_first: '/' }}">
+        <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%-d %b %Y" }}</time>
+        <h3>{{ post.title }}</h3>
+        <span class="notes__arrow" aria-hidden="true"></span>
+      </a></li>
+      {%- endfor %}
+    </ul>
+    {%- endif %}
+  </div>
+</section>
+
+<section class="band band--ink" id="quote">
+  <div class="wrap contact">
+    <div>
+      <p class="label"><span class="num">05</span>Quote</p>
+      <h2 class="h2" style="margin-top:18px">Tell us about <strong>the site</strong></h2>
+      <p class="lede" style="margin-top:20px">Send the location and what you need to know. We reply within two hours on business days.</p>
+      <dl class="contact__list">
+        <div><dt>Phone</dt><dd>{% for p in c.phones %}<span><a href="tel:{{ p.tel }}">{{ p.label }}</a></span>{% endfor %}</dd></div>
+        <div><dt>Email</dt><dd><a href="mailto:{{ c.email }}">{{ c.email }}</a></dd></div>
+      </dl>
+      <p style="margin-top:28px"><a class="text-link" href="{{ root }}#clients">Other clients we work with</a></p>
+    </div>
+    {% include quote-form.html client=page.who %}
+  </div>
+</section>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": {{ page.title | jsonify }},
+  "description": {{ page.description | jsonify }},
+  "serviceType": {{ page.services | join: ', ' | jsonify }},
+  "audience": { "@type": "Audience", "audienceType": {{ page.who | jsonify }} },
+  "areaServed": { "@type": "Country", "name": "Kenya" },
+  "provider": { "@type": "LocalBusiness", "name": "ZeroPoint Geospatial", "url": {{ '/' | absolute_url | jsonify }} },
+  "url": {{ page.url | absolute_url | jsonify }}
+}
+</script>

@@ -1,0 +1,66 @@
+---
+layout: default
+title: County map prints
+description: Relief map prints of all 47 counties of Kenya, each cut to its boundary and ray-traced from elevation data. Made to order, named for you, with a proof to approve before printing.
+og_image: assets/prints/kenya-counties-share.jpg
+---
+{%- include root.html -%}
+{%- assign shop = site.data.shop -%}
+{%- assign counties = site.prints | where: 'series', 'Counties' | where_exp: 'p', 'p.plate_label == "County"' | sort: 'plate' -%}
+{%- assign kc = site.prints | where: 'slug', 'kenya-counties' | first -%}
+<section class="shop-hero band band--ink">
+  <div class="wrap shop-hero__grid">
+    <div>
+      <p class="label"><a href="{{ root }}prints/">Map prints</a> <span class="sep">/</span> Counties</p>
+      <h1 class="display">All {{ counties.size }} counties,<br><strong>made to order</strong></h1>
+      <p class="lede">Every county of Kenya as a relief model, cut to its boundary and lit like a physical object. We name the towns, rivers and peaks you care about, send you a proof {{ shop.proof.time }}, and print only once you approve.</p>
+      <div class="btn-row">
+        <a class="btn btn--light" href="#all">Find your county</a>
+        <a class="btn btn--ghost" href="{{ root }}prints/custom/">Another area or style</a>
+      </div>
+    </div>
+    <div class="shop-hero__wall" aria-hidden="true">
+      {%- assign heroes = "county-nakuru,kenya-counties,county-kajiado" | split: "," -%}
+      {%- for slug in heroes -%}
+      {%- assign d = site.data.print_images[slug] %}
+      <span class="frame"><img src="{{ root }}assets/prints/{{ slug }}-640.webp" alt="" width="{{ d.w }}" height="{{ d.h }}"{% if forloop.index == 2 %} fetchpriority="high"{% endif %}></span>
+      {%- endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="band band--paper" id="all">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="label"><span class="num">01</span>By county number</p>
+      <div class="sec-head__body">
+        <h2 class="h2">Find <strong>your county</strong></h2>
+        <p class="lede">Numbered by the official county codes, from Mombasa (001) to Nairobi (047). The pictures show each plate before places are named; yours is labelled to order.</p>
+      </div>
+    </div>
+    <div class="field county-find">
+      <label for="county-q">Search</label>
+      <input id="county-q" type="search" placeholder="Type a county name" autocomplete="off">
+    </div>
+    <div class="catalogue catalogue--counties">
+      {%- for p in counties %}
+      {% include print-card.html print=p %}
+      {%- endfor %}
+    </div>
+    <p class="county-none muted" hidden>No county by that name. Try the first few letters.</p>
+  </div>
+</section>
+
+<section class="band band--white">
+  <div class="wrap split">
+    <div>
+      <p class="label"><span class="num">02</span>How they are made</p>
+      <h2 class="h2" style="margin-top:18px">One pipeline, <strong>every county</strong></h2>
+    </div>
+    <div class="prose">
+      <p>Each plate starts from the Copernicus elevation model, at 30 metres for the smaller counties and 90 metres for the large ones in the north and east. The terrain is cut to the county boundary, coloured by height across the county's own range, so a flat county still shows its shape, and ray-traced with a low sun from the north-west.</p>
+      <p>The scale is chosen to fill the sheet and printed on it, with the projection and the sheet centre. County boundaries come from OpenStreetMap and are right for a wall map; they are not a statement about where any boundary legally runs.</p>
+      <p>The same model hangs well next to the national plates: <a href="{{ root }}prints/kenya-counties/">{{ kc.short }}</a>, <a href="{{ root }}prints/kenya-relief/">relief</a> and <a href="{{ root }}prints/kenya-rivers/">rivers</a>.</p>
+    </div>
+  </div>
+</section>

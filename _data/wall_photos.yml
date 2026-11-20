@@ -1,0 +1,13 @@
+# Photographs of real prints, framed and hung. They appear on the print's own
+# page and in the "On real walls" strip in the shop. Leave the list empty and
+# nothing is shown.
+#
+# Put the photo in assets/photos/ (a JPEG or WebP about 1200 px on the long
+# side), then add a line:
+#
+#   - { print: kenya-rivers, src: assets/photos/kenya-rivers-office.jpg,
+#       w: 1200, h: 1500, alt: "Rivers of Kenya in a black frame above a desk",
+#       caption: "A1, black frame, at a client's office in Westlands" }
+#
+# `print` is the print's file name in _prints/ without .md.
+[]

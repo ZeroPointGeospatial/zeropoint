@@ -5,3 +5,17 @@
 # `url` if the Cloudflare project gets a different name or a domain of its own.
 baseurl: ""
 url: "https://zeropointgeospatial.pages.dev"
+
+# Cloudflare Pages reads these two files from the built site: caching and
+# security headers, and permanent redirects for old addresses.
+include: [_headers, _redirects]
+
+# Search and measurement. Both stay empty until the accounts exist.
+# google_site_verification: the `content` value of the HTML tag that Google
+#   Search Console gives when you add https://zeropointgeospatial.pages.dev/
+#   as a URL-prefix property (Verify > HTML tag).
+# cloudflare_analytics_token: only needed if Web Analytics is not switched on
+#   from the Pages project itself (Metrics > Web Analytics), which adds the
+#   script without any code. Cloudflare Web Analytics sets no cookies.
+google_site_verification: ""
+cloudflare_analytics_token: ""

@@ -372,7 +372,25 @@ def main(name, dpi=100, spp=32):
             " Relief modelled and ray-traced by ZeroPoint Geospatial.").replace("  ", " "),
         centre=(lon, lat), legend=legend, label=cfg.get("label", "PLATE"))
     path = plate.save(slug if dpi >= 250 else f"{slug}_{dpi}")
+    if shape == "county":
+        write_county_facts(slug, cfg, scale, zex, zlo, zhi, outline, back)
     print(path, f"{time.time() - t0:.0f}s")
+
+
+def write_county_facts(slug, cfg, scale, zex, zlo, zhi, outline, back):
+    """Facts about a county plate, read by tools/county_pages.py to write its shop page."""
+    import json
+    from pyproj import Geod
+    from shapely.ops import transform as reproject
+    from common import OUT
+    ll = reproject(lambda x, y: back.transform(x, y), outline)
+    area = abs(Geod(ellps="WGS84").geometry_area_perimeter(ll)[0]) / 1e6
+    x0, y0, x1, y1 = outline.bounds
+    facts = dict(slug=slug, name=cfg["title"], number=cfg["number"], scale=scale, zex=zex,
+                 zmin=round(zlo), zmax=round(zhi), area_km2=round(area),
+                 width_km=round((x1 - x0) / 1000), height_km=round((y1 - y0) / 1000),
+                 source=cfg["source"])
+    (OUT / f"{slug}.json").write_text(json.dumps(facts, indent=1))
 
 
 if __name__ == "__main__":

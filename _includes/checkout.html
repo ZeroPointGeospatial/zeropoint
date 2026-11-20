@@ -1,0 +1,25 @@
+{%- comment -%}
+  Checkout for a print from the collection: the customer's details, then the
+  Paystack window (M-Pesa or card). Shown only when _data/shop.yml has a
+  Paystack public key. js/site.js runs it.
+{%- endcomment -%}
+{%- assign c = site.data.contact -%}
+<dialog class="checkout" id="checkout" aria-labelledby="checkout-title" data-key="{{ site.data.shop.paystack_key }}" data-form="{{ c.form_action }}">
+  <form class="form" method="dialog" novalidate>
+    <p class="label" id="checkout-title">Checkout</p>
+    <p class="checkout__item"><strong>{{ include.print }}</strong><span data-checkout-summary></span></p>
+    <div class="form__grid">
+      <div class="field"><label for="k-name">Full name</label><input id="k-name" name="name" type="text" autocomplete="name" required></div>
+      <div class="field"><label for="k-phone">Phone for M-Pesa and delivery</label><input id="k-phone" name="phone" type="tel" autocomplete="tel" placeholder="+254 7XX XXX XXX" required></div>
+      <div class="field field--wide"><label for="k-email">Email for the receipt</label><input id="k-email" name="email" type="email" autocomplete="email" required></div>
+      <div class="field field--wide"><label for="k-delivery">Delivery address</label><input id="k-delivery" name="delivery" type="text" autocomplete="street-address" placeholder="Estate, street, town" required></div>
+      <div class="field field--wide"><label for="k-notes">Notes <span class="muted">(optional)</span></label><textarea id="k-notes" name="notes" rows="2"></textarea></div>
+    </div>
+    <div class="btn-row checkout__actions">
+      <button class="btn btn--dark" type="submit" value="pay">Continue to payment</button>
+      <button class="btn btn--ghost" type="button" data-checkout-close>Cancel</button>
+    </div>
+    <p class="form__status" role="status" aria-live="polite"></p>
+    <p class="checkout__secure">Payment is handled by Paystack. We never see your card or M-Pesa PIN.</p>
+  </form>
+</dialog>

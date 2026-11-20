@@ -1,6 +1,8 @@
 ---
 layout: post
 title: "How GIS Is Reshaping Urban Planning in African Cities"
+description: "What GIS does for a growing African city, with examples from Nairobi, Kigali and Accra, the data problems that hold it back, and where survey fits in."
+topic: GIS and remote sensing
 ---
 
 African cities are growing faster than any region on earth. By 2050, over 1.3 billion people will live in urban areas across the continent — many in cities that did not meaningfully exist 30 years ago. Nairobi, Kampala, Kigali, Accra. These cities are expanding outward and upward simultaneously, and the infrastructure that should support that growth is perpetually playing catch-up.

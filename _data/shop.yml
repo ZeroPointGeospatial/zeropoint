@@ -4,10 +4,14 @@ price: "KSh 9,000 – 15,500"
 price_low: 9000          # the same range as numbers, for search engines; keep in step with `price`
 price_high: 15500
 price_note: Depending on size and framing. We confirm the exact figure before you pay.
+# `print` and `framed` are the prices in KSh for that size, print only and in
+# any of the frames. Leave them empty and that size is ordered by WhatsApp or
+# email; fill them in and, with a Paystack key below, the print page shows the
+# exact price and a "Pay now" button.
 sizes:
-  - { id: A2, label: A2, dims: "420 × 594 mm" }
-  - { id: A1, label: A1, dims: "594 × 841 mm" }
-  - { id: A0, label: A0, dims: "841 × 1189 mm" }
+  - { id: A2, label: A2, dims: "420 × 594 mm", print: , framed:  }
+  - { id: A1, label: A1, dims: "594 × 841 mm", print: , framed:  }
+  - { id: A0, label: A0, dims: "841 × 1189 mm", print: , framed:  }
   - { id: custom, label: Custom, dims: "ask us" }
 frames:
   - { id: black, label: Black frame, swatch: "#141615" }
@@ -20,3 +24,17 @@ series:
   - Landforms
   - Counties
   - Cities
+
+# Online payment through Paystack: M-Pesa and card, in KSh. Paste the PUBLIC key
+# from the Paystack dashboard (Settings > API Keys & Webhooks), the one that
+# starts pk_live_. Never put the secret key (sk_...) here or anywhere in this
+# repository. Leave it empty to hide the Pay now button.
+paystack_key: ""
+
+# Made-to-order prints (any county, a custom area) are not printed until the
+# customer approves a proof. These lines appear on the order pages; edit them
+# to match how you work.
+proof:
+  time: within three working days
+  rounds: two rounds of changes
+  pay: Payment is due once you approve the proof, by M-Pesa or card.

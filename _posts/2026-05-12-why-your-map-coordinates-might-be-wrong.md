@@ -1,6 +1,8 @@
 ---
 layout: post
 title: "Why Your Map Coordinates Might Be Wrong (And How to Fix It)"
+description: "WGS84, Arc 1960 and UTM in Kenya: why two datasets of the same place land metres apart, how to tell which system data is in, and how to fix it."
+topic: GNSS and coordinates
 ---
 
 Here is a situation that happens more often than it should:

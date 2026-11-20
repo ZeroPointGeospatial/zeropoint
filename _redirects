@@ -1,0 +1,3 @@
+# Cloudflare Pages redirects. Not used by GitHub Pages.
+/prints-shop.html   /prints/   301
+/prints-shop        /prints/   301

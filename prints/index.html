@@ -8,7 +8,8 @@ wa_text: Hello ZeroPoint Geospatial, I would like to order a map print.
 {%- include root.html -%}
 {%- assign c = site.data.contact -%}
 {%- assign shop = site.data.shop -%}
-{%- assign prints = site.prints | sort: 'order' -%}
+{%- assign prints = site.prints | where_exp: 'p', 'p.catalogue != false' | sort: 'order' -%}
+{%- assign counties = site.prints | where: 'series', 'Counties' -%}
 {%- assign wa = 'https://wa.me/' | append: c.whatsapp | append: '?text=' -%}
 
 <section class="shop-hero band band--ink">
@@ -45,7 +46,7 @@ wa_text: Hello ZeroPoint Geospatial, I would like to order a map print.
       <p class="label"><span class="num">01</span>The collection</p>
       <div class="sec-head__body">
         <h2 class="h2">{{ prints.size }} prints, <strong>{{ shop.series.size }} series</strong></h2>
-        <p class="lede">The Kenya atlas plates share one scale and projection, so they hang as a set. County plates and city prints are made to order for any county or town. Prices are for A2 to A0 and depend on size and framing.</p>
+        <p class="lede">The Kenya atlas plates share one scale and projection, so they hang as a set. All {{ counties.size }} counties are drawn as relief plates, and any town can be made as a city print. Prices are for A2 to A0 and depend on size and framing.</p>
       </div>
     </div>
     <div class="filters" role="group" aria-label="Filter by series">
@@ -57,10 +58,37 @@ wa_text: Hello ZeroPoint Geospatial, I would like to order a map print.
     <div class="catalogue">
       {%- for p in prints %}
       {% include print-card.html print=p %}
+      {%- if p.slug == 'nairobi-county-population' %}
+      <a class="print-card print-card--all" href="{{ root }}prints/counties/" data-series="Counties">
+        <span class="print-card__wall"><span class="frame">{%- assign kc = site.prints | where: 'slug', 'kenya-counties' | first %}{% include print-img.html print=kc lazy=true %}</span></span>
+        <span class="print-card__meta"><span>{{ counties.size }} plates</span><span>Counties</span></span>
+        <h3>Every county of Kenya</h3>
+        <p>Find your county, made to order with a proof first</p>
+        <span class="print-card__price">See all {{ counties.size }}</span>
+      </a>
+      {%- endif %}
+      {%- endfor %}
+    </div>
+    <p class="mt-l"><a class="text-link" href="{{ root }}prints/custom/">A map of your own place, made to order</a></p>
+  </div>
+</section>
+
+{%- assign photos = site.data.wall_photos %}
+{%- if photos.size > 0 %}
+<section class="band band--white" id="walls">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="label">On real walls</p>
+      <div class="sec-head__body"><h2 class="h2">Framed, delivered <strong>and hung</strong></h2></div>
+    </div>
+    <div class="wall-photos">
+      {%- for ph in photos limit: 6 %}
+      <figure><img src="{{ root }}{{ ph.src }}" alt="{{ ph.alt }}" width="{{ ph.w | default: 900 }}" height="{{ ph.h | default: 1125 }}" loading="lazy" decoding="async">{% if ph.caption %}<figcaption>{{ ph.caption }}</figcaption>{% endif %}</figure>
       {%- endfor %}
     </div>
   </div>
 </section>
+{%- endif %}
 
 <section class="band band--white" id="made">
   <div class="wrap">
@@ -128,7 +156,7 @@ wa_text: Hello ZeroPoint Geospatial, I would like to order a map print.
         <li>Sets and bulk orders for offices</li>
       </ul>
       <div class="btn-row">
-        <a class="btn btn--dark" href="{{ root }}#contact">Request a custom quote</a>
+        <a class="btn btn--dark" href="{{ root }}prints/custom/">Request a proof</a>
         <a class="btn btn--wa" href="{{ wa }}{{ 'Hello ZeroPoint Geospatial, I would like a custom map print quote.' | url_encode | replace: '+', '%20' }}" target="_blank" rel="noopener">{% include wa-icon.html %} WhatsApp</a>
       </div>
     </div>

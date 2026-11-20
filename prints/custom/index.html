@@ -1,0 +1,68 @@
+---
+layout: default
+title: Custom map prints
+description: A map print of your own place, made to order in Kenya. Any county, town, mountain or your own land as relief, rivers, roads in gold or contours. You approve a proof before anything is printed.
+og_image: assets/img/og-prints.jpg
+styles:
+  - { print: county-kiambu, name: Relief, text: "A ray-traced model of the terrain, cut to the boundary of a county or drawn as a block for a mountain or region." }
+  - { print: kenya-rivers, name: Rivers and drainage, text: "Every stream traced from the terrain and weighted by flow, coloured by the basin it drains to." }
+  - { print: mombasa-gold, name: Roads in gold, text: "The road network of a town or estate inside a circle, gold on deep green, with its coordinates." }
+  - { print: longonot-contours, name: Contours, text: "A contour study of a crater, a hill or a farm, framed like a topographic sheet." }
+  - { print: kenya-population, name: Population, text: "Where people live, as columns rising from the land, ray-traced like a physical model." }
+---
+{%- include root.html -%}
+{%- assign c = site.data.contact -%}
+{%- assign shop = site.data.shop -%}
+<header class="page-head band band--ink">
+  <img class="page-head__texture" src="{{ root }}assets/img/contours.webp" alt="" width="1280" height="784">
+  <div class="wrap">
+    <p class="label"><a href="{{ root }}prints/">Map prints</a> <span class="sep">/</span> Made to order</p>
+    <h1 class="page-head__title">Your place, <strong>mapped</strong></h1>
+    <p class="lede">Any county, town, mountain or piece of land, drawn in the style of the collection from the same data and the same pipeline. You see a proof before anything is printed.</p>
+    <div class="btn-row">
+      <a class="btn btn--light" href="#proof">Request a proof</a>
+      <a class="btn btn--ghost" href="{{ root }}prints/counties/">Browse the 47 counties</a>
+    </div>
+  </div>
+</header>
+
+<section class="band band--paper">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="label"><span class="num">01</span>What we can make</p>
+      <div class="sec-head__body">
+        <h2 class="h2">Five styles, <strong>any area</strong></h2>
+        <p class="lede">Each style below exists in the collection, so you can see exactly what you are ordering. Click through to look at one full size.</p>
+      </div>
+    </div>
+    <div class="rule-grid cols-3">
+      {%- for st in page.styles %}
+      {%- assign p = site.prints | where: "slug", st.print | first %}
+      <a class="card card--link card--print" href="{{ root }}prints/{{ st.print }}/">
+        <span class="card__thumb">{% include print-img.html print=p lazy=true sizes="(min-width: 1020px) 26vw, (min-width: 640px) 44vw, 88vw" %}</span>
+        <p class="label">{{ st.name }}</p>
+        <p>{{ st.text }}</p>
+        <span class="text-link">See {{ p.short | default: p.title }}</span>
+      </a>
+      {%- endfor %}
+      <article class="card">
+        <p class="label">Your own data</p>
+        <h3 class="h3">A survey plan or GIS output as a wall print</h3>
+        <p>Send us a deed plan, a topographic survey or a set of GIS layers and we redraw it as a framed print for an office, a reception or a gift.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="band band--paper-2" id="proof">
+  <div class="wrap contact">
+    <div>
+      <p class="label"><span class="num">02</span>How it works</p>
+      <h2 class="h2" style="margin-top:18px">Proof first, <strong>then print</strong></h2>
+      <p class="lede" style="margin-top:20px">Tell us the area, the style and the size. We draw it and send you a proof {{ shop.proof.time }}. Nothing is printed until you approve it.</p>
+      {% include proof-steps.html %}
+      <p class="muted" style="margin-top:24px">Prefer to talk it through? <a href="https://wa.me/{{ c.whatsapp }}?text={{ 'Hello ZeroPoint Geospatial, I would like a custom map print.' | url_encode | replace: '+', '%20' }}" target="_blank" rel="noopener">WhatsApp us</a> or email <a href="mailto:{{ c.email }}">{{ c.email }}</a>.</p>
+    </div>
+    {% include proof-form.html %}
+  </div>
+</section>

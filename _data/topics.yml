@@ -1,0 +1,8 @@
+# Topics for field notes, in the order the blog page lists them. A post's
+# `topic:` must be one of these. tools/blog/autopost.py reads this list too.
+- Land and boundaries
+- Survey methods
+- GNSS and coordinates
+- GIS and remote sensing
+- Construction and engineering
+- Mapping and cartography

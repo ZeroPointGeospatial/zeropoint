@@ -1,0 +1,17 @@
+# Cloudflare Pages response headers. Not used by GitHub Pages.
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  X-Frame-Options: SAMEORIGIN
+
+# Fonts never change; images and styles are replaced under the same names, so
+# they are cached for a week rather than for ever.
+/assets/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+/assets/*
+  Cache-Control: public, max-age=604800
+/css/*
+  Cache-Control: public, max-age=86400
+/js/*
+  Cache-Control: public, max-age=86400

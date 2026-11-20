@@ -1,6 +1,8 @@
 ---
 layout: post
 title: "Drone Mapping vs Traditional Survey: What You Actually Need to Know"
+description: "Where drones beat ground survey and where they do not: ground control, vegetation, boundary work, weather, cost and the accuracy each method delivers."
+topic: Survey methods
 ---
 
 The question comes up on almost every project brief: *Can you just use a drone for this?*

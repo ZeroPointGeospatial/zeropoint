@@ -29,6 +29,8 @@ PLATES = ["kenya-population", "kenya-rivers", "kenya-relief", "kenya-roads", "ke
           "longonot-contours", "mount-kenya-summit",
           "county-kiambu", "county-nakuru", "county-nyeri", "county-kajiado"]
 MASTER_NAME = {"kenya-relief": "kenya"}                 # plate slug -> master file stem
+# every county plate the renderer has written facts for (tools/prints/render_counties.sh)
+PLATES += sorted(p.stem for p in MASTERS.glob("county-*.json") if p.stem not in PLATES)
 CITY_PRINTS = ["mombasa-gold", "kisumu-gold", "nakuru-gold", "eldoret-gold"]   # no bleed
 OWN_PRINTS = ["nairobi-gold", "nairobi-gold-centre", "nairobi-county-population"]
 BLEED_MM = 3.0                                          # as in tools/prints/common.py
@@ -134,11 +136,20 @@ def project_crops():
          IMG / "gis.webp", 80)
 
 
-def print_previews():
-    """640, 1280 and 2000 px wide previews of every print, plus their sizes."""
-    lines = ["# Pixel sizes of the print previews in assets/prints/.",
-             "# Written by tools/site_assets.py; do not edit by hand."]
+def print_previews(only=None):
+    """640, 1280 and 2000 px wide previews of every print, plus their sizes.
+    With `only`, rebuild those prints and keep the other entries as they are."""
+    import re
+    path = ROOT / "_data" / "print_images.yml"
+    sizes = {}
+    if only and path.exists():
+        for line in path.read_text().splitlines():
+            m = re.match(r"([a-z0-9-]+): (\{.*\})$", line)
+            if m:
+                sizes[m.group(1)] = m.group(2)
     for slug in PLATES + CITY_PRINTS + OWN_PRINTS:
+        if only and slug not in only:
+            continue
         try:
             im = master(slug)
         except FileNotFoundError:
@@ -150,10 +161,14 @@ def print_previews():
             kb = webp(out, PRINTS / f"{slug}-{w}.webp", q) / 1024
             dims[w] = out.size
             print(f"  {slug}-{w}.webp  {out.size[0]}x{out.size[1]}  {kb:.0f} KB")
-        lines.append(f"{slug}: {{ w: {dims[640][0]}, h: {dims[640][1]}, "
-                     f"w2000: {dims[2000][0]}, h2000: {dims[2000][1]} }}")
+        sizes[slug] = (f"{{ w: {dims[640][0]}, h: {dims[640][1]}, "
+                       f"w2000: {dims[2000][0]}, h2000: {dims[2000][1]} }}")
         share_card(slug, im)
-    (ROOT / "_data" / "print_images.yml").write_text("\n".join(lines) + "\n")
+    lines = ["# Pixel sizes of the print previews in assets/prints/.",
+             "# Written by tools/site_assets.py; do not edit by hand."]
+    order = PLATES + CITY_PRINTS + OWN_PRINTS
+    lines += [f"{k}: {sizes[k]}" for k in sorted(sizes, key=lambda k: order.index(k) if k in order else 999)]
+    path.write_text("\n".join(lines) + "\n")
 
 
 def hang(canvas, im, x, y, h, frame=(20, 22, 21)):
@@ -212,6 +227,8 @@ if __name__ == "__main__":
         textures()
     if "prints" in steps:
         print_previews()
+    if "counties" in steps:                 # previews of the county plates only
+        print_previews([p for p in PLATES if p.startswith("county-")])
     if "crops" in steps:
         project_crops()
     if "share" in steps:

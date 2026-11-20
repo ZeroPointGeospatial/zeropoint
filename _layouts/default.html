@@ -14,5 +14,8 @@
 </main>
 {% include footer.html %}
 <script src="{{ root }}js/site.js?v={{ site.time | date: '%Y%m%d%H%M' }}" defer></script>
+{%- if site.cloudflare_analytics_token and site.cloudflare_analytics_token != "" %}
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "{{ site.cloudflare_analytics_token }}"}'></script>
+{%- endif %}
 </body>
 </html>

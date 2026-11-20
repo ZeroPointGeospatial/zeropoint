@@ -1,6 +1,8 @@
 ---
 layout: post
 title: "GNSS Explained: Why Your Phone GPS and a Survey GPS Are Not the Same Thing"
+description: "Why a phone's GPS is good to a few metres and a survey receiver to a centimetre: satellite errors, RTK corrections, CORS networks and when a phone is enough."
+topic: GNSS and coordinates
 ---
 
 When people find out what professional survey equipment costs, the first question is usually some version of: *But my phone has GPS. Why can't you just use that?*

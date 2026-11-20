@@ -2,16 +2,27 @@
 layout: default
 ---
 {%- include root.html -%}
+{%- assign words = content | strip_html | number_of_words -%}
 <article class="post">
   <header class="page-head band band--ink">
     <div class="wrap wrap--narrow">
-      <p class="label"><a href="{{ root }}blog/">Field notes</a> <span class="sep">/</span> <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%-d %B %Y" }}</time></p>
+      <p class="label"><a href="{{ root }}blog/">Field notes</a> <span class="sep">/</span> <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%-d %B %Y" }}</time>{% if page.topic %} <span class="sep">/</span> {{ page.topic }}{% endif %}</p>
       <h1 class="page-head__title page-head__title--post">{{ page.title }}</h1>
+      {%- if page.description %}<p class="lede">{{ page.description }}</p>{% endif %}
+      <p class="post__meta mono">{{ words | divided_by: 200 | at_least: 1 }} min read</p>
     </div>
   </header>
   <div class="band band--paper">
     <div class="wrap wrap--narrow prose">
       {{ content }}
+      {%- if page.sources and page.sources.size > 0 %}
+      <h2>Sources</h2>
+      <ul class="post__sources">
+        {%- for s in page.sources %}
+        <li><a href="{{ s.url }}" rel="noopener" target="_blank">{{ s.title }}</a>{% if s.publisher %}, {{ s.publisher }}{% endif %}{% if s.date %} ({{ s.date | date: "%-d %B %Y" }}){% endif %}</li>
+        {%- endfor %}
+      </ul>
+      {%- endif %}
     </div>
     <aside class="wrap wrap--narrow post__cta">
       <div>
@@ -20,5 +31,33 @@ layout: default
       </div>
       <a class="btn btn--dark" href="{{ root }}#contact">Request a survey quote</a>
     </aside>
+    {%- assign related = site.posts | where: 'topic', page.topic | where_exp: 'p', 'p.url != page.url' -%}
+    {%- if page.topic and related.size > 0 %}
+    <aside class="wrap wrap--narrow post__related">
+      <p class="label">More on {{ page.topic | downcase }}</p>
+      <ul class="notes">
+        {%- for post in related limit: 3 %}
+        <li><a href="{{ root }}{{ post.url | remove_first: '/' }}">
+          <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%-d %b %Y" }}</time>
+          <h3>{{ post.title }}</h3>
+          <span class="notes__arrow" aria-hidden="true"></span>
+        </a></li>
+        {%- endfor %}
+      </ul>
+    </aside>
+    {%- endif %}
   </div>
 </article>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": {{ page.title | jsonify }},
+  "description": {{ page.description | default: page.excerpt | strip_html | strip_newlines | jsonify }},
+  "datePublished": {{ page.date | date_to_xmlschema | jsonify }},
+  "author": { "@type": "Organization", "name": {{ site.title | jsonify }}, "url": {{ '/' | absolute_url | jsonify }} },
+  "publisher": { "@type": "Organization", "name": {{ site.title | jsonify }}, "logo": { "@type": "ImageObject", "url": {{ 'assets/img/logo-mark.webp' | absolute_url | jsonify }} } },
+  "mainEntityOfPage": {{ page.url | absolute_url | jsonify }}
+}
+</script>

@@ -1,0 +1,49 @@
+{%- comment -%}
+  Request a proof for a made-to-order print. Posts to Formspree.
+    {% include proof-form.html subject="Kiambu: County relief" place="Kiambu" %}
+  Without `place`, the form asks which area the print should show.
+{%- endcomment -%}
+{%- assign c = site.data.contact -%}
+{%- assign shop = site.data.shop -%}
+<form class="form" id="proof-form" data-ajax action="{{ c.form_action }}" method="POST" data-ok="Thank you. We have your request and will send the proof {{ shop.proof.time }}.">
+  <input type="hidden" name="_subject" value="Proof request: {{ include.subject | default: 'custom map print' }}">
+  <input type="hidden" name="request" value="proof">
+  <div class="form__grid">
+    <div class="field"><label for="p-name">Name</label><input id="p-name" name="name" type="text" autocomplete="name" required></div>
+    <div class="field"><label for="p-phone">Phone or WhatsApp</label><input id="p-phone" name="phone" type="tel" autocomplete="tel" placeholder="+254 7XX XXX XXX" required></div>
+    <div class="field field--wide"><label for="p-email">Email</label><input id="p-email" name="email" type="email" autocomplete="email" required></div>
+    {%- if include.place %}
+    <input type="hidden" name="area" value="{{ include.place }}">
+    {%- else %}
+    <div class="field field--wide"><label for="p-area">Area to map</label><input id="p-area" name="area" type="text" placeholder="A county, town, mountain or your own land" required></div>
+    <div class="field field--wide">
+      <label for="p-style">Style</label>
+      <select id="p-style" name="style" required>
+        <option value="">Choose a style</option>
+        <option>Relief, ray-traced like the county plates</option>
+        <option>Rivers and drainage</option>
+        <option>Roads in gold, like the city prints</option>
+        <option>Contours</option>
+        <option>From my own survey or GIS data</option>
+        <option>Not sure, advise me</option>
+      </select>
+    </div>
+    {%- endif %}
+    <div class="field">
+      <label for="p-size">Size</label>
+      <select id="p-size" name="size" required>
+        {%- for s in shop.sizes %}<option{% if forloop.first %} selected{% endif %}>{{ s.label }}{% if s.id != 'custom' %} ({{ s.dims }}){% endif %}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="p-finish">Finish</label>
+      <select id="p-finish" name="finish" required>
+        {%- for f in shop.frames %}<option{% if forloop.first %} selected{% endif %}>{{ f.label }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field field--wide"><label for="p-notes">Names, places or wording to include <span class="muted">(optional)</span></label><textarea id="p-notes" name="notes" rows="3" placeholder="e.g. mark our farm near Limuru, add the family name under the title"></textarea></div>
+  </div>
+  <div class="hp" aria-hidden="true"><label for="p-website">Leave this empty</label><input id="p-website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+  <button class="btn btn--dark" type="submit">Request my proof</button>
+  <p class="form__status" role="status" aria-live="polite"></p>
+</form>

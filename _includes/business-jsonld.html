@@ -1,0 +1,33 @@
+{%- assign c = site.data.contact -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  "@id": {{ '/#business' | absolute_url | jsonify }},
+  "name": {{ site.title | jsonify }},
+  "description": {{ site.description | jsonify }},
+  "url": {{ '/' | absolute_url | jsonify }},
+  "logo": {{ 'assets/img/logo-mark.webp' | absolute_url | jsonify }},
+  "image": {{ 'assets/img/og-image.jpg' | absolute_url | jsonify }},
+  "telephone": {{ c.phones[0].tel | jsonify }},
+  "email": {{ c.email | jsonify }},
+  "address": { "@type": "PostalAddress", "addressLocality": "Nairobi", "addressCountry": "KE" },
+  "areaServed": { "@type": "Country", "name": "Kenya" },
+  "openingHoursSpecification": [{
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    "opens": "08:00", "closes": "17:00"
+  }],
+  "knowsAbout": ["Land surveying", "Boundary survey", "Topographic survey", "RTK GNSS", "GIS mapping", "Remote sensing"],
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Survey and GIS services",
+    "itemListElement": [
+      {%- for s in site.data.services %}
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": {{ s.name | jsonify }}, "description": {{ s.desc | jsonify }} } }{% unless forloop.last %},{% endunless %}
+      {%- endfor %}
+    ]
+  },
+  "sameAs": [{% for s in c.social %}{{ s.url | jsonify }}{% unless forloop.last %}, {% endunless %}{% endfor %}]
+}
+</script>

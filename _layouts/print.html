@@ -18,6 +18,14 @@ layout: default
         </button>
       </div>
       <p class="print__hint">Select the print to see it larger</p>
+      {%- assign photos = site.data.wall_photos | where: 'print', page.slug %}
+      {%- if photos.size > 0 %}
+      <div class="print__photos">
+        {%- for ph in photos %}
+        <figure><img src="{{ root }}{{ ph.src }}" alt="{{ ph.alt }}" width="{{ ph.w | default: 900 }}" height="{{ ph.h | default: 1125 }}" loading="lazy" decoding="async">{% if ph.caption %}<figcaption>{{ ph.caption }}</figcaption>{% endif %}</figure>
+        {%- endfor %}
+      </div>
+      {%- endif %}
     </div>
 
     <div>
@@ -26,9 +34,11 @@ layout: default
       <p class="print__theme">{{ page.theme }}</p>
       <div class="print__body">{{ content }}</div>
 
-      <div class="print__price"><strong>{{ shop.price }}</strong><span>{{ shop.price_note }}</span></div>
+      <div class="print__price"><strong data-price>{{ shop.price }}</strong><span data-price-note>{{ shop.price_note }}</span></div>
 
-      <form id="print-order" data-print="{{ fullname | escape }}">
+      {%- assign found = false -%}
+      {%- capture prices -%}{ {%- for s in shop.sizes -%}{%- if s.print or s.framed -%}{%- if found %},{% endif -%}{%- assign found = true -%}"{{ s.id }}":{"print":{{ s.print | default: 'null' }},"framed":{{ s.framed | default: 'null' }}}{%- endif -%}{%- endfor -%} }{%- endcapture -%}
+      <form id="print-order" data-print="{{ fullname | escape }}" data-slug="{{ page.slug }}" data-prices='{{ prices | strip }}' data-range="{{ shop.price }}" data-note="{{ shop.price_note }}"{% if page.proof %} data-proof{% endif %}>
         <fieldset class="options">
           <legend>Size</legend>
           <div class="options__row">
@@ -48,10 +58,26 @@ layout: default
       </form>
 
       {%- assign msg = 'Hello ZeroPoint, I would like to order the print "' | append: fullname | append: '".' %}
+      {%- if page.proof %}
+      <div class="print__proof">
+        <p><strong>Made to order, proof first.</strong> We draw your plate, send you a proof {{ shop.proof.time }} and allow {{ shop.proof.rounds }}. Nothing is printed until you approve it. {{ shop.proof.pay }}</p>
+      </div>
       <div class="btn-row">
+        <a class="btn btn--dark" href="#proof">Request a proof</a>
+        <a class="btn btn--wa" id="order-wa" data-number="{{ c.whatsapp }}" href="https://wa.me/{{ c.whatsapp }}?text={{ msg | url_encode | replace: '+', '%20' }}" target="_blank" rel="noopener">{% include wa-icon.html %} Ask on WhatsApp</a>
+      </div>
+      {%- else %}
+      <div class="btn-row">
+        {%- if shop.paystack_key != "" %}
+        <button class="btn btn--dark" type="button" id="pay-now" hidden>Pay now <span data-pay-amount></span></button>
+        {%- endif %}
         <a class="btn btn--wa" id="order-wa" data-number="{{ c.whatsapp }}" href="https://wa.me/{{ c.whatsapp }}?text={{ msg | url_encode | replace: '+', '%20' }}" target="_blank" rel="noopener">{% include wa-icon.html %} Order on WhatsApp</a>
         <a class="btn btn--ghost" id="order-mail" data-email="{{ c.email }}" href="mailto:{{ c.email }}?subject={{ 'Print order: ' | append: fullname | url_encode | replace: '+', '%20' }}">Order by email</a>
       </div>
+      {%- if shop.paystack_key != "" %}
+      <p class="print__assure" data-pay-note hidden>Pay by M-Pesa or card through Paystack. We call you to arrange delivery.</p>
+      {%- endif %}
+      {%- endif %}
       <p class="print__assure">Free delivery and installation in Nairobi for framed prints. Delivery across Kenya on request.</p>
 
       <dl class="sheet">
@@ -63,6 +89,24 @@ layout: default
     </div>
   </div>
 </section>
+
+{%- if page.proof %}
+<section class="band band--paper-2" id="proof">
+  <div class="wrap contact">
+    <div>
+      <p class="label">Request a proof</p>
+      <h2 class="h2" style="margin-top:18px">{{ page.short | default: page.title }}, <strong>made for you</strong></h2>
+      <p class="lede" style="margin-top:20px">Tell us the size and finish, and anything you would like named on the map: your town, your farm, a school, a river. We reply with a proof {{ shop.proof.time }}.</p>
+      {% include proof-steps.html %}
+    </div>
+    {% include proof-form.html subject=fullname place=page.title %}
+  </div>
+</section>
+{%- endif %}
+
+{%- if shop.paystack_key != "" %}{% unless page.proof %}
+{% include checkout.html print=fullname %}
+{%- endunless %}{% endif %}
 
 <section class="band band--white">
   <div class="wrap">

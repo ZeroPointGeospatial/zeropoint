@@ -1,18 +1,25 @@
+# The six client types. Each has its own page, written in _sectors/<slug>.md.
 - who: Landowners
+  slug: landowners
   title: Know exactly what you own.
   text: Boundary verification, beacon checks, parcel maps and land-buying due diligence before money changes hands.
 - who: Developers
+  slug: developers
   title: De-risk land before design.
   text: Topographic surveys, site constraints, access checks, coordinate control and planning-ready terrain data.
 - who: Contractors
+  slug: contractors
   title: Build from verified control.
   text: Setting-out, level transfer, grid control, as-built checks and repeatable construction reference points.
 - who: Architects and planners
+  slug: architects-and-planners
   title: Design on trustworthy base data.
   text: CAD-ready survey drawings, contour maps, GIS layers and site information prepared for design workflows.
 - who: County and public teams
+  slug: county-and-public-sector
   title: Make location intelligence operational.
   text: Land-use mapping, asset inventories, spatial analysis, remote sensing support and GIS-ready datasets.
 - who: Banks and lenders
+  slug: banks-and-lenders
   title: Confirm collateral before you lend.
   text: Boundary and beacon verification, title-support surveys and valuation-ready reports for secured lending.

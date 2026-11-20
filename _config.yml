@@ -4,6 +4,7 @@ description: Land surveying, RTK/GNSS control, topographic mapping and GIS deliv
 baseurl: "/zeropoint"
 url: "https://zeropointgeospatial.github.io"
 lang: en
+timezone: Africa/Nairobi
 markdown: kramdown
 
 # Blog posts live at /blog/<title>/
@@ -14,12 +15,18 @@ collections:
   prints:
     output: true
     permalink: /prints/:name/
+  # One page per client type, from the files in _sectors/
+  sectors:
+    output: true
+    permalink: /for/:name/
 
 defaults:
   - scope: { path: "", type: posts }
     values: { layout: post }
   - scope: { path: "", type: prints }
     values: { layout: print }
+  - scope: { path: "", type: sectors }
+    values: { layout: sector }
 
 # Not part of the published site
 exclude:

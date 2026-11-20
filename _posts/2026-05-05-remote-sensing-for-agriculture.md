@@ -1,6 +1,8 @@
 ---
 layout: post
 title: "Remote Sensing for Agriculture: How Satellite Data Is Changing Farming in Kenya"
+description: "What satellites measure over farmland, which imagery is free, how NDVI works, and what remote sensing can and cannot tell a farm or a county in Kenya."
+topic: GIS and remote sensing
 ---
 
 In 1972, NASA launched Landsat 1 — the first satellite designed specifically to observe the earth's land surface. The images it returned were revolutionary, even at a resolution of 80 metres per pixel.

@@ -8,6 +8,9 @@ permalink: /sitemap.xml
 {%- for p in pages %}{% if p.url contains '.xml' or p.url contains '.css' or p.url contains '.js' %}{% continue %}{% endif %}
   <url><loc>{{ p.url | replace: 'index.html', '' | absolute_url }}</loc><lastmod>{{ site.time | date: '%Y-%m-%d' }}</lastmod></url>
 {%- endfor %}
+{%- for p in site.sectors %}
+  <url><loc>{{ p.url | absolute_url }}</loc><lastmod>{{ site.time | date: '%Y-%m-%d' }}</lastmod></url>
+{%- endfor %}
 {%- for p in site.prints %}
   <url><loc>{{ p.url | absolute_url }}</loc><lastmod>{{ site.time | date: '%Y-%m-%d' }}</lastmod></url>
 {%- endfor %}

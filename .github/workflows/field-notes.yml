@@ -1,0 +1,78 @@
+# Writes a field note for the blog when one is due: about five every two
+# months (see cadence_days in tools/blog/sources.yml).
+#
+# Needs one repository secret, ANTHROPIC_API_KEY (Settings > Secrets and
+# variables > Actions). Optional repository variables:
+#   FIELD_NOTES_BRANCH  branch the posts are published to (default: cloudflare)
+#   FIELD_NOTES_REVIEW  "true" to open a pull request for each post instead of
+#                       publishing it straight away
+#
+# GitHub only runs scheduled workflows from the repository's default branch,
+# so this file must be on that branch for the schedule to fire.
+name: Field notes
+
+on:
+  schedule:
+    - cron: "17 5 * * 1"          # Mondays, 08:17 in Nairobi
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Write a post now, even if one is not due
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: field-notes
+  cancel-in-progress: false
+
+jobs:
+  write:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BRANCH: ${{ vars.FIELD_NOTES_BRANCH || 'cloudflare' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.BRANCH }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: pip install -r tools/blog/requirements.txt
+
+      - name: Write a field note if one is due
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_MODEL: ${{ vars.CLAUDE_MODEL || 'claude-opus-5-5' }}
+        run: python tools/blog/autopost.py ${{ inputs.force && '--force' || '' }}
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REVIEW: ${{ vars.FIELD_NOTES_REVIEW }}
+        run: |
+          git add _posts
+          if git diff --cached --quiet; then
+            echo "Nothing to publish."
+            exit 0
+          fi
+          post=$(git diff --cached --name-only | head -1)
+          title=$(sed -n 's/^title: //p' "$post" | head -1 | sed "s/^['\"]//; s/['\"]$//")
+          git config user.name "ZeroPoint field notes"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Field note: $title"
+          if [ "$REVIEW" = "true" ]; then
+            draft="field-notes/$(date +%Y-%m-%d)"
+            git push origin "HEAD:refs/heads/$draft"
+            gh pr create --base "$BRANCH" --head "$draft" --title "Field note: $title" \
+              --body "Written by tools/blog/autopost.py. Merge to publish it, or close to discard it."
+          else
+            git push origin "HEAD:$BRANCH"
+          fi

@@ -1,0 +1,239 @@
+# What tools/blog/autopost.py writes about, and how often.
+# Edit freely: the script reads this file on every run.
+
+# About five posts every two months: one post when the last automatic post is
+# at least this many days old. The job runs weekly, so posts come out every
+# twelve to eighteen days.
+cadence_days: 12
+
+# How far back to look for news.
+lookback_days: 35
+
+# News feeds. A feed that fails to load is skipped and named in the job log;
+# run `python tools/blog/autopost.py --check-feeds` to test them all.
+feeds:
+  - { name: GPS World, url: "https://www.gpsworld.com/feed/" }
+  - { name: Inside GNSS, url: "https://insidegnss.com/feed/" }
+  - { name: GIM International, url: "https://www.gim-international.com/rss" }
+  - { name: Geospatial World, url: "https://www.geospatialworld.net/feed/" }
+  - { name: xyHt, url: "https://www.xyht.com/feed/" }
+  - { name: Spatial Source, url: "https://www.spatialsource.com.au/feed/" }
+  - { name: Geoawesomeness, url: "https://www.geoawesomeness.com/feed/" }
+  - { name: weeklyOSM, url: "https://weeklyosm.eu/feed" }
+  - { name: NASA Earth Observatory, url: "https://earthobservatory.nasa.gov/feeds/earth-observatory.rss" }
+  - { name: ESA Observing the Earth, url: "https://www.esa.int/rssfeed/Applications/Observing_the_Earth" }
+
+# An article must mention at least one of these to be considered. More matches,
+# and matches in the title, rank it higher. Kenya and East Africa rank highest.
+keywords:
+  strong: [Kenya, Nairobi, East Africa, Africa, cadastre, cadastral, land registry, land administration, title deed]
+  normal: [survey, surveying, surveyor, GNSS, GPS, RTK, CORS, geodesy, datum, lidar, LiDAR, photogrammetry,
+           drone, UAV, GIS, mapping, remote sensing, satellite imagery, Sentinel, Landsat, Earth observation,
+           topographic, elevation, boundary, total station, OpenStreetMap, flood mapping, land cover]
+
+# Articles mentioning any of these are skipped: they are adverts, events or
+# subjects a land survey firm should not be writing about.
+exclude: [sponsored, webinar, podcast, "job opening", hiring, "press release", conference, award, military,
+          missile, weapon, defense, defence, jamming, spoofing, warfare, stock, shares, earnings, funding round]
+
+# Evergreen guides, written when there is no suitable news or in turn with it.
+# Each is written once. `brief` is what the post must be built on: the writer
+# is told not to add specific figures, fees, timelines or legal references
+# that are not in the brief.
+guides:
+  - id: topo-survey-contents
+    title: What a topographic survey includes, and what it leaves out
+    topic: Survey methods
+    reader: Developers, architects and landowners commissioning a first survey
+    brief: >-
+      A topographic survey records the shape of the ground and the features on it: spot levels and contours,
+      buildings, walls and fences, roads and paths, trees, drains, manholes and poles. It does not establish
+      legal boundaries; that is a boundary survey. Deliverables are usually a CAD drawing (DWG or DXF) in
+      layers, a PDF plan, and sometimes a terrain model. The drawing should state its coordinate system,
+      height datum, scale and the date of fieldwork. Underground services are only shown where visible
+      (manhole covers, valves); buried pipes and cables need a separate utility search. Agree the contour
+      interval and the features needed before fieldwork.
+
+  - id: contour-interval
+    title: Choosing a contour interval for a site plan
+    topic: Mapping and cartography
+    reader: Architects, engineers and developers
+    brief: >-
+      The contour interval is the height difference between neighbouring contour lines. A smaller interval
+      shows more detail but needs denser measurement and can clutter a plan. Gentle building plots are often
+      drawn at 0.5 m; larger or steeper sites at 1 m or more; very flat sites may need spot levels rather than
+      contours to show drainage falls. Contours are interpolated between measured points, so their accuracy
+      depends on point density and on breaklines along kerbs, banks and drains. Index contours (every fifth)
+      are drawn heavier and labelled.
+
+  - id: rtk-or-total-station
+    title: RTK GNSS or total station? Choosing the instrument for a construction site
+    topic: Construction and engineering
+    reader: Contractors and site engineers
+    brief: >-
+      RTK GNSS gives centimetre-level positions in real time where the receiver has a clear view of the sky
+      and a correction source (a base station or a network). It is fast for open sites, roads and control.
+      Accuracy drops near tall buildings, under trees and close to walls because of blocked signals and
+      multipath. A total station measures angles and distances from known control; it works anywhere with
+      line of sight and is the usual choice for building setting-out with tight tolerances. Many jobs use
+      both, tied to the same control. Heights from GNSS are ellipsoidal and need a geoid model or a local
+      benchmark to become usable levels.
+
+  - id: setting-out-checks
+    title: Five checks before concrete is poured on set-out points
+    topic: Construction and engineering
+    reader: Contractors and site engineers
+    brief: >-
+      Before pouring: confirm the drawings used are the latest approved revision; check the control points
+      against each other before setting out from them; check every set-out point from a second station or a
+      second control point; check diagonals and running dimensions between set-out points against the
+      drawing; carry levels from a benchmark and close back onto it. Record what was checked, by whom and
+      when. Pegs disturbed by plant must be re-set, not nudged back.
+
+  - id: earthwork-volumes
+    title: How earthwork volumes are calculated from a survey
+    topic: Construction and engineering
+    reader: Developers, quantity surveyors and contractors
+    brief: >-
+      Volumes come from comparing two surfaces: the existing ground (from a topographic survey) and the
+      design or final surface. Methods include grid (prism) comparisons, triangulated surface comparison and
+      cross-sections along an alignment. Accuracy depends on point density and on capturing breaklines. Bulking
+      and compaction factors are applied separately, because loose excavated material takes more space than
+      it did in the ground. Surveying the stockpile or excavation before and after gives a measured figure for
+      payment.
+
+  - id: read-survey-drawing
+    title: How to read a survey drawing
+    topic: Mapping and cartography
+    reader: Landowners, buyers and anyone handed a survey plan
+    brief: >-
+      Start with the title block: project, parcel, date of survey, surveyor, scale and drawing number. Find the
+      north arrow and the scale bar. Check the coordinate system and height datum note. The legend explains
+      symbols for beacons, trees, buildings, fences and services. Spot levels are heights at points; contours
+      join points of equal height. Boundaries may be shown as found on site or as taken from records, and a
+      good drawing says which. A drawing at 1:500 means 1 cm on paper is 5 m on the ground.
+
+  - id: control-points
+    title: Why survey control points matter on long projects
+    topic: Survey methods
+    reader: Developers and contractors
+    brief: >-
+      Control points are marked, measured reference points left on or near a site. Every later survey, setting
+      out and as-built is measured from them, so they keep the whole project in one coordinate system. They
+      should be placed where construction will not disturb them, protected, described with a sketch and
+      photographs, and checked against each other periodically. Losing control mid-project forces a resurvey
+      and risks mismatches between earlier and later work.
+
+  - id: drone-ground-control
+    title: Ground control for drone surveys, explained
+    topic: Survey methods
+    reader: Developers and project managers considering drone mapping
+    brief: >-
+      Photogrammetry from drone images builds a 3D model, but its position and scale are only as good as the
+      ground control. Ground control points are marked targets measured with RTK GNSS or a total station and
+      visible in the images; check points are measured the same way but held back to test the result. Drones
+      with RTK or PPK positioning need fewer control points but still need check points. Drone surfaces show
+      the top of vegetation, not the ground beneath it. Results should be reported with their measured
+      accuracy at the check points.
+
+  - id: send-coordinates
+    title: How to send a surveyor your coordinates without causing problems
+    topic: GNSS and coordinates
+    reader: Clients sharing locations, plans or GIS files
+    brief: >-
+      A coordinate pair means nothing without its coordinate system. In Kenya data is commonly in WGS 84
+      (latitude and longitude, as phones show), UTM zones 36 or 37 (north or south) on WGS 84, or the older Arc
+      1960 datum used on many survey records. The same point in WGS 84 and Arc 1960 differs by a few hundred
+      metres or less, enough to put a point in the wrong parcel. Send the system name or EPSG code with any
+      coordinates, send files in their original format, and for a simple site visit a phone location pin is
+      fine because it only needs to find the place.
+
+  - id: phone-gps-site-visit
+    title: What a phone's GPS is good for on a land visit
+    topic: GNSS and coordinates
+    reader: Land buyers and landowners
+    brief: >-
+      A phone positions itself to within a few metres in open sky, worse near buildings and trees. That is good
+      enough to find a parcel, share its location, and see roughly where it sits on satellite imagery. It is
+      not good enough to locate a boundary, check a beacon or measure an area for a sale, where errors of a
+      few metres matter. Survey GNSS receivers with RTK corrections reach centimetres. Satellite imagery in
+      map apps can itself be offset from true positions.
+
+  - id: sentinel-land-cover
+    title: Mapping land cover across a county with free satellite imagery
+    topic: GIS and remote sensing
+    reader: County planners and programme teams
+    brief: >-
+      Sentinel-2 (European Space Agency, Copernicus programme) provides free multispectral imagery at 10 m to
+      60 m resolution, revisiting every few days; Landsat 8 and 9 provide free 30 m imagery with an archive
+      back to the 1980s through earlier Landsat missions. Land cover is mapped by classifying the imagery
+      into classes such as cropland, forest, grassland, built-up and water, trained on field-checked samples.
+      Cloud cover in rainy seasons limits usable scenes. Accuracy must be assessed against independent field
+      or high-resolution samples and reported. Comparing classifications from different years shows change.
+
+  - id: asset-inventory
+    title: Building a county asset inventory that stays up to date
+    topic: GIS and remote sensing
+    reader: County and agency teams
+    brief: >-
+      An asset inventory maps facilities and infrastructure (roads, water points, markets, schools, health
+      facilities) with attributes such as condition, owner and date checked. Start by agreeing the attribute
+      list and its allowed values; collect positions with GNSS and attributes with mobile forms; check data
+      before it enters the master dataset; give every asset a permanent identifier; record who changed what
+      and when. Open formats such as GeoPackage keep the data usable in QGIS and ArcGIS alike.
+
+  - id: gis-handover
+    title: What a good GIS data handover looks like
+    topic: GIS and remote sensing
+    reader: Anyone commissioning GIS work
+    brief: >-
+      A handover should include the data in open formats (GeoPackage, shapefile, GeoTIFF), one stated
+      coordinate system for all layers, a data dictionary describing every layer and field and its allowed
+      values, the source and date of each dataset, known limitations, and the map layouts or styles used.
+      Without these, data is hard to reuse once the people who made it move on.
+
+  - id: flood-from-elevation
+    title: What elevation data can and cannot tell you about flooding
+    topic: GIS and remote sensing
+    reader: Developers, planners and landowners
+    brief: >-
+      Elevation models show low ground, natural drainage lines and catchments, which is the start of any flood
+      assessment. Free global models such as Copernicus DEM at 30 m are surface models: they include trees and
+      buildings, and their vertical accuracy is a few metres, so they cannot resolve a 0.5 m difference on a
+      building plot. Site decisions need a measured topographic survey and local knowledge of past floods.
+      Flood risk also depends on rainfall, soils, drains and culverts that elevation data does not show.
+
+  - id: how-relief-maps-are-made
+    title: How our relief map prints are made
+    topic: Mapping and cartography
+    reader: People interested in the map prints
+    brief: >-
+      ZeroPoint's relief prints start from the Copernicus DEM, at 30 m for mountains and counties and 90 m for
+      the whole country. The elevation grid is turned into a 3D mesh, exaggerated vertically so the relief reads
+      at wall scale (the factor is printed on each sheet), coloured by height, and rendered with a path tracer
+      using a low sun from the north-west and a soft sky, so shadows fall as they would on a physical model.
+      The view is straight down, so the printed scale holds across the sheet. Prints are A2 at 300 dpi with
+      3 mm bleed and an embedded sRGB profile.
+
+  - id: rivers-from-terrain
+    title: Drawing every river in Kenya from the shape of the land
+    topic: Mapping and cartography
+    reader: People interested in the map prints and in hydrology
+    brief: >-
+      ZeroPoint's rivers print does not use a downloaded river dataset. The 90 m Copernicus DEM is filled with a
+      priority-flood algorithm (keeping real closed basins such as the Rift lakes open), flow is routed to the
+      steepest downhill neighbour, and upstream area is accumulated. Streams are cells draining more than 12 km2.
+      Line weight shows estimated mean flow: CHIRPS rainfall (1991 to 2020) converted to runoff with the Budyko
+      curve, accumulated downstream. Each stream is coloured by which of Kenya's five drainage basins it reaches.
+      It is a model, not a gauged record, and dryland rivers lose water to their beds that the model ignores.
+
+  - id: map-scale
+    title: Map scale, explained with a wall map
+    topic: Mapping and cartography
+    reader: General readers
+    brief: >-
+      Scale is the ratio between a distance on the map and the same distance on the ground. At 1:2 400 000,
+      1 cm on paper is 24 km on the ground. Enlarging a print changes its scale: the same plate printed at A0
+      (twice the width of A2) is at half the scale number, 1:1 200 000. A "large-scale" map shows a small area
+      in detail (1:500 site plan); a "small-scale" map shows a large area with little detail (a country map).
+      A map stating its scale, projection and date lets a reader judge what it can be used for.

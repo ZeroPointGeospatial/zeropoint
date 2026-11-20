@@ -77,11 +77,12 @@ schema:
     </div>
     <div class="rule-grid cols-3">
       {%- for a in site.data.audiences %}
-      <article class="card">
+      <a class="card card--link" href="{{ root }}for/{{ a.slug }}/">
         <p class="label">{{ a.who }}</p>
         <h3 class="h3">{{ a.title }}</h3>
         <p>{{ a.text }}</p>
-      </article>
+        <span class="text-link">How we help</span>
+      </a>
       {%- endfor %}
     </div>
   </div>
@@ -273,39 +274,8 @@ schema:
         <a class="btn btn--ghost" href="{{ c.booking }}" target="_blank" rel="noopener">Book a 30-minute call</a>
       </div>
     </div>
-    <form class="form" id="quote-form" action="{{ c.form_action }}" method="POST">
-      <input type="hidden" name="_subject" value="New Survey Quote Request">
-      <div class="form__grid">
-        <div class="field"><label for="fname">First name</label><input id="fname" name="firstname" type="text" autocomplete="given-name" required></div>
-        <div class="field"><label for="lname">Last name</label><input id="lname" name="lastname" type="text" autocomplete="family-name" required></div>
-        <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" required></div>
-        <div class="field"><label for="phone">Phone or WhatsApp</label><input id="phone" name="phone" type="tel" autocomplete="tel" placeholder="+254 7XX XXX XXX" required></div>
-        <div class="field"><label for="location">Project location</label><input id="location" name="location" type="text" placeholder="Town, estate or county" required></div>
-        <div class="field"><label for="size">Land or site size</label><input id="size" name="size" type="text" placeholder="e.g. 1 acre, 500 m road"></div>
-        <div class="field">
-          <label for="service">Service needed</label>
-          <select id="service" name="service" required>
-            <option value="">Select a service</option>
-            {%- for s in site.data.services %}
-            <option>{{ s.name }}</option>
-            {%- endfor %}
-          </select>
-        </div>
-        <div class="field">
-          <label for="timeline">Timeline</label>
-          <select id="timeline" name="timeline" required>
-            <option value="">Select a timeline</option>
-            <option>Urgent, this week</option>
-            <option>1 to 2 weeks</option>
-            <option>This month</option>
-            <option>Flexible</option>
-          </select>
-        </div>
-        <div class="field field--wide"><label for="notes">Anything else we should know <span class="muted">(optional)</span></label><textarea id="notes" name="notes" rows="3"></textarea></div>
-      </div>
-      <div class="hp" aria-hidden="true"><label for="website">Leave this empty</label><input id="website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
-      <button class="btn btn--dark" type="submit">Request quote</button>
-      <p class="form__status" role="status" aria-live="polite"></p>
-    </form>
+    {% include quote-form.html %}
   </div>
 </section>
+
+{% include business-jsonld.html %}
