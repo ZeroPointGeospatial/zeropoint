@@ -73,7 +73,7 @@ wa_text: Hello ZeroPoint Geospatial, I would like to order a map print.
   </div>
 </section>
 
-{%- assign photos = site.data.wall_photos %}
+{%- assign photos = site.data.wall_photos | default: empty %}
 {%- if photos.size > 0 %}
 <section class="band band--white" id="walls">
   <div class="wrap">

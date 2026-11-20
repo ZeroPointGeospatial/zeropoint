@@ -28,7 +28,7 @@ A Jekyll site. Two copies are published:
 | Colours, type and layout | `css/site.css` |
 | Page furniture (head, navigation, footer) | `_includes/` and `_layouts/` |
 
-Pages: `index.html` (home), `projects.html`, `prints/index.html` (shop),
+Pages: `index.html` (home), `projects.html` (served at /projects/), `prints/index.html` (shop),
 `prints/counties/` (all 47 counties), `prints/custom/` (made-to-order prints),
 `blog/index.html`. Each print gets its own page at `/prints/<name>/` from
 `_layouts/print.html`, and each client type one at `/for/<name>/` from
@@ -80,6 +80,11 @@ customer approves the proof.
 3. Copy a file in `_prints/`, rename it `<name>.md` and edit the text.
    `series` must be one of the series listed in `_data/shop.yml`; `order`
    sets its place in the catalogue.
+
+Custom maps of any area (relief, population, contours, city roads) are made
+from a short spec file: see "Custom maps of any area" in
+`tools/prints/README.md`, or ask Claude Code, which has a skill for it in
+`.claude/skills/zeropoint-map-print`.
 
 County plates: `sh tools/prints/render_counties.sh` renders every county,
 `python tools/county_pages.py` writes their pages, and

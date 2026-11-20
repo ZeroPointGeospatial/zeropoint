@@ -18,7 +18,7 @@ layout: default
         </button>
       </div>
       <p class="print__hint">Select the print to see it larger</p>
-      {%- assign photos = site.data.wall_photos | where: 'print', page.slug %}
+      {%- assign photos = site.data.wall_photos | default: empty | where: 'print', page.slug %}
       {%- if photos.size > 0 %}
       <div class="print__photos">
         {%- for ph in photos %}
@@ -36,6 +36,7 @@ layout: default
 
       {%- include price-range.html series=page.series %}
       {%- capture range %}KSh {% include ksh.html n=pr_lo %} – {% include ksh.html n=pr_hi %}{% endcapture %}
+      {%- assign page_lo = pr_lo -%}{%- assign page_hi = pr_hi -%}  {%- comment -%} kept: the print cards below reset pr_lo and pr_hi {%- endcomment -%}
       <div class="print__price"><strong data-price>{{ range }}</strong><span data-price-note>{{ shop.price_note }}</span></div>
 
       <form id="print-order" data-print="{{ fullname | escape }}" data-slug="{{ page.slug }}" data-prices='{{ pr_table | jsonify }}' data-range="{{ range }}" data-note="{{ shop.price_note }}" data-custom-note="{{ shop.custom_note }}"{% if page.proof %} data-proof{% endif %}>
@@ -147,8 +148,8 @@ layout: default
   "offers": {
     "@type": "AggregateOffer",
     "priceCurrency": "KES",
-    "lowPrice": {{ pr_lo }},
-    "highPrice": {{ pr_hi }},
+    "lowPrice": {{ page_lo }},
+    "highPrice": {{ page_hi }},
     "availability": "https://schema.org/InStock",
     "url": {{ page.url | absolute_url | jsonify }}
   }

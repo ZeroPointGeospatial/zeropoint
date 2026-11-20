@@ -13,7 +13,7 @@ Then:
 
     python3 tools/checks/links.py _site
     node tools/checks/interact.js http://localhost:4000/zeropoint/
-    node tools/checks/phone.js http://localhost:4000/zeropoint/ /tmp/phone_ ",prints/,projects.html,blog/"
+    node tools/checks/phone.js http://localhost:4000/zeropoint/ /tmp/phone_ ",prints/,projects/,blog/"
 
 - `links.py` reads every built page and reports broken internal links,
   anchors and images, images without a size or alt text, duplicate ids and

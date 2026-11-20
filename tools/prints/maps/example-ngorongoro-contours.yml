@@ -1,0 +1,12 @@
+# A contour study anywhere: centre, scale and contour interval.
+slug: ngorongoro-contours
+title: Ngorongoro
+subtitle: A contour study of the crater
+label: CUSTOM
+number: "C1"
+centre: [35.585, -3.175]
+scale: 75000
+interval: 25
+index: 125
+names:
+  - { text: Lake Magadi, lon: 35.545, lat: -3.18, size: 2.6 }

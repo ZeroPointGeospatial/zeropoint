@@ -12,6 +12,8 @@ rift-valley: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
 east-africa: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
 longonot-contours: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
 mount-kenya-summit: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
+africa-relief: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
+africa-population: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
 county-kiambu: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
 county-nakuru: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
 county-nyeri: { w: 640, h: 905, w2000: 2000, h2000: 2828 }

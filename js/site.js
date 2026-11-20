@@ -91,11 +91,13 @@
   if (countyQ) {
     var countyCards = document.querySelectorAll('.catalogue--counties .print-card');
     var none = document.querySelector('.county-none');
+    /* letters only, so "Murang'a", "muranga", "Taita Taveta" and "taita-taveta" all match */
+    function norm(t) { return t.toLowerCase().normalize('NFD').replace(/[^a-z]/g, ''); }
     countyQ.addEventListener('input', function () {
-      var q = countyQ.value.trim().toLowerCase();
+      var q = norm(countyQ.value);
       var shown = 0;
       countyCards.forEach(function (c) {
-        var hit = !q || c.querySelector('h3').textContent.toLowerCase().indexOf(q) !== -1;
+        var hit = !q || norm(c.querySelector('h3').textContent).indexOf(q) !== -1;
         c.hidden = !hit;
         if (hit) shown++;
       });
@@ -160,7 +162,23 @@
       if (waLink) waLink.href = 'https://wa.me/' + waLink.dataset.number + '?text=' + encodeURIComponent(line);
       if (mailLink) mailLink.href = 'mailto:' + mailLink.dataset.email + '?subject=' +
         encodeURIComponent('Print order: ' + name) + '&body=' + encodeURIComponent(line);
+      /* made-to-order pages: the proof request carries the same choices. Both come
+         from the same lists in _data/shop.yml, in the same order, so match by position. */
+      PROOF_SYNC.forEach(function (g) {
+        var sel = proofForm && proofForm.querySelector('select[name="' + g + '"]');
+        var radios = order.querySelectorAll('input[name="' + g + '"]');
+        var on = picked(g);
+        if (sel && on) sel.selectedIndex = Array.prototype.indexOf.call(radios, on);
+      });
     }
+    var PROOF_SYNC = ['size', 'frame', 'paper'];
+    var proofForm = document.getElementById('proof-form');
+    if (proofForm) proofForm.addEventListener('change', function (e) {
+      var g = e.target.name;
+      if (PROOF_SYNC.indexOf(g) === -1) return;
+      var r = order.querySelectorAll('input[name="' + g + '"]')[e.target.selectedIndex];
+      if (r && !r.checked) { r.checked = true; update(); }
+    });
     order.addEventListener('change', update);
     order.addEventListener('submit', function (e) { e.preventDefault(); });
     update();
@@ -175,16 +193,21 @@
       payStatus.className = 'form__status print__paid';
       payStatus.setAttribute('role', 'status');
       payBtn.parentNode.insertAdjacentElement('afterend', payStatus);
+      var loading = null;                     /* one script load, shared by every tap */
       function loadPaystack() {
-        return new Promise(function (resolve, reject) {
+        if (!loading) loading = new Promise(function (resolve, reject) {
           if (window.PaystackPop) return resolve();
           var s = document.createElement('script');
           s.src = 'https://js.paystack.co/v2/inline.js';
           s.onload = function () { resolve(); };
-          s.onerror = function () { reject(new Error('Paystack did not load')); };
+          s.onerror = function () { s.remove(); reject(new Error('Paystack did not load')); };
           document.head.appendChild(s);
-        });
+        }).catch(function (err) { loading = null; throw err; });   /* a later tap can try again */
+        return loading;
       }
+      var busy = false;                       /* a second tap while the window opens does nothing */
+      var submitBtn = cform.querySelector('[type="submit"]');
+      function setBusy(on) { busy = on; if (submitBtn) submitBtn.disabled = on; }
       function selection() {
         var size = picked('size'), fr = picked('frame'), pa = picked('paper');
         return { size: size.dataset.label, frame: fr.dataset.label, paper: pa ? pa.dataset.label + ' paper' : '',
@@ -192,7 +215,7 @@
       }
       payBtn.addEventListener('click', function () {
         var sel = selection();
-        if (!sel.amount) return;
+        if (paid || !sel.amount) return;
         summary.textContent = chosen() + ', ' + ksh(sel.amount);
         cstatus.textContent = '';
         checkout.showModal();
@@ -200,7 +223,9 @@
       checkout.querySelector('[data-checkout-close]').addEventListener('click', function () { checkout.close(); });
       cform.addEventListener('submit', function (e) {
         e.preventDefault();
+        if (busy || paid) return;
         if (!cform.checkValidity()) { cform.reportValidity(); return; }
+        setBusy(true);
         var sel = selection();
         var d = Object.fromEntries(new FormData(cform).entries());
         var parts = d.name.trim().split(/\s+/);
@@ -210,6 +235,7 @@
         ];
         cstatus.textContent = 'Opening the payment window';
         loadPaystack().then(function () {
+          setBusy(false);
           checkout.close();                     /* the Paystack window cannot sit above a modal */
           new window.PaystackPop().newTransaction({
             key: checkout.dataset.key,
@@ -243,15 +269,18 @@
               payStatus.scrollIntoView({ behavior: 'smooth', block: 'center' });
             },
             onCancel: function () {
+              if (paid) return;
               payStatus.dataset.state = 'error';
               payStatus.textContent = 'The payment window was closed before payment finished. You can try again, or order on WhatsApp.';
             },
             onError: function (err) {
+              if (paid) return;
               payStatus.dataset.state = 'error';
               payStatus.textContent = 'Payment could not start (' + (err && err.message || 'unknown error') + '). Please order on WhatsApp.';
             }
           });
         }).catch(function () {
+          setBusy(false);
           cstatus.dataset.state = 'error';
           cstatus.textContent = 'The payment service did not load. Check your connection, or order on WhatsApp.';
         });

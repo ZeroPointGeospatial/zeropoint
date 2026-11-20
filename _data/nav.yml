@@ -1,5 +1,5 @@
 - { title: Services, path: "#services", home: true }
-- { title: Projects, path: "projects.html" }
+- { title: Projects, path: "projects/" }
 - { title: Prints, path: "prints/" }
 - { title: Field notes, path: "blog/" }
 - { title: About, path: "#about", home: true }

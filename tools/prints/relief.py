@@ -6,18 +6,20 @@ in plan view, so the sheet keeps an exact map scale.
     python relief.py kenya              # the country, cut to its outline
     python relief.py kenya-forest       # the same model, bone white, with tree cover
     python relief.py county:Kiambu      # any of the 47 counties, scale chosen to fit
+    python relief.py spec:maps/africa-relief.yml   # any area, from a map spec (maps/README.md)
 
 A finished render is cached, so changing labels or type and running again
 takes seconds. Set ZP_FRESH=1 to force a new render.
 """
 import sys
+from pathlib import Path
 import time
 
 import numpy as np
 from scipy import ndimage
 
 import render3d as r3
-from common import (CACHE, HYPSO, INK, MAP_CRS, OLIVE, PAPER, Plate, annotate, apply_ramp,
+from common import (HYPSO, INK, MAP_CRS, OLIVE, PAPER, Plate, annotate, apply_ramp,
                     cached_render, draw_text, font, hex_rgb, hypso_rgb, kenya, load_dem,
                     name_label, place_render, ramp, ramp_legend, rasterize_geom, transformer,
                     warp_to_map)
@@ -192,9 +194,8 @@ def local_stops(zlo, zhi):
 def county_config(name, box_mm):
     """Build a plate description for one county: pick the largest tidy scale
     at which it fits the sheet, and a vertical exaggeration to suit its relief."""
-    import geopandas as gpd
-    g = gpd.read_file(CACHE / "kenya_counties.gpkg")
-    g["name"] = g["name"].str.replace("`", "'").str.replace("Taita Taveta", "Taita-Taveta")
+    from common import county_boundaries
+    g = county_boundaries()
     row = g[g["name"].str.lower() == name.lower()]
     if row.empty:
         raise SystemExit(f"no county called {name!r}; try one of: {', '.join(sorted(g['name']))}")
@@ -213,6 +214,42 @@ def county_config(name, box_mm):
     return cfg
 
 
+def spec_config(path, box_mm):
+    """Build a plate description from a map spec file (see maps/README.md)."""
+    import yaml
+    import regions
+    spec = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+    geom_ll, _, what = regions.region_outline(spec["region"])
+    crs, proj_name = regions.projection_for(geom_ll, spec.get("crs"))
+    geom = regions.project(geom_ll, crs)
+    x0, y0, x1, y1 = geom.bounds
+    scale = spec.get("scale") or regions.tidy_scale(x1 - x0, y1 - y0, box_mm)
+    cell = spec.get("cell") or max(30, round(scale * 0.00017 / 5) * 5)
+    cut = spec.get("cut", "bbox" not in spec["region"])
+    w, s_, e, n = geom_ll.bounds
+    boundary = {"countries": "Boundaries: Natural Earth (public domain).",
+                "continent": "Boundaries: Natural Earth (public domain).",
+                "county": "County boundary: OpenStreetMap contributors, via Overture Maps (ODbL).",
+                }.get(next(iter(spec["region"])), "")
+    cfg = dict(
+        slug=spec["slug"], title=spec["title"], subtitle=spec.get("subtitle", "Relief"),
+        label=spec.get("label", "CUSTOM"), number=str(spec.get("number", "")),
+        scale=scale, cell=cell, crs=crs, projection=spec.get("projection", proj_name),
+        shape="outline" if cut else "block", geom=geom, geom_ll=geom_ll,
+        centre=((w + e) / 2, (s_ + n) / 2), source=spec.get("source") or ("glo30" if scale <= 400_000 else "glo90"),
+        coarse=cell >= 300, zex=spec.get("zex"), sun_el=spec.get("sun_el", 30), spec=True,
+        stops=[(z, c) for z, c in spec["stops"]] if spec.get("stops") else None,
+        min_water_km2=spec.get("min_water_km2", max(0.4, (cell / 1000) ** 2 * 25)),
+        boundary=spec.get("credit", boundary),
+        labels=[(x["name"], x.get("value"), x["lon"], x["lat"], x.get("side", "right"), x.get("snap", 0))
+                for x in spec.get("labels", [])],
+        names=[(x["text"], x["lon"], x["lat"], x.get("angle", 0), x.get("size", 3.0))
+               for x in spec.get("names", [])])
+    print(f"{cfg['slug']}: {what}, {proj_name}, 1:{scale:,}, {cell} m cells"
+          + (", coarse elevation" if cfg["coarse"] else ""))
+    return cfg
+
+
 def main(name, dpi=100, spp=32):
     t0 = time.time()
     plate = Plate(dpi=dpi, bg=PAPER, fg=INK, accent=OLIVE, block_mm=90)
@@ -221,6 +258,9 @@ def main(name, dpi=100, spp=32):
     if name.startswith("county:"):
         cfg = county_config(name.split(":", 1)[1], (bw_mm, bh_mm))
         slug = "county-" + cfg["title"].lower().replace(" ", "-").replace("'", "")
+    elif name.startswith("spec:"):
+        cfg = spec_config(name.split(":", 1)[1], (bw_mm, bh_mm))
+        slug = cfg["slug"]
     else:
         cfg, slug = PLATES[name], name
     crs = cfg.get("crs", MAP_CRS)
@@ -236,7 +276,7 @@ def main(name, dpi=100, spp=32):
     outline = None
     if shape == "kenya":
         outline = kenya(MAP_CRS)
-    elif shape == "county":
+    elif shape in ("county", "outline"):
         outline = cfg["geom"]
     if outline is not None:
         x0, y0, x1, y1 = outline.bounds
@@ -250,6 +290,17 @@ def main(name, dpi=100, spp=32):
     # --- elevation --------------------------------------------------------------
     if shape == "kenya":
         dem, tr = load_dem((32, -6, 43, 7), cfg["source"], factor=2)
+    elif cfg.get("coarse"):
+        # a large area: read the elevation tiles at reduced resolution, straight from the cloud
+        import regions
+        xs = [bounds[0], bounds[2], bounds[0], bounds[2], cx, cx, bounds[0], bounds[2]]
+        ys = [bounds[1], bounds[1], bounds[3], bounds[3], bounds[1], bounds[3], cy, cy]
+        lons, lats = back.transform(xs, ys)
+        gw_ll = cfg["geom_ll"].bounds
+        ll = (min(min(lons), gw_ll[0]) - 0.5, min(min(lats), gw_ll[1]) - 0.5,
+              max(max(lons), gw_ll[2]) + 0.5, max(max(lats), gw_ll[3]) + 0.5)
+        land = cfg["geom_ll"].buffer(0.5) if shape == "outline" else None
+        dem, tr = regions.load_dem_coarse(ll, cell / 111_320 / 1.5, cfg["source"], land=land)
     else:
         xs = [bounds[0], bounds[2], bounds[0], bounds[2], cx, cx]
         ys = [bounds[1], bounds[1], bounds[3], bounds[3], bounds[1], bounds[3]]
@@ -272,12 +323,17 @@ def main(name, dpi=100, spp=32):
     zhi = float(z.max())
     # A county's exaggeration is set from its own relief, and kept modest: the
     # elevation data is a surface model, so forest edges become cliffs if pushed.
-    zex = cfg.get("zex") or float(np.clip(round(0.07 * gw / max(zhi - zlo, 250)), 3, 12))
+    if cfg.get("spec") and not cfg.get("zex"):
+        import regions
+        zex = regions.default_exaggeration(gw, zhi - zlo)
+    else:
+        zex = cfg.get("zex") or float(np.clip(round(0.07 * gw / max(zhi - zlo, 250)), 3, 12))
     print(f"{slug}: 1:{scale:,}, grid {z.shape} at {cell} m, {zlo:.0f}-{zhi:.0f} m, "
           f"exaggeration x{zex:g}, {time.time() - t0:.0f}s")
 
     # --- colour -----------------------------------------------------------------
-    stops = cfg.get("stops") or (local_stops(zlo, zhi) if shape == "county" else HYPSO)
+    local = shape == "county" or (cfg.get("spec") and zhi - zlo < 1500)
+    stops = cfg.get("stops") or (local_stops(zlo, zhi) if local else HYPSO)
     facts_extra, legend, credit = None, None, None
     if cfg.get("texture") == "forest":
         import forest
@@ -358,11 +414,19 @@ def main(name, dpi=100, spp=32):
     if legend is None:
         ticks = cfg.get("ticks")
         vr = cfg.get("vrange")
-        if not ticks:                      # a county: round ticks across its own range
-            step = next(s for s in (100, 200, 250, 500, 1000) if (zhi - zlo) / s <= 5)
+        if not ticks and cfg.get("spec") and not local:     # a large area on the shared colours
+            step = next(s for s in (250, 500, 1000, 2000) if (zhi - max(zlo, 0)) / s <= 6)
+            vr = (min(zlo, 0), zhi)
+            span = vr[1] - vr[0]
+            # round steps, then the top; a step too close to the top would overprint it
+            ticks = [v for v in range(0, int(zhi) + 1, step) if zhi - v >= 0.12 * span] + [int(round(zhi))]
+        if not ticks:                      # a county or a small area: round ticks across its own range
+            step = next((s for s in (10, 20, 25, 50, 100, 200, 250, 500, 1000) if (zhi - zlo) / s <= 5), 2000)
             lo_t = int(np.ceil(zlo / step) * step)
-            ticks = list(range(lo_t, int(zhi) + 1, step))
+            ticks = list(range(lo_t, int(zhi) + 1, step)) or [int(round(zlo)), int(round(zhi))]
             vr = (min(zlo, ticks[0]), max(zhi, ticks[-1]))
+            if vr[1] <= vr[0]:
+                vr = (vr[0] - 1, vr[0] + 1)
         legend = ramp_legend(stops, "Elevation, metres", ticks, vmin=vr[0], vmax=vr[1])
     plate.title_block(
         cfg["title"], cfg["subtitle"], cfg["number"], facts=facts,

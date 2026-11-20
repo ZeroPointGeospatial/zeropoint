@@ -21,6 +21,8 @@ for sending the files to a print shop.
 | 13 | Kenya, the 47 counties | `counties.py` | OpenStreetMap via Overture Maps, GLO-90 |
 | 14 | East Africa, relief | `relief.py east-africa` | Copernicus DEM GLO-90 |
 | 15 | Mount Kenya summit contours | `contours.py mount-kenya-summit` | Copernicus DEM GLO-30 |
+| 20 | Africa, relief | `relief.py spec:maps/africa-relief.yml` | Copernicus DEM GLO-90 (read at reduced resolution), Natural Earth |
+| 21 | Africa, population | `population.py spec:maps/africa-population.yml` | Kontur Population 2023, Natural Earth |
 | County | Relief of one county | `relief.py county:Kiambu` | Copernicus DEM, Overture Maps boundary |
 | City | Roads of a town in gold | `cities.py mombasa` | OpenStreetMap via Overture Maps |
 
@@ -36,7 +38,33 @@ spot heights for a county go in `COUNTY_LABELS` in `relief.py`; without an
 entry the plate is drawn unlabelled.
 
 **Another town.** Add a line to `CITIES` in `cities.py` with the centre and
-the radius in kilometres.
+the radius in kilometres, or write a map spec (below) for a town anywhere.
+
+## Custom maps of any area
+
+Relief, population, contour and city prints can be made for any area from a
+short YAML file in `maps/`: the area (countries, a continent, a box, an
+outline, a county), the title and the labels. The pipeline chooses the
+projection, scale, elevation data and hexagon size, so a custom map matches
+the collection. `maps/README.md` lists the fields; `maps/africa-relief.yml`,
+`maps/africa-population.yml` and the `maps/example-*.yml` files are worked
+examples.
+
+    python relief.py spec:maps/africa-relief.yml 100 16          # proof
+    python population.py spec:maps/africa-population.yml 300 40   # master
+    python contours.py spec:maps/example-ngorongoro-contours.yml 100
+    python cities.py spec:maps/example-kampala-gold.yml 1600
+    python proof_jpeg.py $ZP_OUT/africa-relief_100.png            # watermarked proof for a customer
+
+For large areas the elevation tiles are read at reduced resolution straight
+from S3 (`regions.load_dem_coarse`), so all of Africa takes about a minute.
+Population for several countries is downloaded once per country and, for large
+areas, summed into larger H3 hexagons.
+
+Claude Code sessions in this repository have a skill for this,
+`.claude/skills/zeropoint-map-print`, which holds the house style and the
+proof-review-print steps. Asking for "a relief map of Uganda" or "Kampala in
+gold, like the Nairobi print" is enough.
 
 ## Setting up
 
@@ -57,7 +85,8 @@ Python 3.11 or newer.
 ## Rendering
 
     python relief.py mount-kenya 100    # a quick proof at 100 dpi
-    sh render_all.sh                    # every plate at A2, 300 dpi
+    sh render_all.sh                    # every plate in the table at A2, 300 dpi
+    sh render_counties.sh               # all 47 county plates (previews at 150 dpi)
     python export_print.py              # print-ready JPEGs in $ZP_OUT/print
 
 Every plate is designed at A2 portrait. The second argument is the dpi and

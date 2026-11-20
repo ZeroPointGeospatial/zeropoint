@@ -1,0 +1,25 @@
+# Africa as one relief model, cut to the coast. Plate 20 of the collection.
+slug: africa-relief
+title: Africa
+subtitle: Relief, from the Danakil to Kilimanjaro
+label: PLATE
+number: "20"
+region: { continent: Africa }
+labels:
+  - { name: Kilimanjaro, value: "5 895 m", lon: 37.3556, lat: -3.0758, side: right, snap: 20000 }
+  - { name: Mount Kenya, value: "5 199 m", lon: 37.3083, lat: -0.1517, side: right, snap: 20000 }
+  - { name: Rwenzori, value: "5 109 m", lon: 29.871, lat: 0.386, side: left, snap: 20000 }
+  - { name: Ras Dashen, value: "4 550 m", lon: 38.372, lat: 13.236, side: right, snap: 20000 }
+  - { name: Toubkal, value: "4 167 m", lon: -7.915, lat: 31.06, side: right, snap: 20000 }
+  - { name: Mount Cameroon, value: "4 040 m", lon: 9.170, lat: 4.203, side: left, snap: 20000 }
+  - { name: Emi Koussi, value: "3 415 m", lon: 18.55, lat: 19.79, side: right, snap: 25000 }
+  - { name: Thabana Ntlenyana, value: "3 482 m", lon: 29.267, lat: -29.467, side: right, snap: 20000 }
+names:
+  - { text: Sahara, lon: 5.0, lat: 24.0, size: 5.0 }
+  - { text: Congo Basin, lon: 22.0, lat: -1.5, size: 3.6 }
+  - { text: Kalahari, lon: 22.0, lat: -23.0, size: 3.6 }
+  - { text: Atlas Mountains, lon: 2.0, lat: 34.2, angle: 16, size: 3.0 }
+  - { text: Ethiopian Highlands, lon: 38.5, lat: 9.0, size: 3.0 }
+  - { text: Lake Victoria, lon: 33.0, lat: -1.1, size: 2.8 }
+  - { text: Lake Tanganyika, lon: 29.6, lat: -6.3, angle: -72, size: 2.6 }
+  - { text: Lake Malawi, lon: 34.6, lat: -11.8, angle: -80, size: 2.6 }

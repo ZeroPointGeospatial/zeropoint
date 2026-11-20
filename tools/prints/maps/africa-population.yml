@@ -1,0 +1,14 @@
+# Where 1.5 billion people live: Africa as columns of population. Plate 21 of the collection.
+slug: africa-population
+title: Africa
+subtitle: Where 1.5 billion people live
+label: PLATE
+number: "21"
+region: { continent: Africa }
+towns:
+  - { name: Cairo, lon: 31.236, lat: 30.044, offset: [10, -14], side: right }
+  - { name: Lagos, lon: 3.379, lat: 6.524, offset: [-10, 12], side: left }
+  - { name: Kinshasa, lon: 15.307, lat: -4.322, offset: [10, 10], side: right }
+  - { name: Luanda, lon: 13.234, lat: -8.839, offset: [-12, 12], side: left }
+  - { name: Nairobi, lon: 36.817, lat: -1.286, offset: [10, 12], side: right }
+  - { name: Johannesburg, lon: 28.047, lat: -26.204, offset: [10, 10], side: right }

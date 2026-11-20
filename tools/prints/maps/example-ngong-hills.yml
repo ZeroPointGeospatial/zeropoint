@@ -1,0 +1,11 @@
+# A small area as a block: the kind of plate a customer orders for their own
+# corner of the country. A bbox region is drawn as a rectangle, not cut out.
+slug: ngong-hills
+title: Ngong Hills
+subtitle: The knuckles above the Rift
+label: CUSTOM
+number: "N1"
+region: { bbox: [36.55, -1.50, 36.75, -1.30] }
+labels:
+  - { name: Lamwia, value: "2 460 m", lon: 36.636, lat: -1.395, side: right, snap: 1500 }
+  - { name: Ngong, lon: 36.656, lat: -1.362, side: right }

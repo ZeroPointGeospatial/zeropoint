@@ -5,7 +5,12 @@
 # variables > Actions). Optional repository variables:
 #   FIELD_NOTES_BRANCH  branch the posts are published to (default: cloudflare)
 #   FIELD_NOTES_REVIEW  "true" to open a pull request for each post instead of
-#                       publishing it straight away
+#                       publishing it straight away. No new post is written while
+#                       one is waiting for review, and a closed pull request is not
+#                       written again (tools/blog/history.yml records it). GitHub
+#                       must be allowed to open pull requests: Settings > Actions >
+#                       General > "Allow GitHub Actions to create and approve pull
+#                       requests".
 #
 # GitHub only runs scheduled workflows from the repository's default branch,
 # so this file must be on that branch for the schedule to fire.
@@ -40,39 +45,70 @@ jobs:
         with:
           ref: ${{ env.BRANCH }}
 
+      - name: Wait while a field note is in review
+        id: gate
+        if: vars.FIELD_NOTES_REVIEW == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          waiting=$(gh pr list --repo "$GITHUB_REPOSITORY" --base "$BRANCH" --state open \
+            --json headRefName --jq '[.[] | select(.headRefName | startswith("field-notes/"))] | length')
+          if [ "$waiting" != "0" ]; then
+            echo "A field note is waiting for review; merge or close it first."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/setup-python@v5
+        if: steps.gate.outputs.skip != 'true'
         with:
           python-version: "3.12"
 
       - name: Install
+        if: steps.gate.outputs.skip != 'true'
         run: pip install -r tools/blog/requirements.txt
 
       - name: Write a field note if one is due
+        if: steps.gate.outputs.skip != 'true'
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           CLAUDE_MODEL: ${{ vars.CLAUDE_MODEL || 'claude-opus-5-5' }}
+          FIELD_NOTES_REVIEW: ${{ vars.FIELD_NOTES_REVIEW }}
         run: python tools/blog/autopost.py ${{ inputs.force && '--force' || '' }}
 
       - name: Publish
+        if: steps.gate.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           REVIEW: ${{ vars.FIELD_NOTES_REVIEW }}
         run: |
-          git add _posts
+          git add _posts tools/blog/history.yml
           if git diff --cached --quiet; then
             echo "Nothing to publish."
             exit 0
           fi
-          post=$(git diff --cached --name-only | head -1)
-          title=$(sed -n 's/^title: //p' "$post" | head -1 | sed "s/^['\"]//; s/['\"]$//")
           git config user.name "ZeroPoint field notes"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Field note: $title"
+          post=$(git diff --cached --name-only --diff-filter=A -- _posts | head -1)
+          if [ -z "$post" ]; then
+            # nothing written, but the sources that were tried are recorded so the next run moves on
+            git commit -m "Field notes: record sources that were not used"
+            git push origin "HEAD:$BRANCH"
+            exit 0
+          fi
+          title=$(sed -n 's/^title: //p' "$post" | head -1 | sed "s/^['\"]//; s/['\"]$//")
           if [ "$REVIEW" = "true" ]; then
-            draft="field-notes/$(date +%Y-%m-%d)"
+            # the record goes straight to the branch, the post to a pull request
+            if ! git diff --cached --quiet -- tools/blog/history.yml; then
+              git commit -m "Field notes: record the draft sent for review" -- tools/blog/history.yml
+              git push origin "HEAD:$BRANCH"
+            fi
+            git commit -m "Field note: $title"
+            draft="field-notes/$(date +%Y-%m-%d)-$GITHUB_RUN_ID"
             git push origin "HEAD:refs/heads/$draft"
-            gh pr create --base "$BRANCH" --head "$draft" --title "Field note: $title" \
+            gh pr create --repo "$GITHUB_REPOSITORY" --base "$BRANCH" --head "$draft" \
+              --title "Field note: $title" \
               --body "Written by tools/blog/autopost.py. Merge to publish it, or close to discard it."
           else
+            git commit -m "Field note: $title"
             git push origin "HEAD:$BRANCH"
           fi

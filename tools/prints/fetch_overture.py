@@ -3,6 +3,7 @@
 
     python fetch_overture.py roads
     python fetch_overture.py counties
+    python fetch_overture.py roads-bbox 32.45,0.20,32.75,0.45 kampala   # any area, for a city print
 
 Overture publishes GeoParquet on S3. The files are spatially sorted and
 every row group carries bounding-box statistics, so this script reads only
@@ -153,12 +154,16 @@ def read_group(job):
     return geoms, code[keep]
 
 
-def roads(release):
+def roads(release, bbox=None, name="kenya_roads"):
+    """Roads inside bbox (default: Kenya), saved as $ZP_DATA/cache/<name>.npz."""
+    global BBOX
+    if bbox:
+        BBOX = tuple(bbox)
     files = list_files(release)
     print(f"Overture {release}: {len(files)} segment files")
     with cf.ThreadPoolExecutor(12) as ex:
         hits = [(u, g) for u, gs in ex.map(touching_row_groups, files) for g in gs]
-    print(f"{len(hits)} row groups in {len({u for u, _ in hits})} files touch Kenya")
+    print(f"{len(hits)} row groups in {len({u for u, _ in hits})} files touch {BBOX}")
     geoms, codes = [], []
     with cf.ThreadPoolExecutor(6) as ex:
         for i, (g, c) in enumerate(ex.map(read_group, hits)):
@@ -171,7 +176,7 @@ def roads(release):
     xy, idx = shapely.get_coordinates(geoms, return_index=True)
     offs = np.concatenate([[0], np.cumsum(np.bincount(idx, minlength=len(geoms)))])
     CACHE.mkdir(parents=True, exist_ok=True)
-    np.savez_compressed(CACHE / "kenya_roads.npz", xy=xy.astype("float32"), offs=offs,
+    np.savez_compressed(CACHE / f"{name}.npz", xy=xy.astype("float32"), offs=offs,
                         code=codes.astype("int8"), release=release)
     print(f"saved {len(geoms):,} roads, {len(xy):,} vertices; "
           f"per class: {np.bincount(codes).tolist()}")
@@ -211,6 +216,10 @@ def counties(release):
 
 def main():
     what = sys.argv[1] if len(sys.argv) > 1 else "roads"
+    if what == "roads-bbox":
+        bbox = [float(v) for v in sys.argv[2].split(",")]
+        roads(latest_release(), bbox, f"roads_{sys.argv[3]}")
+        return
     release = sys.argv[2] if len(sys.argv) > 2 else latest_release()
     {"roads": roads, "counties": counties}[what](release)
 

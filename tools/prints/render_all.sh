@@ -28,3 +28,9 @@ for plate in kenya kenya-forest mount-kenya kilimanjaro rift-valley east-africa 
              county:Kiambu county:Nakuru county:Nyeri county:Kajiado; do
   $PY relief.py "$plate" "$DPI" "$SPP"
 done
+
+# the Africa series (plates 20 and 21), from their map specs
+$PY relief.py spec:maps/africa-relief.yml "$DPI" "$SPP"
+$PY population.py spec:maps/africa-population.yml "$DPI" "$SPP"
+
+# The other 43 county plates are made to order: render_counties.sh.

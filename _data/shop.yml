@@ -9,6 +9,10 @@ pricing:
     A2: { none: 18000, black: 18500, natural: 19000, silver: 19500, gold: 20000 }
     A1: { none: 19500, black: 20000, natural: 20500, silver: 21000, gold: 21500 }
     A0: { none: 21000, black: 21500, natural: 22000, silver: 22500, gold: 23000 }
+  Africa:                 # the continent plates, KSh 35 000 to 45 000
+    A2: { none: 35000, black: 36000, natural: 37000, silver: 38000, gold: 39000 }
+    A1: { none: 38000, black: 39000, natural: 40000, silver: 41000, gold: 42000 }
+    A0: { none: 41000, black: 42000, natural: 43000, silver: 44000, gold: 45000 }
   Counties:               # KSh 9 000 to 20 000
     A2: { none: 9000, black: 10500, natural: 11000, silver: 11500, gold: 12000 }
     A1: { none: 12000, black: 14000, natural: 14500, silver: 15000, gold: 15500 }
@@ -46,6 +50,7 @@ papers:
   - { id: satin, label: Satin, note: "a soft sheen, slightly richer colour" }
 series:
   - Kenya atlas
+  - Africa
   - Landforms
   - Counties
   - Cities

@@ -17,7 +17,8 @@ Each post is one of two kinds, taken in turn:
 Every draft goes through a second, separate review that checks it against its
 sources and removes anything it cannot support, then through local checks
 (length, headings, links, filler phrases). A draft that fails is not
-published; the job log says why.
+published; the job log says why, and the source is noted in history.yml so
+later runs move on to another. A run tries at most three drafts.
 
 Needs ANTHROPIC_API_KEY in the environment.
 """
@@ -37,19 +38,35 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent.parent
 HERE = Path(__file__).resolve().parent
 POSTS = ROOT / "_posts"
+HISTORY = HERE / "history.yml"           # sources tried and not published, so they are not tried again
+MAX_DRAFTS = 3                           # drafts per run, at two requests each
 MODEL = os.environ.get("CLAUDE_MODEL", "claude-opus-5-5")
 UA = "Mozilla/5.0 (compatible; ZeroPointFieldNotes/1.0; +https://zeropointgeospatial.pages.dev/blog/)"
 TODAY = dt.date.today()
 
 # Phrases that mark filler writing. A draft containing any of them is sent back.
+# Matched as whole words; a trailing * also matches longer forms ("unlock*": unlocks, unlocking).
 BANNED = [
-    "delve", "in today's", "fast-paced", "ever-evolving", "ever-changing", "game-changer", "game changer",
-    "unlock", "unleash", "revolutioniz", "revolutionis", "landscape of", "tapestry", "navigate the",
+    "delve*", "delving", "in today's", "fast-paced", "ever-evolving", "ever-changing", "game-changer*", "game changer*",
+    "unlock*", "unleash*", "revolutioniz*", "revolutionis*", "landscape of", "tapestry", "navigate the",
     "navigating the", "it's important to note", "it is important to note", "in conclusion", "in summary",
-    "seamless", "cutting-edge", "cutting edge", "harness the power", "elevate", "embark", "realm",
-    "paradigm", "synergy", "robust solution", "a testament to", "plays a crucial role", "plays a vital role",
-    "whether you're", "look no further", "dive into", "deep dive", "stay tuned", "as an ai",
+    "seamless*", "cutting-edge", "cutting edge", "harness the power", "elevate", "elevates", "elevating",
+    "embark*", "realm", "realms", "paradigm*", "synergy", "synergies", "robust solution*", "a testament to",
+    "plays a crucial role", "plays a vital role", "whether you're", "look no further", "dive into",
+    "deep dive", "stay tuned", "as an ai",
 ]
+
+
+def has(term, text):
+    """True if `term` is in `text` as whole words, ignoring case; "survey*" also matches surveys, surveyor."""
+    t = term.lower()
+    stem = t.endswith("*")
+    pat = r"(?<![a-z0-9])" + re.escape(t.rstrip("*")) + ("" if stem else r"(?![a-z0-9])")
+    return re.search(pat, text.lower()) is not None
+
+
+def banned_in(text):
+    return [b.rstrip("*") for b in BANNED if has(b, text)]
 
 
 # ---------------------------------------------------------------- the blog so far
@@ -75,6 +92,28 @@ def existing_posts():
         fm["_slug"] = m.group(2)
         posts.append(fm)
     return posts
+
+
+def history():
+    if not HISTORY.exists():
+        return []
+    return yaml.safe_load(HISTORY.read_text(encoding="utf-8")) or []
+
+
+def note(kind, item, guide, result, reason=""):
+    """Add a source to history.yml: `rejected` (its draft failed) or `proposed` (sent for review)."""
+    entry = {"date": TODAY.isoformat(), "kind": kind, "result": result}
+    if kind == "news":
+        entry.update(url=item["url"], title=item["title"])
+    else:
+        entry.update(guide=guide["id"])
+    if reason:
+        entry["reason"] = reason[:300]
+    head = ("# Written by autopost.py: sources that were tried and not published, and drafts sent for\n"
+            "# review. They are not tried again. Delete an entry to let the script try it once more.\n")
+    entries = history() + [entry]
+    HISTORY.write_text(head + yaml.safe_dump(entries, sort_keys=False, allow_unicode=True, width=1000),
+                       encoding="utf-8")
 
 
 # ---------------------------------------------------------------- reading the web
@@ -153,21 +192,22 @@ def read_feeds(cfg, verbose=False):
 
 
 def score(item, cfg):
-    text = f"{item['title']} {item['summary']}".lower()
-    title = item["title"].lower()
-    if any(x.lower() in text for x in cfg.get("exclude", [])):
+    text = f"{item['title']} {item['summary']}"
+    title = item["title"]
+    if any(has(x, text) for x in cfg.get("exclude", [])):
         return 0
     s = 0
     for w in cfg["keywords"]["strong"]:
-        if w.lower() in text:
-            s += 3 + (2 if w.lower() in title else 0)
+        if has(w, text):
+            s += 3 + (2 if has(w, title) else 0)
     for w in cfg["keywords"]["normal"]:
-        if w.lower() in text:
-            s += 1 + (1 if w.lower() in title else 0)
+        if has(w, text):
+            s += 1 + (1 if has(w, title) else 0)
     return s
 
 
-def pick_news(cfg, used_urls):
+def news_items(cfg, used_urls):
+    """The best recent articles not yet used, each read in full, best first."""
     items = [i for i in read_feeds(cfg) if i["url"] not in used_urls]
     for i in items:
         i["score"] = score(i, cfg)
@@ -183,8 +223,7 @@ def pick_news(cfg, used_urls):
             print(f"  too little text in {item['url']} ({len(text)} characters)")
             continue
         item["text"] = text[:24000]
-        return item
-    return None
+        yield item
 
 
 # ---------------------------------------------------------------- writing
@@ -296,7 +335,7 @@ def source_block(kind, item, guide):
 
 
 def write_post(client, kind, item, guide, topics):
-    banned = ", ".join(f'"{b}"' for b in BANNED)
+    banned = ", ".join(f'"{b.rstrip("*")}"' for b in BANNED)
     system = STYLE.format(banned=banned)
     src = source_block(kind, item, guide)
     if kind == "news":
@@ -308,22 +347,24 @@ def write_post(client, kind, item, guide, topics):
              "`description`: one sentence of at most 160 characters saying what the reader will learn.")
     draft = call(client, system, f"{src}\n\nTASK\n{task}", DRAFT_SCHEMA)
     if not draft:
-        return None
+        return None, "the writer returned nothing"
     if not draft["usable"]:
         print(f"  writer: not usable ({draft['reason']})")
-        return None
+        return None, f"writer: {draft['reason']}"
     review = call(client, REVIEW.format(banned=banned),
                   f"{src}\n\nDRAFT\n\nTitle: {draft['title']}\nDescription: {draft['description']}\n\n"
                   f"{draft['body_markdown']}", REVIEW_SCHEMA)
     if not review:
-        return None
+        return None, "the review returned nothing"
     for p in review["problems"]:
         print(f"  review: {p}")
     if not review["publish"]:
         print("  review: not publishable")
-        return None
+        return None, "review: " + "; ".join(review["problems"])
     draft.update(title=review["title"], description=review["description"], body_markdown=review["body_markdown"])
-    return draft
+    if kind == "guide" and guide.get("topic") in topics:
+        draft["topic"] = guide["topic"]           # the guide's own topic, not the writer's choice
+    return draft, ""
 
 
 # ---------------------------------------------------------------- checks and output
@@ -339,7 +380,7 @@ def check(draft, topics, allowed_links):
     if re.search(r"^# ", body, re.M):
         problems.append("a top-level heading in the body")
     low = f"{draft['title']} {draft['description']} {body}".lower()
-    found = [b for b in BANNED if b in low]
+    found = banned_in(low)
     if found:
         problems.append("filler phrases: " + ", ".join(found))
     if draft["topic"] not in topics:
@@ -357,13 +398,17 @@ def slugify(s):
     return "-".join(s.split("-")[:8]) or "field-note"
 
 
-def save(draft, kind, item, guide, folder=POSTS):
-    slug = slugify(draft["slug"] or draft["title"])
-    path = folder / f"{TODAY.isoformat()}-{slug}.md"
+def save(draft, kind, item, guide, folder=None):
+    folder = folder or POSTS
+    # Posts are served at /blog/<slug>/ whatever their date, so the slug must be new to the whole blog.
+    taken = {p["_slug"] for p in existing_posts()}
+    taken |= {m.group(1) for f in folder.glob("*.md") if (m := re.match(r"\d{4}-\d{2}-\d{2}-(.+)\.md$", f.name))}
+    base = slug = slugify(draft["slug"] or draft["title"])
     n = 2
-    while path.exists():
-        path = folder / f"{TODAY.isoformat()}-{slug}-{n}.md"
+    while slug in taken:
+        slug = f"{base}-{n}"
         n += 1
+    path = folder / f"{TODAY.isoformat()}-{slug}.md"
     fm = {"layout": "post", "title": draft["title"], "description": draft["description"],
           "topic": draft["topic"], "auto": True, "kind": kind}
     if kind == "news":
@@ -430,10 +475,22 @@ def main():
             print(f"Not due: the last automatic post is {age} days old.")
             return 0
 
-    used_urls = {s.get("url") for p in posts for s in (p.get("sources") or [])}
+    tried = history()
+    used_urls = {x.get("url") for p in posts for x in (p.get("sources") or [])}
+    used_urls |= {e["url"] for e in tried if e.get("url")}
     used_guides = {p.get("guide") for p in posts if p.get("guide")}
+    used_guides |= {e["guide"] for e in tried if e.get("guide")}
     guides = [g for g in cfg["guides"] if g["id"] not in used_guides]
-    kind = args.kind or ("guide" if last and last.get("kind") == "news" else "news")
+    review_mode = os.environ.get("FIELD_NOTES_REVIEW", "").lower() == "true"
+
+    # Alternate with the last automatic post, and fall back to the other kind.
+    if args.kind:
+        kinds = [args.kind]
+    elif args.dry_run:
+        kinds = ["guide"]
+    else:
+        first = "guide" if last and last.get("kind") == "news" else "news"
+        kinds = [first, "news" if first == "guide" else "guide"]
 
     if args.dry_run:
         client = Canned()
@@ -444,41 +501,54 @@ def main():
         import anthropic
         client = anthropic.Anthropic()
 
-    item = guide = None
-    if kind == "news" and not args.dry_run:
-        print("Looking for news")
-        item = pick_news(cfg, used_urls)
-        if not item:
-            print("  no usable article; writing a guide instead")
-            kind = "guide"
-    if kind == "guide" or args.dry_run:
-        kind = "guide"
-        if not guides:
-            print("Every guide in sources.yml has been written; add more to keep posting.")
-            return 0
-        guide = guides[0]
-        print(f"Writing guide: {guide['title']}")
-    else:
-        print(f"Writing about: {item['title']} ({item['publisher']}, {item['date']})")
+    def candidates():
+        """(kind, news item, guide) in the order to try them."""
+        for kind in kinds:
+            if kind == "news":
+                print("Looking for news")
+                for item in news_items(cfg, used_urls):
+                    yield "news", item, None
+                print("  no more usable articles")
+            else:
+                if not guides:
+                    print("Every guide in sources.yml has been written; add more to keep them coming.")
+                for guide in guides:
+                    yield "guide", None, guide
 
-    draft = write_post(client, kind, item, guide, topics)
-    if not draft:
-        print("Nothing published.")
+    drafts = 0
+    for kind, item, guide in candidates():
+        if drafts == MAX_DRAFTS:
+            print(f"Tried {MAX_DRAFTS} drafts; stopping until the next run.")
+            break
+        drafts += 1
+        if kind == "guide":
+            print(f"Writing guide: {guide['title']}")
+        else:
+            print(f"Writing about: {item['title']} ({item['publisher']}, {item['date']})")
+        draft, reason = write_post(client, kind, item, guide, topics)
+        if draft:
+            problems = check(draft, topics, {item["url"]} if item else set())
+            if problems and not args.dry_run:
+                reason = "failed the checks: " + "; ".join(problems)
+                print("  draft " + reason)
+                draft = None
+        if not draft:
+            if not args.dry_run:
+                note(kind, item, guide, "rejected", reason)
+            continue
+        if args.dry_run:                   # never into _posts, so a test cannot be published by mistake
+            import tempfile
+            path = save(draft, kind, item, guide, Path(tempfile.mkdtemp(prefix="field-note-")))
+            print(f"Wrote {path} (dry run)")
+            if problems:
+                print("  checks: " + "; ".join(problems))
+        else:
+            path = save(draft, kind, item, guide)
+            if review_mode:                # a closed pull request must not bring the same source back
+                note(kind, item, guide, "proposed")
+            print(f"Wrote {path.relative_to(ROOT)}")
         return 0
-    allowed = {item["url"]} if item else set()
-    problems = check(draft, topics, allowed)
-    if problems and not args.dry_run:
-        print("Draft failed the checks, nothing published: " + "; ".join(problems))
-        return 0
-    if args.dry_run:                       # never into _posts, so a test cannot be published by mistake
-        import tempfile
-        path = save(draft, kind, item, guide, Path(tempfile.mkdtemp(prefix="field-note-")))
-        print(f"Wrote {path} (dry run)")
-    else:
-        path = save(draft, kind, item, guide)
-        print(f"Wrote {path.relative_to(ROOT)}")
-    if problems:
-        print("  checks: " + "; ".join(problems))
+    print("Nothing published.")
     return 0
 
 
