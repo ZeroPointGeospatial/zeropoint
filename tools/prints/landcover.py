@@ -6,7 +6,7 @@ the two colours, as the land looks from the air.
     drape: landcover                 # in a plate or a map spec
     drape_options: {year: 2021}      # 2020 (v100) or 2021 (v200)
 
-Used by plate 16 (Kenya, land cover) and by any custom area.
+Used by plate 22 (Kenya, land cover) and by any custom area.
 """
 import hashlib
 

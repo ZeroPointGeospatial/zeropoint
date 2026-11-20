@@ -2,7 +2,7 @@
 slug: magadi-true-colour
 order: 19
 plate: "26"
-series: Landforms
+series: Regions
 short: Lake Magadi in true colour
 title: Lake Magadi
 theme: The soda lake in true colour

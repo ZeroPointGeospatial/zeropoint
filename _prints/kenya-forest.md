@@ -17,4 +17,4 @@ facts:
 ---
 A bone-white relief model with tree canopy painted on, darker where the cover is denser. The forests sit where the mountains are: Mount Kenya, the Aberdares, the Mau, Cherangani and Elgon, the water towers that feed most of the country's rivers, with Kakamega in the west and Arabuko-Sokoke and Boni on the coast.
 
-Canopy is taken from 30 metre satellite data: cover in the year 2000, with every cell that has lost its trees since then removed.
+Canopy is taken from 30 metre satellite data: cover in the year 2000, with every cell that has lost its trees since then removed. The land cover plate (22) uses a different dataset and a different definition of tree cover, and gives 9.3 %; the two figures are not comparable.

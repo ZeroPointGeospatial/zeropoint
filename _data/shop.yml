@@ -21,10 +21,11 @@ pricing:
     A2: { none: 10000, black: 10500, natural: 11000, silver: 11500, gold: 12000 }
     A1: { none: 12000, black: 12500, natural: 13000, silver: 13500, gold: 14000 }
     A0: { none: 14500, black: 15000, natural: 15500, silver: 16000, gold: 16500 }
-  Landforms:              # mountains, the Rift, East Africa, contour studies, the regional theme plates (Mau, Baringo, Lake Victoria, Magadi), KSh 14 000 to 19 000
+  Landforms: &landforms   # mountains, the Rift, East Africa, contour studies, KSh 14 000 to 19 000
     A2: { none: 14000, black: 14500, natural: 15000, silver: 15500, gold: 16000 }
     A1: { none: 15500, black: 16000, natural: 16500, silver: 17000, gold: 17500 }
     A0: { none: 17000, black: 17500, natural: 18000, silver: 18500, gold: 19000 }
+  Regions: *landforms     # the regional theme plates (Mau, Baringo, Lake Victoria, Magadi), priced as Landforms
   default:                # any series not listed above
     A2: { none: 9000, black: 9500, natural: 10000, silver: 10500, gold: 11000 }
     A1: { none: 11000, black: 11500, natural: 12000, silver: 12500, gold: 13000 }
@@ -52,6 +53,7 @@ series:
   - Kenya atlas
   - Africa
   - Landforms
+  - Regions
   - Counties
   - Cities
 

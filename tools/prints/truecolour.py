@@ -95,6 +95,7 @@ CLOUD = (3, 8, 9, 10)                  # SCL: cloud shadow, cloud medium, cloud 
 MAX_TILE_CLOUD = 40.0
 CLEAR_ENOUGH = 0.999
 STORE = CACHE / "drapes" / "s2"
+MAX_TILES = 16                         # more is refused: the drape is for areas up to a few hundred km
 
 
 # --------------------------------------------------------------------------- listing
@@ -197,6 +198,13 @@ def tiles_for(bbox):
     return [tuple(t) for t in found]
 
 
+def tiles_needed(bbox):
+    """How many Sentinel-2 tiles cover bbox, from the MGRS grid alone (no network): what search()
+    reads, give or take a tile at sea."""
+    return len(cover(bbox, [(f"{z}/{bands[0]}/{sq}", epsg, rect, 0)
+                            for z, bands, sq, epsg, rect in candidate_tiles(bbox)]))
+
+
 def cover(bbox, tiles):
     """The fewest tiles that cover bbox, greedily: the tile covering most of what is left
     first, so an area inside one UTM zone is read from that zone's tiles."""
@@ -293,7 +301,7 @@ def search(bbox, years=1, months=None, max_cloud=MAX_TILE_CLOUD, date=None, work
     tiles = cover(bbox, tiles_for(bbox))
     if not tiles:
         raise SystemExit(f"true colour: no Sentinel-2 tiles found for {bbox}")
-    if len(tiles) > 16:
+    if len(tiles) > MAX_TILES:
         raise SystemExit(f"true colour: {len(tiles)} Sentinel-2 tiles; the drape is made for areas "
                          "up to a few hundred kilometres across")
     session = _http()

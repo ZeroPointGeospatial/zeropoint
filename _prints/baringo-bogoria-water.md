@@ -2,7 +2,7 @@
 slug: baringo-bogoria-water
 order: 17
 plate: "24"
-series: Landforms
+series: Regions
 short: Lakes Baringo and Bogoria
 title: Baringo & Bogoria
 theme: The growing Rift lakes, 1984 to 2021
@@ -17,4 +17,4 @@ facts:
 ---
 A bone-white relief model of the Rift floor between the Tugen Hills and the eastern wall of the valley, with the water painted on. Deep blue is water at the start of each place's record, from 1984, that was still water in 2021; coral is land that had become water by 2021. Both lakes grew: Lake Baringo from about 147 km² of water to 238 km², spreading over the flats to its south and east, and Lake Bogoria from about 33 km² to 42 km².
 
-The water comes from the JRC Global Surface Water record, built from Landsat images at 30 metres. For each place it compares the first year with enough clear images against 2021, so the map shows where the shore was then and where it is now, not the years in between. Almost nothing went the other way: less than a third of a square kilometre of water on the whole sheet had turned back to land.
+The water comes from the JRC Global Surface Water record, built from Landsat images at 30 metres. For each place it compares the first year with enough clear images against 2021, so the map shows where the shore was at the start and where it was in 2021, not the years in between. Almost nothing went the other way: less than a third of a square kilometre of water on the whole sheet had turned back to land.

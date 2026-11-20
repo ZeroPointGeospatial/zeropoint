@@ -47,8 +47,9 @@ colour request for a whole country becomes land cover, with a note.
 Read the notes before trusting the draft. They say when a place was read from
 a close spelling, when only the wider place was found ("Juja, Kiambu" drawn as
 all of Kiambu), when the place found is outside Kenya, when the customer's
-coordinates are not on the sheet, and when a county page's request is simply
-the shop's county plate. A second request for the same place never replaces
+coordinates are not on the sheet, and when a request is simply one of the
+shop's plates (a county, or plates 22 to 26: the draft then starts from the
+plate's own spec where it has one). A second request for the same place never replaces
 an earlier draft: it gets the next number (`draft-limuru-2-contours.yml`).
 
 If the script can't find the place, it says what it tried. Ask for
@@ -58,10 +59,12 @@ of the same name for a Kenyan one without saying so: offline, "Juja" or
 "Bondo" stop with that message rather than draw Peru or Congo. When the
 computer is online it asks OpenStreetMap's search, in Kenya first, sending
 only the place-name parts of the request: never plot or phone numbers, links,
-the customer's own name, or a name with a kinship word or title (Mzee,
-grandfather, Mr) or just before "farm" or "plot". A bare name given for the
-land can't be told from a place name, so read the request before running it
-online if it holds other people's names. If a render fails, the notes still get written, with the
+the customer's own name or the WhatsApp sender's, a name with a kinship word
+or title (Mzee, grandfather, Mr), a first name and surname just before "farm"
+or "plot", or a Swahili possessive ("shamba la Wanjiku"). A lone word before
+"farm" is read as the place ("Juja farm"), and a bare name given for the land
+can't be told from a place name, so read the request before running it online
+if it holds other people's names. If a render fails, the notes still get written, with the
 likely cause and the full log beside them.
 
 ## 1. Pin down the brief
@@ -98,7 +101,7 @@ scales up to A1 and A0.
 | Land cover, land use, "forest and farms" | Relief + `drape: landcover` | `relief.py spec:` | anywhere (ESA WorldCover 2021, 10 m) |
 | Forest, deforestation, forest loss | Relief + `drape: forest-loss` | `relief.py spec:` | anywhere; Kenya's tiles are on disk, elsewhere up to about 4 square degrees unless `allow_download` |
 | Lakes, floods, "how the lake has changed" | Relief + `drape: water` | `relief.py spec:` | anywhere (JRC Global Surface Water, 1984 to 2021); name the lakes to measure |
-| Satellite view, "real colours", true colour | Relief + `drape: true-colour` | `relief.py spec:` | areas up to a few Sentinel-2 tiles (about 100 km each); pin `date` for a shop plate |
+| Satellite view, "real colours", true colour | Relief + `drape: true-colour` | `relief.py spec:` | areas up to a few hundred km (at most 16 Sentinel-2 tiles of about 110 km; not the four largest counties, a country or a continent, which first look draws as land cover); pin `date` for a shop plate |
 
 Rivers and national roads for other countries are not built yet. Say so
 plainly and offer relief or population for that area, or quote the extra work.
