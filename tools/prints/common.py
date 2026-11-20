@@ -342,12 +342,26 @@ class Plate:
             draw_text(d, (x, y_rule + px(12.6)), v, f_v, soft, 0.0)
             x += col
 
-        # credit line at the very foot
+        # credit line at the very foot; a credit too long for one line is broken at a
+        # sentence onto two, so it never runs into the copyright on the right
         f_c = font("Barlow-400", px(2.45))
         y_c = self.h - m
-        draw_text(d, (left, y_c), credit, f_c, faint, 0.04)
-        draw_text(d, (right, y_c), "© ZeroPoint Geospatial, Nairobi", f_c, faint,
-                  0.04, anchor="rs")
+        mark = "© ZeroPoint Geospatial, Nairobi"
+        room = (right - left) - text_width(mark, f_c, 0.04) - px(8)
+        lines = [credit]
+        if text_width(credit, f_c, 0.04) > room:
+            parts = [s for s in credit.replace(". ", ".\n").split("\n")]
+            best = None
+            for k in range(1, len(parts)):
+                a, b = " ".join(parts[:k]), " ".join(parts[k:])
+                wa, wb = text_width(a, f_c, 0.04), text_width(b, f_c, 0.04)
+                if wa <= right - left and wb <= room and (best is None or abs(wa - wb) < best[0]):
+                    best = (abs(wa - wb), a, b)
+            if best:
+                lines = [best[1], best[2]]
+        for i, line in enumerate(lines):
+            draw_text(d, (left, y_c - (len(lines) - 1 - i) * px(3.6)), line, f_c, faint, 0.04)
+        draw_text(d, (right, y_c), mark, f_c, faint, 0.04, anchor="rs")
         return self
 
     def save(self, name):

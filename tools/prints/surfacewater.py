@@ -52,7 +52,7 @@ NATIVE = 0.00025                       # the layer's cell in degrees, about 28 m
 BONE = "#ebe6da"
 # (label on the sheet, colour, transition codes painted with it)
 GROUPS = [
-    ("Water at the start and in 2021", "#2f5b7c", (1, 4, 7, 8)),
+    ("Water at the start and in 2021", "#3b6481", (1, 4, 7, 8)),
     ("New permanent water", "#d8613a", (2,)),
     ("New seasonal water", "#efa983", (5,)),
     ("Water lost by 2021", "#8f8a3e", (3, 6)),
@@ -111,22 +111,66 @@ def class_areas(cls, tr, mask=None):
     return np.bincount(cls[m].ravel(), weights=w[m].ravel(), minlength=256)
 
 
+def inside_sheet(shape, tr, ctx):
+    """Cells of a lon/lat grid that fall on the model: inside the outline if there is one,
+    else inside the model grid's bounds in the map projection."""
+    ol = ctx.get("outline_ll")
+    if ol is not None:
+        from common import rasterize_geom
+        return rasterize_geom(ol, shape, tr)
+    from common import transformer
+    lon = tr.c + tr.a * (np.arange(shape[1]) + 0.5)
+    lat = tr.f + tr.e * (np.arange(shape[0]) + 0.5)
+    x0, y0, x1, y1 = ctx["bounds"]
+    t = transformer("EPSG:4326", ctx["crs"])
+    out = np.zeros(shape, bool)
+    for r in range(0, shape[0], 512):
+        lo, la = np.meshgrid(lon, lat[r:r + 512])
+        x, y = t.transform(lo, la)
+        out[r:r + 512] = (x >= x0) & (x <= x1) & (y >= y0) & (y <= y1)
+    return out
+
+
 def lake_areas(cls, tr, lon, lat):
     """(km² of water at the start, km² in 2021, extent) of the water body holding (lon, lat)."""
     from scipy import ndimage
     ever = (cls >= 1) & (cls <= 10)
     lab, _ = ndimage.label(ndimage.binary_closing(ever, iterations=2) | ever)
     r, c = int((tr.f - lat) / -tr.e), int((lon - tr.c) / tr.a)
+    if not (0 <= r < cls.shape[0] and 0 <= c < cls.shape[1]):
+        raise SystemExit(f"surface water: the lake point {lon}, {lat} is off the sheet")
+    if not ever.any():
+        raise SystemExit("surface water: no water anywhere on the sheet, so no lake can be measured")
     k = lab[r, c]
     if k == 0:                                          # the point is on land: take the nearest water
         _, (ri, ci) = ndimage.distance_transform_edt(lab == 0, return_indices=True)
         k = lab[ri[r, c], ci[r, c]]
     body = (lab == k) & ever
+    if not body.any():
+        raise SystemExit(f"surface water: no water body found near {lon}, {lat}")
     a = class_areas(cls, tr, body)
     rows, cols = np.nonzero(body)
     ext = (tr.c + cols.min() * tr.a, tr.f + (rows.max() + 1) * tr.e,
            tr.c + (cols.max() + 1) * tr.a, tr.f + rows.min() * tr.e)
     return float(sum(a[i] for i in START)), float(sum(a[i] for i in END)), ext, a
+
+
+def lake_native(lon, lat, guess_ext):
+    """Measure a lake on the native 30 m grid: read a window round the extent found on a
+    coarser grid, and grow it until the water body no longer touches the window's edge."""
+    w, s, e, n = guess_ext
+    m = max(0.02, 0.15 * max(e - w, n - s))
+    for _ in range(4):
+        box = (w - m, s - m, e + m, n + m)
+        cls, tr = classes(box)
+        a0, a1, ext, a = lake_areas(cls, tr, lon, lat)
+        touches = (ext[0] <= box[0] + 2 * NATIVE or ext[1] <= box[1] + 2 * NATIVE or
+                   ext[2] >= box[2] - 2 * NATIVE or ext[3] >= box[3] - 2 * NATIVE)
+        if not touches:
+            return a0, a1, ext, a
+        w, s, e, n = ext
+        m *= 2
+    return a0, a1, ext, a
 
 
 def legend(items, title, notes, width_mm=86):
@@ -158,29 +202,46 @@ def drape(ctx):
     opts = ctx["options"]
     w, s, e, n = ctx["ll"]
     pad = 0.01
-    cls, tr = classes((w - pad, s - pad, e + pad, n + pad))
-    rgb = TABLE[cls].astype("float32") / 255
-    tex = drapes.to_map(rgb, tr, ctx, resampling="average")
+    # the texture at about half the model cell (native 30 m on a detailed sheet), coloured
+    # and blended 2 x 2, so a county or a country-sized sheet stays within memory
+    res = max(NATIVE, ctx["cell"] / 2 / 111_320)
+    block = 1 if res == NATIVE else 2
+    cls, tr = classes((w - pad, s - pad, e + pad, n + pad), res)
+    if block == 1:
+        rgb = TABLE[cls].astype("float32") / 255
+        tex = drapes.to_map(rgb, tr, ctx, resampling="average")
+    else:
+        from rasterio.transform import Affine
+        rgb = drapes.classes_to_rgb_blocks(cls, TABLE, 2)
+        tex = drapes.to_map(rgb, Affine(tr.a * 2, 0, tr.c, 0, tr.e * 2, tr.f), ctx)
 
-    # what is on the sheet, for the legend and the log
-    on_sheet = class_areas(cls, tr)
+    # what is on the sheet (the model grid, or the outline when there is one), for the legend
+    on_sheet = class_areas(cls, tr, inside_sheet(cls.shape, tr, ctx))
     nodata = on_sheet[255]
     print("  transitions on the sheet, km²: " + ", ".join(
         f"{c}:{on_sheet[c]:.2f}" for c in list(range(11)) + [255] if on_sheet[c] > 0.005))
     if nodata > 0.01:
         print(f"  WARNING: {nodata:.2f} km² without data, drawn as land")
-    present = [(label, colour) for label, colour, codes in GROUPS
-               if codes[0] == 0 or sum(on_sheet[c] for c in codes) >= 0.05]
+    present = []
+    for label, colour, codes in GROUPS:
+        area = sum(on_sheet[c] for c in codes)
+        if codes[0] == 0 or area >= 0.05:
+            if codes[0] == 3 and area < 2:                # a trace: say how little, so no one hunts for it
+                label = f"{label}, {area:.1f} km²"
+            present.append((label, colour))
 
     # the lakes, measured on the native grid (cached with the class grid)
     facts, measured = [], {}
-    key = drapes.cache_path("gsw-lakes", [round(v, 5) for v in (w, s, e, n)], opts.get("lakes"))
+    key = drapes.cache_path("gsw-lakes", [round(v, 5) for v in (w, s, e, n)], opts.get("lakes"),
+                            "v2-native-window-closing2-cosarea")      # bump when lake_areas changes
     f = key.with_suffix(".json")
     if f.exists():
         measured = json.loads(f.read_text())
     else:
         for lk in opts.get("lakes") or []:
             a0, a1, ext, a = lake_areas(cls, tr, lk["lon"], lk["lat"])
+            if res != NATIVE:                                 # measure on the native grid
+                a0, a1, ext, a = lake_native(lk["lon"], lk["lat"], ext)
             measured[lk["name"]] = dict(start=a0, end=a1, extent=ext,
                                         codes={str(i): float(a[i]) for i in range(1, 11) if a[i] > 0})
         f.parent.mkdir(parents=True, exist_ok=True)
@@ -188,19 +249,19 @@ def drape(ctx):
     for name, m in measured.items():
         new = m["codes"].get("2", 0) + m["codes"].get("5", 0)
         lost = m["codes"].get("3", 0) + m["codes"].get("6", 0)
-        print(f"  {name}: water at the start {m['start']:.1f} km², in 2021 {m['end']:.1f} km² "
-              f"({(m['end'] / m['start'] - 1) * 100:+.0f} %), new water {new:.1f} km², lost {lost:.2f} km²; "
-              "body spans {:.4f}..{:.4f} E, {:.4f}..{:.4f} N".format(m["extent"][0], m["extent"][2],
-                                                                 m["extent"][1], m["extent"][3]))
+        change = f"{(m['end'] / m['start'] - 1) * 100:+.0f} %" if m["start"] > 0 else "new"
+        x0, y0, x1, y1 = m["extent"]
+        print(f"  {name}: water at the start {m['start']:.1f} km², in 2021 {m['end']:.1f} km² ({change}), "
+              f"new water {new:.1f} km², lost {lost:.2f} km²; body spans {x0:.4f}..{x1:.4f} E, "
+              f"{y0:.4f}..{y1:.4f} N")
         facts.append((f"{name}, start to 2021", f"{m['start']:.0f} → {m['end']:.0f} km²"))
+    if not facts:                                        # no lakes named: the sheet's own totals
+        a0, a1 = sum(on_sheet[c] for c in START), sum(on_sheet[c] for c in END)
+        facts = [("Water, start to 2021", f"{a0:.0f} → {a1:.0f} km²"),
+                 ("New water by 2021", drapes.km2(sum(on_sheet[c] for c in (2, 5))))]
     zex = ctx.get("zex") or opts.get("zex")
     if zex and len(facts) < 3:
         facts.append(("Vertical exaggeration", f"×{zex:g}"))
-    if not facts:                                        # no lakes named: the sheet's own totals
-        new = sum(on_sheet[c] for c in (2, 5))
-        facts = [("Water at the start", drapes.km2(sum(on_sheet[c] for c in START))),
-                 ("Water in 2021", drapes.km2(sum(on_sheet[c] for c in END))),
-                 ("New water by 2021", drapes.km2(new))]
 
     notes = opts.get("notes") or [
         "Start: each place's first year with enough Landsat views, from 1984.",
@@ -209,5 +270,5 @@ def drape(ctx):
     return dict(
         tex=tex, legend=legend(present, opts.get("legend_title", "Surface water, 1984 to 2021"), notes),
         facts=facts[:3], water=False, key=dict(groups=[(g[1], g[2]) for g in GROUPS], v="1.4-2021"),
-        credit="Surface water: EC JRC/Google, Global Surface Water v1.4, 1984–2021 (Pekel et al., "
-               "Nature 2016; Copernicus, free of restriction).")
+        credit="Surface water: EC JRC/Google, Global Surface Water v1.4, 1984–2021 (Pekel et al. 2016; "
+               "Copernicus, free and open).")

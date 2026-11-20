@@ -25,6 +25,7 @@ Tiles: the four Kenya tiles that `fetch_data.py forest` puts in
 $ZP_DATA/hansen are read from disk; any other tile is read from the
 dataset's own bucket on storage.googleapis.com, a window at a time.
 """
+import hashlib
 import json
 import math
 
@@ -121,6 +122,12 @@ def read_classes(bbox, block, threshold, inside_ll):
     from rasterio.transform import Affine
     from rasterio.windows import Window
     table = colour_table().astype("float32") / 255
+    remote = [tile for tile, _, _ in tiles_for(bbox) if tile_path("treecover2000", tile).startswith("/vsicurl/")]
+    sq_deg = (bbox[2] - bbox[0]) * (bbox[3] - bbox[1])
+    if remote and sq_deg > 4 and not ALLOW_DOWNLOAD[0]:
+        raise SystemExit(f"forest loss: {sq_deg:.0f} square degrees from tiles not on disk ({', '.join(remote)}) "
+                         "would mean gigabytes of reads; download them first (fetch_data.py forest has the URLs) "
+                         "or set drape_options allow_download: true")
     step = PX * block
     w, s, e, n = bbox
     w, s = math.floor(w / step) * step, math.floor(s / step) * step
@@ -191,7 +198,7 @@ def legend_for(stats):
         f_v = font("IBMPlexMono-400", pl.px(2.3))
         f_s = font("Barlow-400", pl.px(2.6))
         f_n = font("IBMPlexMono-400", pl.px(2.0))
-        draw_text(d, (x0, top), "FOREST LOST EACH YEAR, KM²", f_k, pl.mix(0.55), 0.2)
+        draw_text(d, (x0, top), "FOREST LOSS MAPPED EACH YEAR, KM²", f_k, pl.mix(0.55), 0.2)
         base = top + pl.px(14.0)                          # foot of the bars
         hmax = pl.px(8.6)
         for i in range(n):
@@ -219,7 +226,7 @@ def legend_for(stats):
         # swatches
         sq = pl.px(2.8)
         yq = ys + hs + pl.px(7.6)
-        for k, (label, colour) in enumerate((("Forest in 2000, standing in 2023", STANDING),
+        for k, (label, colour) in enumerate((("Forest in 2000, no loss mapped", STANDING),
                                              ("Not forest in 2000", NOT_FOREST))):
             cx = x0 + k * w * 0.62
             d.rectangle([cx, yq, cx + sq, yq + sq], fill=hex_rgb(colour), outline=pl.mix(0.35),
@@ -228,9 +235,13 @@ def legend_for(stats):
     return draw
 
 
+ALLOW_DOWNLOAD = [False]
+
+
 def drape(ctx):
     opts = ctx["options"]
     threshold = int(opts.get("threshold", 30))
+    ALLOW_DOWNLOAD[0] = bool(opts.get("allow_download", False))
     # pre-average only for coarse models: to about half the model cell, by a factor that
     # divides the 40 000-cell tiles so the blocks line up across tile edges
     want = ctx["cell"] / 2 / (PX * 111_320)
@@ -241,7 +252,7 @@ def drape(ctx):
     inside = sheet_outline_ll(ctx)
 
     f = drapes.cache_path("forestloss", VERSION, [round(v, 5) for v in bbox], block, threshold,
-                          inside.wkb_hex[:4000], YEAR_STOPS, STANDING, NOT_FOREST)
+                          hashlib.sha1(inside.wkb).hexdigest(), YEAR_STOPS, STANDING, NOT_FOREST)
     if f.exists():
         from rasterio.transform import Affine
         z = np.load(f)
@@ -275,11 +286,17 @@ def drape(ctx):
 
     # areas to the nearest 10 km²: the model's edges move by a cell between a proof and
     # a master, and the data supports no finer figure for a whole sheet
-    facts = [("Forest in 2000", drapes.km2(round(forest, -1))),
-             (f"Lost {FIRST}–{LAST}", f"{drapes.km2(round(lost, -1))} · {drapes.pct(stats['lost_share'])}"),
-             ("Most lost in one year", f"{stats['peak_year']} · {drapes.km2(loss[peak_i])}")]
+    # The figures cover the whole sheet, not one named forest, and say so. No single year is
+    # singled out: the data's makers warn that loss before 2011 was mapped with an earlier
+    # method, so years either side of it should not be compared closely.
+    sheet = stats["sheet_km2"] or 1.0
+    facts = [("Forest on the sheet, 2000", f"{drapes.km2(round(forest, -1))} · {drapes.pct(forest / sheet)}"),
+             (f"Loss mapped on the sheet, {FIRST}–{LAST}",
+              f"{drapes.km2(round(lost, -1))} · {drapes.pct(stats['lost_share'])}")]
     return dict(
-        tex=tex, legend=legend_for(stats), facts=facts, water=bool(opts.get("water", False)),
+        # lakes and the sea are painted blue-grey from the elevation model, not left the
+        # colour of land that was never forest
+        tex=tex, legend=legend_for(stats), facts=facts, water=bool(opts.get("water", True)),
         key=dict(version=VERSION, threshold=threshold, block=block, stops=YEAR_STOPS),
         stats=stats,
         credit=f"Forest: Hansen/UMD/Google/USGS/NASA Global Forest Change v1.11, canopy ≥ {threshold} % "

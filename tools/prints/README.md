@@ -23,11 +23,17 @@ for sending the files to a print shop.
 | 15 | Mount Kenya summit contours | `contours.py mount-kenya-summit` | Copernicus DEM GLO-30 |
 | 20 | Africa, relief | `relief.py spec:maps/africa-relief.yml` | Copernicus DEM GLO-90 (read at reduced resolution), Natural Earth |
 | 21 | Africa, population | `population.py spec:maps/africa-population.yml` | Kontur Population 2023, Natural Earth |
+| 22 | Kenya, land cover | `relief.py kenya-landcover` | ESA WorldCover 2021, GLO-90 |
+| 23 | The Mau Forest, forest loss | `relief.py spec:maps/mau-forest-loss.yml` | Hansen Global Forest Change v1.11, GLO-30 |
+| 24 | Baringo & Bogoria, the growing lakes | `relief.py spec:maps/baringo-bogoria-water.yml` | JRC Global Surface Water v1.4, GLO-30, OpenStreetMap names |
+| 25 | Lake Victoria, population | `population.py spec:maps/lake-victoria-population.yml` | Kontur Population 2023, Natural Earth |
+| 26 | Lake Magadi, true colour | `relief.py spec:maps/magadi-true-colour.yml` | Copernicus Sentinel-2 L2A, GLO-30, OpenStreetMap names |
 | County | Relief of one county | `relief.py county:Kiambu` | Copernicus DEM, Overture Maps boundary |
 | City | Roads of a town in gold | `cities.py mombasa` | OpenStreetMap via Overture Maps |
 
 Plates 10 to 12 (the Nairobi prints) were made separately; their files are
-in `originals/prints/`. The city prints copy the layout of the Nairobi gold
+in `originals/prints/`. Plates 16 to 19 are the gold city prints of Mombasa,
+Kisumu, Nakuru and Eldoret (`cities.py`). The city prints copy the layout of the Nairobi gold
 print so they hang as a set.
 
 **A county to order.** `python relief.py county:Machakos` draws any of the

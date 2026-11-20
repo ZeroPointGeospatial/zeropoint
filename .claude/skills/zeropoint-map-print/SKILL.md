@@ -88,6 +88,10 @@ scales up to A1 and A0.
 | Rivers and drainage basins | Rivers | `kenya_rivers.py` | Kenya only (see styles.md) |
 | Every road and track, as density | Roads | `kenya_roads.py` | Kenya only (see styles.md) |
 | One of Kenya's 47 counties | Relief | `relief.py county:<Name>` | already set up; add labels in `COUNTY_LABELS` |
+| Land cover, land use, "forest and farms" | Relief + `drape: landcover` | `relief.py spec:` | anywhere (ESA WorldCover 2021, 10 m) |
+| Forest, deforestation, forest loss | Relief + `drape: forest-loss` | `relief.py spec:` | anywhere; Kenya's tiles are on disk, elsewhere up to about 4 square degrees unless `allow_download` |
+| Lakes, floods, "how the lake has changed" | Relief + `drape: water` | `relief.py spec:` | anywhere (JRC Global Surface Water, 1984 to 2021); name the lakes to measure |
+| Satellite view, "real colours", true colour | Relief + `drape: true-colour` | `relief.py spec:` | areas up to a few Sentinel-2 tiles (about 100 km each); pin `date` for a shop plate |
 
 Rivers and national roads for other countries are not built yet. Say so
 plainly and offer relief or population for that area, or quote the extra work.

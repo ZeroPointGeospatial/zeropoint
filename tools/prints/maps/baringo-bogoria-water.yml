@@ -1,4 +1,4 @@
-# Plate 18: Lake Baringo and Lake Bogoria, the rising Rift lakes.
+# Plate 24: Lake Baringo and Lake Bogoria, two Rift lakes that grew, 1984 to 2021.
 # The GLO-30 terrain painted with the JRC Global Surface Water transitions
 # (surfacewater.py): water at the start of the Landsat record and in 2021 in
 # deep blue, land that had become water by 2021 in coral.
@@ -9,13 +9,13 @@
 # The lake areas in the facts row are measured by surfacewater.py from the
 # data on every run. Names and positions: OpenStreetMap, read through Overture
 # Maps (release 2026-11-18): towns and villages from the divisions theme, the
-# lakes and Ol Kokwe from the base theme; the Tugen Hills name sits at OSM's
-# point for the range.
+# lakes and Ol Kokwe from the base theme; the Tugen Hills name is placed on the
+# crest near OSM's point for the range (35.841 E, 0.673 N).
 slug: baringo-bogoria-water
 title: Baringo & Bogoria
-subtitle: The rising Rift lakes, 1984 to 2021
+subtitle: The growing Rift lakes, 1984 to 2021
 label: PLATE
-number: "18"
+number: "24"
 region: { bbox: [35.78, 0.12, 36.32, 0.79] }       # centre 36.05 E, 0.455 N; a block
 scale: 175000
 zex: 3
@@ -33,5 +33,5 @@ labels:
 names:
   - { text: Lake Baringo, lon: 36.078, lat: 0.672, size: 3.2 }
   - { text: Ol Kokwe, lon: 36.0714, lat: 0.6115, size: 2.3 }
-  - { text: Lake Bogoria, lon: 36.094, lat: 0.262, angle: 74, size: 3.0 }
+  - { text: Lake Bogoria, lon: 36.097, lat: 0.260, angle: 74, size: 3.0 }
   - { text: Tugen Hills, lon: 35.835, lat: 0.640, angle: 88, size: 3.2 }

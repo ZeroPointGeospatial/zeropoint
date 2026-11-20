@@ -1,0 +1,42 @@
+# Plate 26: Lake Magadi in true colour. The GLO-30 terrain painted with one
+# clear Copernicus Sentinel-2 scene (truecolour.py): red, green and blue surface
+# reflectance with a gentle tone curve, so the white trona, the pink brine
+# and the green water keep their own colours.
+#
+#   python relief.py spec:maps/magadi-true-colour.yml 100 16    # proof
+#   python relief.py spec:maps/magadi-true-colour.yml 300 40    # master
+#
+# The box is centred on the lake (36.27 E, 1.86 S) and wide enough for the
+# fault blocks on either side and Mount Olorgesailie in the north-east; at
+# 1:125 000 the block is about 42 by 51 km on 30 m cells.
+#
+# Names and positions: OpenStreetMap, read through Overture Maps (release
+# 2026-11-18.0): Magadi and Olkirimatian from the divisions theme, Mount
+# Olorgesailie (a peak) and the Southern Ewaso Ng'iro from the base theme.
+# OSM's polygon for Lake Magadi runs from 36.218 to 36.308 E and 2.010 to
+# 1.808 S; the italic name sits on it.
+slug: magadi-true-colour
+title: Lake Magadi
+subtitle: The soda lake in true colour
+label: PLATE
+number: "26"
+region: { bbox: [36.09, -2.07, 36.45, -1.65] }
+scale: 125000
+drape: true-colour
+# The scene: 14 September 2025 (tiles 36MZC and 36MZD, Sentinel-2C). Of the
+# dates in the two years to November 2026 with the sheet clear (SCL), it shows
+# the lake best: pink brine in the southern lagoons, white trona, green water
+# in the north. Its SCL flags 0.17 % of the sheet, all of it on the lake
+# itself (crust classed as cloud, brine as shadow), all but about 0.02 % of the
+# sheet, which is SCL cirrus over the floodplain with nothing visible at 10 m;
+# there is no cloud.
+drape_options:
+  date: "2025-09-14"
+credit: "Names: OpenStreetMap contributors, via Overture Maps (ODbL)."
+labels:
+  - { name: Magadi, lon: 36.2875, lat: -1.9004, side: right }
+  - { name: Olkirimatian, lon: 36.1505, lat: -1.8598, side: right }
+  - { name: Mount Olorgesailie, lon: 36.4279, lat: -1.6946, side: left, snap: 1500 }
+names:
+  - { text: Lake Magadi, lon: 36.285, lat: -1.836, size: 3.2 }
+  - { text: Southern Ewaso Ng'iro, lon: 36.119, lat: -1.921, angle: -73, size: 2.8 }
