@@ -19,7 +19,7 @@ import numpy as np
 from scipy import ndimage
 
 import render3d as r3
-from common import (CACHE, HYPSO, INK, MAP_CRS, OLIVE, PAPER, Plate, annotate, apply_ramp,
+from common import (HYPSO, INK, MAP_CRS, OLIVE, PAPER, Plate, annotate, apply_ramp,
                     cached_render, draw_text, font, hex_rgb, hypso_rgb, kenya, load_dem,
                     name_label, place_render, ramp, ramp_legend, rasterize_geom, transformer,
                     warp_to_map)
@@ -416,13 +416,17 @@ def main(name, dpi=100, spp=32):
         vr = cfg.get("vrange")
         if not ticks and cfg.get("spec") and not local:     # a large area on the shared colours
             step = next(s for s in (250, 500, 1000, 2000) if (zhi - max(zlo, 0)) / s <= 6)
-            ticks = list(range(0, int(zhi) + 1, step)) + [int(round(zhi))]
             vr = (min(zlo, 0), zhi)
-        if not ticks:                      # a county: round ticks across its own range
-            step = next(s for s in (100, 200, 250, 500, 1000) if (zhi - zlo) / s <= 5)
+            span = vr[1] - vr[0]
+            # round steps, then the top; a step too close to the top would overprint it
+            ticks = [v for v in range(0, int(zhi) + 1, step) if zhi - v >= 0.12 * span] + [int(round(zhi))]
+        if not ticks:                      # a county or a small area: round ticks across its own range
+            step = next((s for s in (10, 20, 25, 50, 100, 200, 250, 500, 1000) if (zhi - zlo) / s <= 5), 2000)
             lo_t = int(np.ceil(zlo / step) * step)
-            ticks = list(range(lo_t, int(zhi) + 1, step))
+            ticks = list(range(lo_t, int(zhi) + 1, step)) or [int(round(zlo)), int(round(zhi))]
             vr = (min(zlo, ticks[0]), max(zhi, ticks[-1]))
+            if vr[1] <= vr[0]:
+                vr = (vr[0] - 1, vr[0] + 1)
         legend = ramp_legend(stops, "Elevation, metres", ticks, vmin=vr[0], vmax=vr[1])
     plate.title_block(
         cfg["title"], cfg["subtitle"], cfg["number"], facts=facts,

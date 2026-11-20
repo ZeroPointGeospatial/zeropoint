@@ -70,7 +70,18 @@ def polygon_slab(poly, thickness):
     return top_v.astype("float32"), top_f, np.concatenate(wv).astype("float32"), np.concatenate(wf)
 
 
-def spec_config(path, box_w_mm):
+def model_scale(width_m, depth_m, box_w, box_h, model_width=0.90, tilt=62.0, drop=0.075, margin=8.0):
+    """Metres per unit of the map box (pass the box and margin in mm or in px).
+    The model spans `model_width` of the box width, unless the area is so tall
+    that its tilted base would run into the title block: then it is shrunk until
+    the front edge of the base stays `margin` above the bottom of the box."""
+    by_width = width_m / (box_w * model_width)
+    room = box_h * (1 - 2 * drop) - 2 * margin       # twice the space below the model's centre
+    by_depth = depth_m * np.sin(np.radians(tilt)) / room
+    return max(by_width, by_depth), by_depth > by_width
+
+
+def spec_config(path, box_mm):
     """Plate description, hexagons and outline for a map spec (see maps/README.md)."""
     from pathlib import Path
     import yaml
@@ -81,11 +92,13 @@ def spec_config(path, box_w_mm):
     land = regions.project(geom_ll, crs)
     x0, y0, x1, y1 = land.bounds
     model_width = spec.get("model_width", 0.90)
-    scale = (x1 - x0) / (box_w_mm * model_width / 1000)
+    m_per_mm, _ = model_scale(x1 - x0, y1 - y0, box_mm[0], box_mm[1], model_width,
+                              spec.get("tilt", 62.0), spec.get("drop", 0.075))
+    scale = m_per_mm * 1000
     res = spec.get("h3_res") or regions.h3_resolution_for(scale)
     print(f"{spec['slug']}: {what}, {proj_name}, about 1:{scale:,.0f}, H3 resolution {res}, "
           f"countries {', '.join(isos)}")
-    cells, pop = regions.population_hexagons(isos, res, geom_ll)
+    cells, pop = regions.population_hexagons(isos, res, geom_ll, box_like="bbox" in spec["region"])
     xy, keep = regions.hexagon_rings(cells, crs)
     lk = lakes(crs)
     water = lk[lk.intersects(land)].geometry.union_all().intersection(land)
@@ -105,7 +118,8 @@ def main(name, dpi=100, spp=32):
     plate = Plate(dpi=dpi, bg=PAPER, fg=INK, accent=OLIVE, block_mm=90)
     l, t, r, b = plate.map_box
     if name.startswith("spec:"):
-        cfg, xy, pop, land, water = spec_config(name.split(":", 1)[1], (r - l) / plate.px(1))
+        cfg, xy, pop, land, water = spec_config(name.split(":", 1)[1],
+                                                ((r - l) / plate.px(1), (b - t) / plate.px(1)))
         return draw(plate, cfg, xy, pop, land, water, cfg["crs"], cfg["slug"], dpi, spp, t0)
     cfg = PLATES[name]
 
@@ -176,10 +190,9 @@ def draw(plate, cfg, xy, pop, land, water, crs, slug, dpi, spp, t0, bounds=None)
     # camera: looking north, tilted; the model's base centre lands in the map box
     tilt = cfg["tilt"]
     sin_t = np.sin(np.radians(tilt))
-    box_w_px = r - l
-    m_per_px = width_m / (box_w_px * cfg["model_width"])
+    m_per_px, by_depth = model_scale(width_m, y1 - y0, r - l, b - t, cfg["model_width"], tilt,
+                                     cfg["drop"], plate.px(8))
     sheet_w = m_per_px * plate.w
-    depth_px = (y1 - y0) * sin_t / m_per_px
     mx = (l + r) / 2
     my = (t + b) / 2 + (b - t) * cfg["drop"]            # sit the model low: columns rise above it
     cam_x = (plate.w / 2 - mx) * m_per_px
@@ -194,6 +207,8 @@ def draw(plate, cfg, xy, pop, land, water, crs, slug, dpi, spp, t0, bounds=None)
     key = dict(plate=slug, size=(plate.w, plate.h), spp=spp, tilt=tilt,
                height=cfg["max_height_km"], width=cfg["model_width"], drop=cfg["drop"],
                hexagons=len(pop), people=round(float(total)))
+    if by_depth:                                         # a tall area, shrunk to clear the title block
+        key["fit"] = round(m_per_px / plate.px(1), 1)    # metres per mm
     rgb, mask = cached_render(key, render)
     place_render(plate, rgb, mask)
 

@@ -80,17 +80,21 @@ def main(name, dpi=150):
     cx, cy = tf.transform(lon0, lat0)
     x0, y0, x1, y1 = cx - gw / 2, cy - gh / 2, cx + gw / 2, cy + gh / 2
 
+    import math
     half = max(0.12, round((max(gw, gh) / 2 + 600) / 111_000 * 1.15, 3))
+    # a degree of longitude shrinks with latitude, so the window widens to match
+    half_lon = round(half / math.cos(math.radians(abs(lat0))), 3)
     if name.startswith("spec:"):                       # make sure the elevation tiles are here
-        import math
         import fetch_data
-        fetch_data.dem((math.floor(lon0 - half), math.floor(lat0 - half),
-                        math.ceil(lon0 + half), math.ceil(lat0 + half)), 10, "glo30")
-    dem, tr = load_dem((round(lon0 - half, 3), round(lat0 - half, 3),
-                        round(lon0 + half, 3), round(lat0 + half, 3)), "glo30")
+        fetch_data.dem((math.floor(lon0 - half_lon), math.floor(lat0 - half),
+                        math.ceil(lon0 + half_lon), math.ceil(lat0 + half)), 10, "glo30")
+    dem, tr = load_dem((round(lon0 - half_lon, 3), round(lat0 - half, 3),
+                        round(lon0 + half_lon, 3), round(lat0 + half, 3)), "glo30")
     cell = 10.0
     z, _ = warp_to_map(dem, tr, (x0 - 200, y0 - 200, x1 + 200, y1 + 200), cell, resampling="cubic",
                        dst_crs=crs)
+    if np.isnan(z).any():
+        raise SystemExit(f"{name}: the elevation data does not cover the whole sheet; check the centre and scale")
     z = ndimage.gaussian_filter(z, 2.0)
     ny, nx = z.shape
     xs = (x0 - 200) + (np.arange(nx) + 0.5) * cell

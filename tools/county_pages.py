@@ -17,7 +17,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools" / "prints"))
 
-from common import CACHE, DATA, MAP_CRS, OUT  # noqa: E402
+from common import DATA, MAP_CRS, OUT  # noqa: E402
 from relief import COUNTY_NUMBERS  # noqa: E402
 
 COASTAL = {"Mombasa", "Kwale", "Kilifi", "Tana River", "Lamu"}

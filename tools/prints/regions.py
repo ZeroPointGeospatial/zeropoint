@@ -76,11 +76,17 @@ def region_outline(region):
     return geom, iso_codes(sel), what
 
 
-def drop_far_islands(geom_ll, keep_km2=2500, near_km=60, near_min_km2=50):
+def drop_far_islands(geom_ll, keep_km2=2500, near_km=60, near_min_km2=50, share=0.02):
     """Leave out small islands far from the coast (Cape Verde, the Comoros, the
     Prince Edward Islands for Africa). On a relief model they become spikes and
-    they stretch the frame. Large islands (Madagascar) and those just offshore
-    (Zanzibar, Bioko) stay. Set keep_islands: true in a spec to keep them all."""
+    they stretch the frame.
+
+    Kept: every part of at least `keep_km2` or `share` of the whole (Madagascar;
+    each main island of an island country such as the Comoros), then, repeatedly,
+    any part of at least `near_min_km2` within `near_km` of a kept part (Zanzibar
+    and Bioko off the mainland, Nosy Be off Madagascar, a chain of islands).
+    Each part left out is named in the log. Set keep_islands: true in a spec to
+    keep them all."""
     import shapely
     from shapely.geometry import MultiPolygon
     parts = list(getattr(geom_ll, "geoms", [geom_ll]))
@@ -90,12 +96,25 @@ def drop_far_islands(geom_ll, keep_km2=2500, near_km=60, near_min_km2=50):
     crs = f"+proj=laea +lat_0={(s + n) / 2:.2f} +lon_0={(w + e) / 2:.2f} +datum=WGS84 +units=m"
     proj = [project(p, crs) for p in parts]
     areas = [p.area / 1e6 for p in proj]
-    main = proj[int(np.argmax(areas))]
-    keep = [p for p, q, a in zip(parts, proj, areas)
-            if a >= keep_km2 or (a >= near_min_km2 and q.distance(main) <= near_km * 1000)]
-    dropped = len(parts) - len(keep)
-    if dropped:
-        print(f"  left out {dropped} small islands far from the coast")
+    total = sum(areas)
+    kept = {i for i, a in enumerate(areas) if a >= keep_km2 or a >= share * total}
+    grew = True
+    while grew:
+        grew = False
+        for i, (q, a) in enumerate(zip(proj, areas)):
+            if i not in kept and a >= near_min_km2 and any(q.distance(proj[j]) <= near_km * 1000 for j in kept):
+                kept.add(i)
+                grew = True
+    left = [i for i in range(len(parts)) if i not in kept]
+    if left:
+        gone = sum(areas[i] for i in left)
+        print(f"  left out {len(left)} small islands far from the coast, {gone:,.0f} km² in all")
+        for i in sorted(left, key=lambda i: -areas[i])[:8]:
+            pt = parts[i].representative_point()
+            print(f"    {areas[i]:,.0f} km² at {pt.x:.2f} E, {pt.y:.2f} N")
+        if gone > 0.01 * total:
+            print("  WARNING: that is more than 1% of the area; check the proof, or set keep_islands: true")
+    keep = [parts[i] for i in sorted(kept)]
     return shapely.make_valid(MultiPolygon(keep)) if len(keep) > 1 else keep[0]
 
 
@@ -234,9 +253,10 @@ def h3_resolution_for(scale, target_mm=0.35):
     return min(H3_EDGE_KM, key=lambda r: abs(math.log(H3_EDGE_KM[r] / want_km)))
 
 
-def population_hexagons(iso_codes, res, outline_ll=None):
+def population_hexagons(iso_codes, res, outline_ll=None, box_like=False):
     """People per H3 hexagon at resolution `res` (8 is Kontur's own 400 m grid;
-    coarser resolutions sum it). Returns (h3 cells, population)."""
+    coarser resolutions sum it), inside `outline_ll` if given (`box_like`: a
+    rectangle, which needs no coastal allowance). Returns (h3 cells, population)."""
     import h3
     import pyogrio
     cells, pops = [], []
@@ -251,19 +271,23 @@ def population_hexagons(iso_codes, res, outline_ll=None):
         print(f"  {iso}: {len(df):,} hexagons, {df['population'].sum() / 1e6:.1f} M people")
     c = np.concatenate(cells)
     p = np.concatenate(pops)
+    # A hexagon on a border is in both countries' files, each time with its whole
+    # population: keep one copy, or border towns are counted twice.
+    c, first = np.unique(c, return_index=True)
+    p = p[first]
     if res < 8:
         parent = np.array([h3.cell_to_parent(x, res) for x in c])
         uniq, inv = np.unique(parent, return_inverse=True)
         p = np.bincount(inv, weights=p)
         c = uniq
-    else:
-        uniq, inv = np.unique(c, return_inverse=True)  # a hexagon on a border appears in both countries
-        p = np.bincount(inv, weights=p)
-        c = uniq
     if outline_ll is not None:
         from shapely import points, intersects
         ll = np.array([h3.cell_to_latlng(x) for x in c])
-        keep = intersects(outline_ll.buffer(0.05), points(ll[:, 1], ll[:, 0]))
+        # Keep hexagons whose centre is inside the outline or just off it, so a
+        # coastal hexagon centred over the sea still counts. The allowance grows
+        # with the hexagon (about 350 m at 400 m hexagons, 0.05 degrees at most).
+        buf = 0.0 if box_like else min(0.05, 0.75 * H3_EDGE_KM[res] / 111.32)
+        keep = intersects(outline_ll.buffer(buf) if buf else outline_ll, points(ll[:, 1], ll[:, 0]))
         c, p = c[keep], p[keep]
     return c, p
 

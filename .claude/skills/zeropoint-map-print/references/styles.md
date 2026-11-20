@@ -54,11 +54,14 @@ python population.py spec:maps/<slug>.yml 300 40
   `h3_res: 8` for a Kenya plate that matches plate 01.
 - **Size on the sheet**: the model spans 90% of the map box width. Raise
   `model_width` toward 1.0 to make it bigger; `scale` does nothing here.
+  A tall country (Mozambique, Malawi, Madagascar) is shrunk automatically
+  so the front of its base clears the title block.
 - **Settings worth changing**: `towns` (name, position and where the text sits,
   with a leader line), `max_height_km` if the tallest city towers over
   everything, `tilt`.
 - **Limits**: Kontur counts people where they sleep, not where they work. Small
-  island states with no Kontur file are skipped and reported in the log.
+  island states with no Kontur file are skipped and reported in the log. A
+  hexagon on a border is in both countries' files; it is counted once.
 
 ## Contours
 

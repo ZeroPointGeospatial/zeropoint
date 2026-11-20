@@ -53,8 +53,9 @@ Contour specs also take `labels` and `names`, as relief does.
 
 Country names follow Natural Earth's `ADMIN` column; common alternatives
 (Tanzania, DRC, Ivory Coast) are understood. Countries and continents lose
-small islands far from the coast unless `keep_islands: true` is added inside
-`region`. A `bbox` is drawn as a rectangular block; every other region is cut
+small islands far from the coast (under 2 500 km², under 2% of the area, and
+more than 60 km from any island that stays), and the log names each one left
+out. Add `keep_islands: true` inside `region` to keep them all. A `bbox` is drawn as a rectangular block; every other region is cut
 to its outline.
 
 ## Where the data comes from

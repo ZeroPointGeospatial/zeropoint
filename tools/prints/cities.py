@@ -4,7 +4,7 @@ its coordinates at the foot.
 
     python cities.py mombasa [width_px]
     python cities.py kisumu | nakuru | eldoret
-    python cities.py spec:maps/kampala-gold.yml [width_px]   # any town (maps/README.md)
+    python cities.py spec:maps/example-kampala-gold.yml [width_px]   # any town (maps/README.md)
 
 The layout, colours and proportions are measured from the existing Nairobi
 file so new cities hang with it as one series. Format is 11 x 14 inches
@@ -70,9 +70,11 @@ def city_spec(path):
     roads = CACHE / f"roads_{key}.npz"
     if c.get("country", "Kenya").lower() != "kenya" and not roads.exists():
         import fetch_overture
-        pad = c["radius_km"] / 100 * 1.6
+        import math
+        pad = c["radius_km"] / 100 * 1.6                       # degrees of latitude, with room to spare
+        pad_lon = pad / math.cos(math.radians(c["lat"]))       # degrees of longitude shrink away from the equator
         fetch_overture.roads(fetch_overture.latest_release(),
-                             (c["lon"] - pad, c["lat"] - pad, c["lon"] + pad, c["lat"] + pad), f"roads_{key}")
+                             (c["lon"] - pad_lon, c["lat"] - pad, c["lon"] + pad_lon, c["lat"] + pad), f"roads_{key}")
     return (key, c["name"], c["lon"], c["lat"], c["radius_km"], c.get("country", "Kenya").upper(),
             roads if roads.exists() else CACHE / "kenya_roads.npz")
 
@@ -90,7 +92,8 @@ def main(key, width=6744):
     tf = Transformer.from_crs("EPSG:4326", f"+proj=aeqd +lat_0={lat0} +lon_0={lon0} +datum=WGS84",
                               always_xy=True)
     pad = radius_km / 100
-    near = ((xy[:, 0] > lon0 - pad) & (xy[:, 0] < lon0 + pad)
+    pad_lon = pad / np.cos(np.radians(lat0))
+    near = ((xy[:, 0] > lon0 - pad_lon) & (xy[:, 0] < lon0 + pad_lon)
             & (xy[:, 1] > lat0 - pad) & (xy[:, 1] < lat0 + pad))
     # keep every road with at least one vertex near the city, and project all
     # of its vertices, so a road that leaves the area is not bent back in

@@ -12,7 +12,6 @@ a wall map and are not an authority on where any boundary runs.
 """
 import sys
 
-import geopandas as gpd
 import numpy as np
 from PIL import Image, ImageDraw
 from rasterio.transform import Affine

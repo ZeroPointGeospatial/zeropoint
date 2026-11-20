@@ -112,7 +112,10 @@ the review list in `references/house-style.md`. The usual fixes:
 - Labels overlapping each other or a strong feature: move the italic names, or
   switch a point label's `side`.
 - Spikes or slivers off the coast: small far-off islands. They are dropped by
-  default for countries and continents, so for other regions check the outline.
+  default for countries and continents (the log names each one, and warns if
+  they add up to more than 1% of the area), so for other regions check the
+  outline. If a customer wants an island that was dropped, set `keep_islands:
+  true` in the region.
 - Relief too flat or too spiky: set `zex`. Counties sit around 3 to 12, Kenya
   at 22, East Africa at 30, Africa at 100.
 - The area too small on the sheet: for relief, set `scale` to the next tidy
