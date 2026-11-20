@@ -14,6 +14,11 @@ longonot-contours: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
 mount-kenya-summit: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
 africa-relief: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
 africa-population: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
+kenya-landcover: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
+mau-forest-loss: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
+baringo-bogoria-water: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
+lake-victoria-population: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
+magadi-true-colour: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
 county-kiambu: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
 county-nakuru: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
 county-nyeri: { w: 640, h: 905, w2000: 2000, h2000: 2828 }
