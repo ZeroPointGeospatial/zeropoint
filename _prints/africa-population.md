@@ -10,7 +10,7 @@ summary: Population as a landscape of columns, from the Nile to the Cape.
 tone: light
 facts:
   - [Data, "Kontur Population 2023 (CC BY 4.0), summed into hexagons about 17 km across"]
-  - [Columns, "87 029 hexagons, 1.46 billion people"]
+  - [Columns, "87 038 hexagons, 1.45 billion people"]
   - [Tallest column, "7.6 million people, around Luanda"]
   - [Method, "3D model, path-traced with a low north-west sun"]
   - [Projection, "Lambert azimuthal equal-area, centred on Africa"]
