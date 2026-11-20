@@ -103,6 +103,7 @@ def naturalearth():
         ("10m_physical", "ne_10m_lakes"),
         ("10m_physical", "ne_10m_ocean"),
         ("10m_physical", "ne_10m_rivers_lake_centerlines"),
+        ("10m_physical", "ne_10m_geography_regions_elevation_points"),   # named peaks, for first_look.py
     ]
     for group, name in layers:
         z = DATA / "ne" / f"{name}.zip"

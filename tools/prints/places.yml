@@ -1,0 +1,213 @@
+# Landmarks that first_look.py finds by name, and the area a first look draws
+# for each. Kenyan counties, countries, towns and named peaks are found
+# without this list (the county boundaries and Natural Earth); this list is
+# for hills, mountains, craters, lakes, valleys and parks.
+#
+#   name      what the customer is likely to write; matching ignores case,
+#             spaces and punctuation, and allows small typos
+#   aliases   other ways of writing it
+#   kind      mountain, hills, crater, lake, valley, park, escarpment or town
+#   bbox      [west, south, east, north] in degrees: the area a draft draws.
+#             These are generous first guesses; tighten them in the draft spec.
+#   centre    [lon, lat] for a town (a gold city print needs a centre and a
+#             radius_km)
+#   labels    point labels for the draft. Heights are copied from the shop's
+#             plates (relief.py, contours.py) and the sources noted there;
+#             add a height only from a source you can name.
+#   names     italic area names for the draft
+#
+# Add a place by copying an entry. Keep the list to places people ask for.
+
+# --- mountains, hills and craters -------------------------------------------
+- name: Ngong Hills
+  aliases: [Ngong]
+  kind: hills
+  bbox: [36.55, -1.50, 36.75, -1.30]
+  labels:
+    - { name: Lamwia, value: "2 460 m", lon: 36.636, lat: -1.395, side: right, snap: 1500 }
+    - { name: Ngong, lon: 36.656, lat: -1.362, side: right }
+
+- name: Mount Kenya
+  aliases: [Kirinyaga, Mt Kenya]
+  kind: mountain
+  bbox: [37.04, -0.51, 37.63, 0.21]            # the Mount Kenya plate (06)
+  labels:
+    - { name: Batian, value: "5 199 m", lon: 37.3083, lat: -0.1517, side: right, snap: 2500 }
+    - { name: Ithanguni, value: "3 894 m", lon: 37.468, lat: -0.117, side: right, snap: 2500 }
+
+- name: Kilimanjaro
+  aliases: [Mount Kilimanjaro, Mt Kilimanjaro, Kibo]
+  kind: mountain
+  bbox: [37.09, -3.38, 37.60, -2.77]           # the Kilimanjaro plate (07)
+  labels:
+    - { name: Kibo · Uhuru Peak, value: "5 895 m", lon: 37.3556, lat: -3.0758, side: left, snap: 2500 }
+    - { name: Mawenzi, value: "5 149 m", lon: 37.455, lat: -3.095, side: right, snap: 2500 }
+    - { name: Shira, value: "3 962 m", lon: 37.210, lat: -3.058, side: left, snap: 3000 }
+
+- name: Mount Longonot
+  aliases: [Longonot, Mt Longonot]
+  kind: crater
+  bbox: [36.36, -0.99, 36.52, -0.84]
+  labels:
+    - { name: Kilele Ngamia, value: "2 776 m", lon: 36.43, lat: -0.915, side: left, snap: 1500 }
+
+- name: Menengai Crater
+  aliases: [Menengai]
+  kind: crater
+  bbox: [35.98, -0.30, 36.16, -0.11]
+  labels:
+    - { name: Menengai, lon: 36.07, lat: -0.205, side: right }
+
+- name: Mount Suswa
+  aliases: [Suswa]
+  kind: crater
+  bbox: [36.25, -1.27, 36.47, -1.06]
+  labels:
+    - { name: Suswa, value: "2 356 m", lon: 36.37, lat: -1.175, side: right, snap: 3000 }
+
+- name: Aberdare Range
+  aliases: [Aberdares, Aberdare Mountains, Aberdare]
+  kind: mountain
+  bbox: [36.45, -0.85, 36.95, -0.05]
+  labels:
+    - { name: Lesatima, value: "4 001 m", lon: 36.617, lat: -0.317, side: left, snap: 3000 }
+    - { name: Kinangop, value: "3 906 m", lon: 36.70, lat: -0.63, side: left, snap: 3000 }
+
+- name: Mount Elgon
+  aliases: [Elgon, Mt Elgon]
+  kind: mountain
+  bbox: [34.30, 0.85, 34.85, 1.40]
+  labels:
+    - { name: Mount Elgon, value: "4 321 m", lon: 34.56, lat: 1.12, side: right, snap: 8000 }
+
+- name: Mount Meru
+  aliases: [Meru Mountain, Mt Meru]
+  kind: mountain
+  bbox: [36.60, -3.40, 36.92, -3.08]
+  labels:
+    - { name: Mount Meru, value: "4 566 m", lon: 36.75, lat: -3.247, side: left, snap: 3000 }
+
+- name: Ngorongoro
+  aliases: [Ngorongoro Crater]
+  kind: crater
+  bbox: [35.43, -3.33, 35.74, -3.02]
+  names:
+    - { text: Lake Magadi, lon: 35.545, lat: -3.18, size: 2.6 }
+
+- name: Ol Doinyo Lengai
+  aliases: [Oldoinyo Lengai, Lengai]
+  kind: mountain
+  bbox: [35.80, -2.86, 36.00, -2.66]
+
+- name: Cherangani Hills
+  aliases: [Cherangani, Cherangany Hills]
+  kind: hills
+  bbox: [35.25, 0.95, 35.70, 1.55]
+
+- name: Chyulu Hills
+  aliases: [Chyulu]
+  kind: hills
+  bbox: [37.55, -2.95, 38.05, -2.40]
+
+- name: Taita Hills
+  aliases: [Taita]
+  kind: hills
+  bbox: [38.15, -3.55, 38.50, -3.25]
+
+- name: Mount Marsabit
+  kind: mountain
+  bbox: [37.80, 2.10, 38.20, 2.55]
+
+- name: Mount Kulal
+  aliases: [Kulal]
+  kind: mountain
+  bbox: [36.80, 2.55, 37.10, 2.90]
+
+# --- the Rift, valleys and escarpments --------------------------------------
+- name: The Rift Valley
+  aliases: [Rift Valley, Great Rift Valley, Central Rift]
+  kind: valley
+  bbox: [35.66, -1.32, 36.84, 0.10]            # the Rift Valley plate (08)
+  labels:
+    - { name: Menengai, value: caldera, lon: 36.07, lat: -0.205, side: right }
+    - { name: Longonot, value: "2 776 m", lon: 36.43, lat: -0.915, side: right, snap: 2500 }
+    - { name: Suswa, value: "2 356 m", lon: 36.37, lat: -1.175, side: right, snap: 3000 }
+    - { name: Lesatima, value: "4 001 m", lon: 36.617, lat: -0.317, side: left, snap: 3000 }
+  names:
+    - { text: Lake Nakuru, lon: 36.09, lat: -0.315, size: 2.8 }
+    - { text: Lake Naivasha, lon: 36.36, lat: -0.705, size: 2.8 }
+
+- name: Hell's Gate
+  aliases: [Hells Gate, Hell's Gate National Park]
+  kind: park
+  bbox: [36.25, -0.98, 36.42, -0.83]
+
+- name: Kerio Valley
+  aliases: [Kerio]
+  kind: valley
+  bbox: [35.45, 0.20, 35.80, 1.00]
+
+- name: Mau Escarpment
+  aliases: [Mau, Mau Forest]
+  kind: escarpment
+  bbox: [35.40, -0.95, 36.00, -0.25]
+
+- name: Nguruman Escarpment
+  aliases: [Nguruman]
+  kind: escarpment
+  bbox: [35.85, -2.10, 36.20, -1.60]
+
+# --- lakes (larger lakes are also found in Natural Earth) --------------------
+- name: Lake Naivasha
+  kind: lake
+  bbox: [36.20, -0.92, 36.50, -0.65]
+
+- name: Lake Nakuru
+  kind: lake
+  bbox: [36.00, -0.46, 36.17, -0.27]
+
+- name: Lake Bogoria
+  kind: lake
+  bbox: [36.02, 0.15, 36.18, 0.38]
+
+- name: Lake Baringo
+  kind: lake
+  bbox: [35.95, 0.50, 36.15, 0.75]
+
+- name: Lake Elmenteita
+  kind: lake
+  bbox: [36.20, -0.48, 36.30, -0.36]
+
+- name: Lake Magadi
+  kind: lake
+  bbox: [36.18, -2.05, 36.35, -1.75]
+
+# --- parks -------------------------------------------------------------------
+- name: Nairobi National Park
+  kind: park
+  bbox: [36.75, -1.45, 36.96, -1.30]
+
+- name: Amboseli
+  aliases: [Amboseli National Park]
+  kind: park
+  bbox: [37.05, -2.80, 37.45, -2.50]
+
+- name: Maasai Mara
+  aliases: [Masai Mara, Mara, Maasai Mara National Reserve]
+  kind: park
+  bbox: [34.85, -1.70, 35.40, -1.25]
+
+# --- towns not in Natural Earth's list, or set up for the gold prints -------
+# radius_km is the circle a gold city print draws (cities.py).
+- { name: Nairobi, kind: town, centre: [36.817, -1.286], radius_km: 7.0 }
+- { name: Mombasa, kind: town, centre: [39.6650, -4.0500], radius_km: 7.0 }
+- { name: Kisumu, kind: town, centre: [34.7680, -0.0917], radius_km: 5.5 }
+- { name: Nakuru, kind: town, centre: [36.0800, -0.3031], radius_km: 5.5 }
+- { name: Eldoret, kind: town, centre: [35.2698, 0.5143], radius_km: 5.5 }
+- { name: Ngong, kind: town, centre: [36.656, -1.362], radius_km: 3.5 }
+- { name: Limuru, kind: town, centre: [36.642, -1.107], radius_km: 3.5 }
+- { name: Kikuyu, kind: town, centre: [36.664, -1.246], radius_km: 3.5 }
+- { name: Ruiru, kind: town, centre: [36.962, -1.146], radius_km: 4.0 }
+- { name: Kitengela, kind: town, centre: [36.960, -1.474], radius_km: 3.5 }
+- { name: Gilgil, kind: town, centre: [36.322, -0.498], radius_km: 3.0 }
+- { name: Kajiado, kind: town, centre: [36.782, -1.852], radius_km: 3.0 }

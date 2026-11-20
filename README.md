@@ -86,6 +86,13 @@ from a short spec file: see "Custom maps of any area" in
 `tools/prints/README.md`, or ask Claude Code, which has a skill for it in
 `.claude/skills/zeropoint-map-print`.
 
+When a proof request comes in from the website, `python
+tools/prints/first_look.py --request request.txt` (the request email saved as
+text) makes a first-look draft for you, never for the customer: it finds the
+area, writes a draft spec and renders a quick proof stamped "FIRST LOOK, NOT
+FOR THE CLIENT", with notes on what it assumed. Or paste the request into
+Claude Code and ask for a first look.
+
 County plates: `sh tools/prints/render_counties.sh` renders every county,
 `python tools/county_pages.py` writes their pages, and
 `python tools/site_assets.py counties` their previews. A city print for a

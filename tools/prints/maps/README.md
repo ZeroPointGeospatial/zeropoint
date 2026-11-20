@@ -15,6 +15,10 @@ The arguments after the spec are the dpi and the samples per pixel. A master
 is A2 at 300 dpi with 3 mm of bleed; anything under 250 dpi is saved as a
 proof, with `_<dpi>` in its name.
 
+Drafts made by `first_look.py` from proof requests go in `maps/drafts/`,
+which is not committed. Move a spec up into `maps/` when it becomes a plate
+for the shop.
+
 ## Fields
 
 | Field | Used by | Meaning |

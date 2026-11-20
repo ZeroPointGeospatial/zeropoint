@@ -82,6 +82,23 @@ Python 3.11 or newer.
     python fetch_overture.py counties   # county boundaries
     python kenya_hydro.py               # drainage analysis, about two minutes
 
+## First looks from proof requests
+
+When a proof request arrives from the website, `first_look.py` turns it into
+a draft for you, not for the customer:
+
+    python first_look.py --request request.txt     # the request email saved as text
+    python first_look.py "ngonghills" --style relief
+    python first_look.py "Kisumu" --style gold
+
+It finds the area (coordinates, a county, a landmark in `places.yml`, a lake,
+a country, a town or a named peak; OpenStreetMap's search when online), writes
+`maps/drafts/<slug>.yml`, renders a 100 dpi proof stamped FIRST LOOK, NOT FOR
+THE CLIENT into `$ZP_OUT/first-look/`, and writes notes of what it assumed
+and what to check. Edit the spec, render again with the command in the notes,
+then make the customer's proof with `proof_jpeg.py`. A relief draft takes
+about half a minute. `maps/drafts/` is not committed.
+
 ## Rendering
 
     python relief.py mount-kenya 100    # a quick proof at 100 dpi
