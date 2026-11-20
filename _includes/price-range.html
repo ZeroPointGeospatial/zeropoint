@@ -1,0 +1,11 @@
+{%- comment -%}
+  Looks up the price table for a series and sets pr_table, pr_lo and pr_hi.
+    {% include price-range.html series=page.series %}
+{%- endcomment -%}
+{%- assign pricing = site.data.shop.pricing -%}
+{%- assign pr_table = pricing[include.series] | default: pricing.default -%}
+{%- assign pr_vals = "" | split: "" -%}
+{%- for row in pr_table -%}{%- for cell in row[1] -%}{%- assign pr_vals = pr_vals | push: cell[1] -%}{%- endfor -%}{%- endfor -%}
+{%- assign pr_vals = pr_vals | sort -%}
+{%- assign pr_lo = pr_vals | first -%}
+{%- assign pr_hi = pr_vals | last -%}

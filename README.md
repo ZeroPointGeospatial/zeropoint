@@ -20,7 +20,7 @@ A Jekyll site. Two copies are published:
 | Services, client types, survey packs, FAQ on the home page | `_data/services.yml`, `audiences.yml`, `packs.yml`, `faq.yml` |
 | A client type's own page (`/for/<name>/`) | its file in `_sectors/` |
 | Project cards | `_data/projects.yml` |
-| Print prices, sizes, frames, Paystack key, proof wording | `_data/shop.yml` |
+| Print prices, sizes, frames, paper, Paystack key, proof wording | `_data/shop.yml` |
 | Photos of framed prints on real walls | `_data/wall_photos.yml`, photos in `assets/photos/` |
 | One print's title, description and facts | its file in `_prints/` |
 | A blog post | a Markdown file in `_posts/` named `YYYY-MM-DD-title.md`, with a `topic` from `_data/topics.yml` |
@@ -36,14 +36,17 @@ Pages: `index.html` (home), `projects.html`, `prints/index.html` (shop),
 
 ## Taking payment
 
-Prints from the collection can be paid for on the site by M-Pesa or card
-through Paystack. It stays switched off until two things are in
-`_data/shop.yml`:
+Prices are set in `_data/shop.yml` under `pricing`: one table per series,
+by size (A2, A1, A0) and frame (none, black, natural wood, silver, gold).
+The Kenya atlas runs from KSh 18 000 to 23 000, the counties from 9 000 to
+20 000, and everything else from 9 000 to 15 500. The paper (matte or satin)
+does not change the price. Custom sizes are quoted by hand.
 
-1. Prices: `print` and `framed` for each size, in KSh.
-2. `paystack_key`: the **public** key from the Paystack dashboard
-   (Settings > API Keys & Webhooks), starting `pk_live_`. Never put the
-   secret key in this repository.
+Prints from the collection can be paid for on the site by M-Pesa or card
+through Paystack. It stays switched off until `paystack_key` in
+`_data/shop.yml` holds the **public** key from the Paystack dashboard
+(Settings > API Keys & Webhooks), starting `pk_live_`. Never put the secret
+key in this repository.
 
 The customer enters their name, phone, email and delivery address, pays in
 the Paystack window, and the order is emailed to you through Formspree with

@@ -34,11 +34,11 @@ layout: default
       <p class="print__theme">{{ page.theme }}</p>
       <div class="print__body">{{ content }}</div>
 
-      <div class="print__price"><strong data-price>{{ shop.price }}</strong><span data-price-note>{{ shop.price_note }}</span></div>
+      {%- include price-range.html series=page.series %}
+      {%- capture range %}KSh {% include ksh.html n=pr_lo %} – {% include ksh.html n=pr_hi %}{% endcapture %}
+      <div class="print__price"><strong data-price>{{ range }}</strong><span data-price-note>{{ shop.price_note }}</span></div>
 
-      {%- assign found = false -%}
-      {%- capture prices -%}{ {%- for s in shop.sizes -%}{%- if s.print or s.framed -%}{%- if found %},{% endif -%}{%- assign found = true -%}"{{ s.id }}":{"print":{{ s.print | default: 'null' }},"framed":{{ s.framed | default: 'null' }}}{%- endif -%}{%- endfor -%} }{%- endcapture -%}
-      <form id="print-order" data-print="{{ fullname | escape }}" data-slug="{{ page.slug }}" data-prices='{{ prices | strip }}' data-range="{{ shop.price }}" data-note="{{ shop.price_note }}"{% if page.proof %} data-proof{% endif %}>
+      <form id="print-order" data-print="{{ fullname | escape }}" data-slug="{{ page.slug }}" data-prices='{{ pr_table | jsonify }}' data-range="{{ range }}" data-note="{{ shop.price_note }}" data-custom-note="{{ shop.custom_note }}"{% if page.proof %} data-proof{% endif %}>
         <fieldset class="options">
           <legend>Size</legend>
           <div class="options__row">
@@ -48,12 +48,21 @@ layout: default
           </div>
         </fieldset>
         <fieldset class="options">
-          <legend>Finish</legend>
+          <legend>Frame</legend>
           <div class="options__row">
             {%- for f in shop.frames %}
             <label class="option"><input type="radio" name="frame" value="{{ f.id }}" data-label="{{ f.label }}"{% if forloop.first %} checked{% endif %}><span><i style="background:{{ f.swatch }}"></i>{{ f.label }}</span></label>
             {%- endfor %}
           </div>
+        </fieldset>
+        <fieldset class="options">
+          <legend>Finish</legend>
+          <div class="options__row">
+            {%- for f in shop.papers %}
+            <label class="option" title="{{ f.note }}"><input type="radio" name="paper" value="{{ f.id }}" data-label="{{ f.label }}"{% if forloop.first %} checked{% endif %}><span>{{ f.label }} <small>paper</small></span></label>
+            {%- endfor %}
+          </div>
+          <p class="options__note" data-paper-note>{{ shop.papers[0].note | capitalize }}.</p>
         </fieldset>
       </form>
 
@@ -96,7 +105,7 @@ layout: default
     <div>
       <p class="label">Request a proof</p>
       <h2 class="h2" style="margin-top:18px">{{ page.short | default: page.title }}, <strong>made for you</strong></h2>
-      <p class="lede" style="margin-top:20px">Tell us the size and finish, and anything you would like named on the map: your town, your farm, a school, a river. We reply with a proof {{ shop.proof.time }}.</p>
+      <p class="lede" style="margin-top:20px">Tell us the size, frame and paper, and anything you would like named on the map: your town, your farm, a school, a river. We reply with a proof {{ shop.proof.time }}.</p>
       {% include proof-steps.html %}
     </div>
     {% include proof-form.html subject=fullname place=page.title %}
@@ -138,8 +147,8 @@ layout: default
   "offers": {
     "@type": "AggregateOffer",
     "priceCurrency": "KES",
-    "lowPrice": {{ shop.price_low }},
-    "highPrice": {{ shop.price_high }},
+    "lowPrice": {{ pr_lo }},
+    "highPrice": {{ pr_hi }},
     "availability": "https://schema.org/InStock",
     "url": {{ page.url | absolute_url | jsonify }}
   }

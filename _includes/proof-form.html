@@ -29,16 +29,22 @@
       </select>
     </div>
     {%- endif %}
-    <div class="field">
+    <div class="field field--wide">
       <label for="p-size">Size</label>
       <select id="p-size" name="size" required>
         {%- for s in shop.sizes %}<option{% if forloop.first %} selected{% endif %}>{{ s.label }}{% if s.id != 'custom' %} ({{ s.dims }}){% endif %}</option>{% endfor %}
       </select>
     </div>
     <div class="field">
-      <label for="p-finish">Finish</label>
-      <select id="p-finish" name="finish" required>
+      <label for="p-frame">Frame</label>
+      <select id="p-frame" name="frame" required>
         {%- for f in shop.frames %}<option{% if forloop.first %} selected{% endif %}>{{ f.label }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="p-paper">Finish</label>
+      <select id="p-paper" name="paper" required>
+        {%- for f in shop.papers %}<option{% if forloop.first %} selected{% endif %}>{{ f.label }} paper</option>{% endfor %}
       </select>
     </div>
     <div class="field field--wide"><label for="p-notes">Names, places or wording to include <span class="muted">(optional)</span></label><textarea id="p-notes" name="notes" rows="3" placeholder="e.g. mark our farm near Limuru, add the family name under the title"></textarea></div>

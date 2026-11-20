@@ -534,6 +534,7 @@ button.frame { font: inherit; text-align: inherit; }
 .option i { width: 14px; height: 14px; border: 1px solid rgba(0, 0, 0, 0.25); border-radius: 50%; }
 .print .btn-row { margin-top: 30px; }
 .print .btn-row .btn { flex: 1 1 220px; }
+.options__note { margin-top: 10px; color: var(--fg-faint); font-size: 0.88rem; }
 .print__assure { margin-top: 16px; color: var(--fg-soft); font-size: 0.92rem; }
 .sheet { margin-top: 40px; border-top: 1px solid var(--rule); }
 .sheet > div { display: grid; grid-template-columns: 170px 1fr; gap: 4px 20px; padding: 14px 0; border-bottom: 1px solid var(--rule); }

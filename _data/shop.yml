@@ -1,24 +1,41 @@
-# Shop-wide settings for the map prints. Edit prices, sizes and frames here
-# and every print page updates.
-price: "KSh 9,000 – 15,500"
-price_low: 9000          # the same range as numbers, for search engines; keep in step with `price`
-price_high: 15500
-price_note: Depending on size and framing. We confirm the exact figure before you pay.
-# `print` and `framed` are the prices in KSh for that size, print only and in
-# any of the frames. Leave them empty and that size is ordered by WhatsApp or
-# email; fill them in and, with a Paystack key below, the print page shows the
-# exact price and a "Pay now" button.
+# Shop-wide settings for the map prints. Edit prices, sizes, frames and paper
+# here and every print page updates.
+
+# Prices in KSh, by series, size and frame. A bigger print, or a frame that
+# takes more work, costs more. A series not listed uses `default`. The custom
+# size has no fixed price: it is quoted on WhatsApp or by email.
+pricing:
+  Kenya atlas:            # KSh 18 000 to 23 000
+    A2: { none: 18000, black: 18500, natural: 19000, silver: 19500, gold: 20000 }
+    A1: { none: 19500, black: 20000, natural: 20500, silver: 21000, gold: 21500 }
+    A0: { none: 21000, black: 21500, natural: 22000, silver: 22500, gold: 23000 }
+  Counties:               # KSh 9 000 to 20 000
+    A2: { none: 9000, black: 10500, natural: 11000, silver: 11500, gold: 12000 }
+    A1: { none: 12000, black: 14000, natural: 14500, silver: 15000, gold: 15500 }
+    A0: { none: 15500, black: 18000, natural: 18500, silver: 19500, gold: 20000 }
+  default:                # Landforms and Cities, KSh 9 000 to 15 500
+    A2: { none: 9000, black: 9500, natural: 10000, silver: 10500, gold: 11000 }
+    A1: { none: 11000, black: 11500, natural: 12000, silver: 12500, gold: 13000 }
+    A0: { none: 13500, black: 14000, natural: 14500, silver: 15000, gold: 15500 }
+price_note: Depending on size and frame.
+custom_note: Custom sizes are quoted on WhatsApp or by email.
+
 sizes:
-  - { id: A2, label: A2, dims: "420 × 594 mm", print: , framed:  }
-  - { id: A1, label: A1, dims: "594 × 841 mm", print: , framed:  }
-  - { id: A0, label: A0, dims: "841 × 1189 mm", print: , framed:  }
+  - { id: A2, label: A2, dims: "420 × 594 mm" }
+  - { id: A1, label: A1, dims: "594 × 841 mm" }
+  - { id: A0, label: A0, dims: "841 × 1189 mm" }
   - { id: custom, label: Custom, dims: "ask us" }
+# In order of the work they take; the first is chosen when a page opens.
 frames:
   - { id: black, label: Black frame, swatch: "#141615" }
   - { id: natural, label: Natural wood frame, swatch: "#b08a5a" }
-  - { id: gold, label: Gold frame, swatch: "#b89a5e" }
   - { id: silver, label: Silver frame, swatch: "#b9bcba" }
-  - { id: none, label: Print only, swatch: "#f1f0eb" }
+  - { id: gold, label: Gold frame, swatch: "#b89a5e" }
+  - { id: none, label: No frame, swatch: "#f1f0eb" }
+# The paper the map is printed on. Both cost the same.
+papers:
+  - { id: matte, label: Matte, note: "no glare, deep blacks on the dark plates" }
+  - { id: satin, label: Satin, note: "a soft sheen, slightly richer colour" }
 series:
   - Kenya atlas
   - Landforms

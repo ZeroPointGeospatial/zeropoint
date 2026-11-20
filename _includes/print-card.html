@@ -4,5 +4,6 @@
   <span class="print-card__meta"><span>{{ p.plate_label | default: 'Plate' }} {{ p.plate }}</span><span>{{ p.series }}</span></span>
   <h3>{{ p.short | default: p.title }}</h3>
   <p>{{ p.theme }}</p>
-  <span class="print-card__price">{{ site.data.shop.price }}</span>
+  {%- include price-range.html series=p.series %}
+  <span class="print-card__price">From KSh {% include ksh.html n=pr_lo %}</span>
 </a>

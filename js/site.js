@@ -120,14 +120,20 @@
     var noteEl = document.querySelector('[data-price-note]');
     var payBtn = document.getElementById('pay-now');
     var payNote = document.querySelector('[data-pay-note]');
+    var paperNote = document.querySelector('[data-paper-note]');
     function ksh(n) { return 'KSh ' + n.toLocaleString('en-KE'); }
-    /* the price of the current selection in KSh, or null when it is quoted by hand */
+    /* the price of the current size and frame in KSh, or null when it is quoted by hand */
     function price() {
       var size = picked('size'), fr = picked('frame');
       var row = size && prices[size.value];
-      if (!row || !fr) return null;
-      var v = fr.value === 'none' ? row.print : row.framed;
+      var v = row && fr ? row[fr.value] : null;
       return typeof v === 'number' && v > 0 ? v : null;
+    }
+    /* "A2, black frame, matte paper" */
+    function chosen() {
+      var size = picked('size'), fr = picked('frame'), pa = picked('paper');
+      return [size && size.dataset.label, fr && fr.dataset.label.toLowerCase(),
+              pa && pa.dataset.label.toLowerCase() + ' paper'].filter(Boolean).join(', ');
     }
     order.price = price;
     function update() {
@@ -135,17 +141,21 @@
       if (fr && frame) frame.dataset.frame = fr.value;
       var amount = price();
       if (priceEl) priceEl.textContent = amount ? ksh(amount) : order.dataset.range;
-      if (noteEl) noteEl.textContent = amount
-        ? (fr.value === 'none' ? 'Print only, ' : 'Framed, ') + size.dataset.label + '. Delivery in Nairobi included for framed prints.'
-        : order.dataset.note;
+      if (noteEl) noteEl.textContent = amount ? chosen().charAt(0).toUpperCase() + chosen().slice(1) + '.'
+        : (size && size.value === 'custom' ? order.dataset.customNote : order.dataset.note);
+      var pa = picked('paper');
+      if (paperNote && pa) paperNote.textContent = pa.parentNode.title.charAt(0).toUpperCase() + pa.parentNode.title.slice(1) + '.';
       if (payBtn) {
         payBtn.hidden = !amount;
         payBtn.querySelector('[data-pay-amount]').textContent = amount ? ksh(amount) : '';
       }
       if (payNote) payNote.hidden = !amount;
+      var pap = picked('paper');
       var line = 'Hello ZeroPoint, I would like to order the print "' + name + '"' +
         (size ? ', size ' + size.dataset.label : '') +
-        (fr ? ', ' + fr.dataset.label.toLowerCase() : '') + '.';
+        (fr ? ', ' + fr.dataset.label.toLowerCase() : '') +
+        (pap ? ', ' + pap.dataset.label.toLowerCase() + ' paper' : '') +
+        (amount ? ' (' + ksh(amount) + ')' : '') + '.';
       if (waLink) waLink.href = 'https://wa.me/' + waLink.dataset.number + '?text=' + encodeURIComponent(line);
       if (mailLink) mailLink.href = 'mailto:' + mailLink.dataset.email + '?subject=' +
         encodeURIComponent('Print order: ' + name) + '&body=' + encodeURIComponent(line);
@@ -175,13 +185,14 @@
         });
       }
       function selection() {
-        var size = picked('size'), fr = picked('frame');
-        return { size: size.dataset.label, finish: fr.dataset.label, amount: price() };
+        var size = picked('size'), fr = picked('frame'), pa = picked('paper');
+        return { size: size.dataset.label, frame: fr.dataset.label, paper: pa ? pa.dataset.label + ' paper' : '',
+                 amount: price() };
       }
       payBtn.addEventListener('click', function () {
         var sel = selection();
         if (!sel.amount) return;
-        summary.textContent = sel.size + ', ' + sel.finish.toLowerCase() + ', ' + ksh(sel.amount);
+        summary.textContent = chosen() + ', ' + ksh(sel.amount);
         cstatus.textContent = '';
         checkout.showModal();
       });
@@ -193,7 +204,7 @@
         var d = Object.fromEntries(new FormData(cform).entries());
         var parts = d.name.trim().split(/\s+/);
         var fields = [
-          ['Print', name], ['Size', sel.size], ['Finish', sel.finish],
+          ['Print', name], ['Size', sel.size], ['Frame', sel.frame], ['Paper', sel.paper],
           ['Name', d.name], ['Phone', d.phone], ['Delivery', d.delivery], ['Notes', d.notes || '']
         ];
         cstatus.textContent = 'Opening the payment window';
