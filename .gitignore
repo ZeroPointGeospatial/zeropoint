@@ -10,3 +10,4 @@ Gemfile.lock
 
 # screenshots written by local browser tests
 shots/
+/tools/prints/maps/drafts/

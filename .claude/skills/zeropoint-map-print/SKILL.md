@@ -1,6 +1,6 @@
 ---
 name: zeropoint-map-print
-description: Make a map print in ZeroPoint Geospatial's house style for any place and theme, using the print pipeline in tools/prints. Use this whenever someone asks for a map, poster, wall map, print, plate or proof of any area, whether a continent, a country, a county, a town, a mountain, a crater or a customer's own land, as relief, population, contours or roads in gold. That includes custom orders from the shop ("can you do one of Uganda", "Africa population", "my farm in Limuru", "Kampala in gold"), proofs to send a customer, and new plates for the collection, even when the request does not say "house style" or name the pipeline.
+description: Make a map print in ZeroPoint Geospatial's house style for any place and theme, using the print pipeline in tools/prints. Use this whenever someone asks for a map, poster, wall map, print, plate or proof of any area, whether a continent, a country, a county, a town, a mountain, a crater or a customer's own land, as relief, population, contours or roads in gold. That includes custom orders from the shop ("can you do one of Uganda", "Africa population", "my farm in Limuru", "Kampala in gold"), a proof request pasted from the website's form or email ("a request came in", "make a first look", "sketch this out for me"), first-look drafts, proofs to send a customer, and new plates for the collection, even when the request does not say "house style" or name the pipeline.
 ---
 
 # ZeroPoint map prints
@@ -16,6 +16,46 @@ whole point.
 
 Read `references/house-style.md` before judging a proof, and
 `references/styles.md` when choosing or tuning a style.
+
+## 0. A proof request came in: make a first look
+
+When the owner pastes a proof request from the website (the Formspree email:
+name, area, style, size, frame, paper, notes), or asks for a quick sketch of a
+customer's area, start with the first-look script. It finds the area, picks the
+style, writes a draft spec and renders a quick proof stamped FIRST LOOK, NOT
+FOR THE CLIENT, with notes of what it assumed:
+
+```bash
+cd tools/prints
+python first_look.py --request request.txt          # the email, saved as a text file
+python first_look.py "ngonghills" --style "Relief, ray-traced like the county plates"
+python first_look.py "my farm near Limuru" --style contours --notes "-1.112, 36.650"
+```
+
+It writes `maps/drafts/<slug>.yml` (left out of git: requests carry
+customers' details), `$ZP_OUT/first-look/<slug>_FIRST-LOOK.jpg` and
+`<slug>_notes.md`. Show the owner the FIRST-LOOK image and the notes' "What the
+draft assumed" list, then carry on from step 3 with the draft spec: fix the
+extent, the title and subtitle, and the labels the customer asked for, and
+render again. The FIRST-LOOK file is for the owner only; the customer gets the
+watermarked proof from step 6 once the draft is right.
+
+Read the notes before trusting the draft. They say when a place was read from
+a close spelling, when only the wider place was found ("Juja, Kiambu" drawn as
+all of Kiambu), when the place found is outside Kenya, when the customer's
+coordinates are not on the sheet, and when a county page's request is simply
+the shop's county plate. A second request for the same place never replaces
+an earlier draft: it gets the next number (`draft-limuru-2-contours.yml`).
+
+If the script can't find the place, it says what it tried. Ask for
+coordinates (a point copied from Google Maps, in any of its formats, or a box),
+or add the place to `tools/prints/places.yml`. It never takes a foreign town
+of the same name for a Kenyan one without saying so: offline, "Juja" or
+"Bondo" stop with that message rather than draw Peru or Congo. When the
+computer is online it asks OpenStreetMap's search, in Kenya first, sending
+only the place-name part of the request (never plot numbers, phone numbers or
+people's names). If a render fails, the notes still get written, with the
+likely cause and the full log beside them.
 
 ## 1. Pin down the brief
 

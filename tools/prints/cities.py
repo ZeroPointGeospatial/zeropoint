@@ -68,13 +68,23 @@ def city_spec(path):
     c = sp["city"]
     key = sp["slug"].removesuffix("-gold")
     roads = CACHE / f"roads_{key}.npz"
-    if c.get("country", "Kenya").lower() != "kenya" and not roads.exists():
-        import fetch_overture
+    if c.get("country", "Kenya").lower() != "kenya":
         import math
-        pad = c["radius_km"] / 100 * 1.6                       # degrees of latitude, with room to spare
-        pad_lon = pad / math.cos(math.radians(c["lat"]))       # degrees of longitude shrink away from the equator
-        fetch_overture.roads(fetch_overture.latest_release(),
-                             (c["lon"] - pad_lon, c["lat"] - pad, c["lon"] + pad_lon, c["lat"] + pad), f"roads_{key}")
+        reach = c["radius_km"] / 110.57 * 1.05                 # the circle, in degrees of latitude
+        reach_lon = reach / math.cos(math.radians(c["lat"]))
+        need = (c["lon"] - reach_lon, c["lat"] - reach, c["lon"] + reach_lon, c["lat"] + reach)
+        have = None
+        if roads.exists():
+            with np.load(roads) as z:
+                have = tuple(z["bbox"]) if "bbox" in z.files else None
+        # fetch the first time, and again when the circle has grown or moved past the saved box
+        if have is None or not (have[0] <= need[0] and have[1] <= need[1] and have[2] >= need[2] and have[3] >= need[3]):
+            import fetch_overture
+            pad = c["radius_km"] / 100 * 1.6                   # degrees of latitude, with room to spare
+            pad_lon = pad / math.cos(math.radians(c["lat"]))   # degrees of longitude shrink away from the equator
+            fetch_overture.roads(fetch_overture.latest_release(),
+                                 (c["lon"] - pad_lon, c["lat"] - pad, c["lon"] + pad_lon, c["lat"] + pad),
+                                 f"roads_{key}")
     return (key, c["name"], c["lon"], c["lat"], c["radius_km"], c.get("country", "Kenya").upper(),
             roads if roads.exists() else CACHE / "kenya_roads.npz")
 

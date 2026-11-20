@@ -15,6 +15,10 @@ The arguments after the spec are the dpi and the samples per pixel. A master
 is A2 at 300 dpi with 3 mm of bleed; anything under 250 dpi is saved as a
 proof, with `_<dpi>` in its name.
 
+Drafts made by `first_look.py` from proof requests go in `maps/drafts/`,
+which is not committed. Move a spec up into `maps/` when it becomes a plate
+for the shop.
+
 ## Fields
 
 | Field | Used by | Meaning |
@@ -32,10 +36,11 @@ proof, with `_<dpi>` in its name.
 | `crs` | both | force a projection (EPSG code or proj string); normally UTM for small areas and Lambert equal-area for large ones |
 | `zex` | relief | force the vertical exaggeration; normally from the area's width and relief |
 | `stops` | relief | colour stops `[[metres, "#hex"], ...]`; normally the shared ramp, or the area's own range when it has less than 1 500 m of relief |
+| `local` | relief | `true` colours the area across its own heights, as the county plates are (a `county` region does this by default); `false` forces the shared ramp |
 | `cut` | relief | `false` draws a rectangle around the area instead of cutting to its outline |
 | `h3_res` | population | force the hexagon size (H3 resolution 4 to 8; 8 is 400 m) |
 | `max_height_km` | population | height of the tallest column; normally half the width of the area |
-| `credit` | relief | replace the boundary credit, e.g. for a customer's own outline |
+| `credit` | both | replace the boundary credit, e.g. for a customer's own outline |
 | `centre` | contours | `[lon, lat]` of the sheet centre, required; contours take no `region` |
 | `interval` | contours | contour interval in metres, required |
 | `index` | contours | every how many metres a contour is drawn heavier and labelled; default five intervals |

@@ -102,7 +102,12 @@ def spec_config(path, box_mm):
     xy, keep = regions.hexagon_rings(cells, crs)
     lk = lakes(crs)
     water = lk[lk.intersects(land)].geometry.union_all().intersection(land)
+    boundary = {"countries": "Boundaries: Natural Earth.",
+                "continent": "Boundaries: Natural Earth.",
+                "county": "County boundary: OpenStreetMap contributors, via Overture Maps (ODbL).",
+                }.get(next(iter(spec["region"])), "")
     cfg = dict(number=str(spec.get("number", "")), label=spec.get("label", "CUSTOM"),
+               boundary=spec.get("credit", boundary),
                title=spec["title"], subtitle=spec.get("subtitle", "Where people live"),
                tilt=spec.get("tilt", 62.0), model_width=model_width, drop=spec.get("drop", 0.075),
                max_height_km=spec.get("max_height_km", 0.5 * (x1 - x0) / 1000), crs=crs, h3_res=res,
@@ -255,7 +260,8 @@ def draw(plate, cfg, xy, pop, land, water, crs, slug, dpi, spp, t0, bounds=None)
                ("Tallest column", f"{peak:,.0f} people".replace(",", " ")),
                ("Total shown", total_txt)],
         credit=f"Population: Kontur Population 2023, 400 m H3 hexagons (CC BY 4.0){summed}. "
-               "Boundaries: Natural Earth. Modelled and ray-traced by ZeroPoint Geospatial.",
+               f"{cfg.get('boundary', 'Boundaries: Natural Earth.')} Modelled and ray-traced by ZeroPoint Geospatial."
+               .replace("  ", " "),
         centre=(lon, lat), legend=legend, label=cfg.get("label", "PLATE"))
     path = plate.save(slug if dpi >= 250 else f"{slug}_{dpi}")
     print(path, f"{time.time() - t0:.0f}s")

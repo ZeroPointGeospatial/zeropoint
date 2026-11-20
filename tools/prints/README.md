@@ -82,6 +82,32 @@ Python 3.11 or newer.
     python fetch_overture.py counties   # county boundaries
     python kenya_hydro.py               # drainage analysis, about two minutes
 
+## First looks from proof requests
+
+When a proof request arrives from the website, `first_look.py` turns it into
+a draft for you, not for the customer:
+
+    python first_look.py --request request.txt     # the request email saved as text
+    python first_look.py "ngonghills" --style relief
+    python first_look.py "Kisumu" --style gold
+
+It finds the area: coordinates (a Google Maps link or pin, decimal degrees,
+degrees-minutes-seconds with N/S/E/W, or a box), then a Kenyan county, a
+landmark in `places.yml`, a town, a lake, a peak or a country; when online,
+OpenStreetMap's search in Kenya (sent the place name only); then close
+spellings of Kenyan names; then the wider place the request names. A town
+abroad with the same name is used only when it is in a neighbouring country
+or the country is named, and the notes flag it. It writes
+`maps/drafts/<slug>.yml`, renders a 100 dpi proof stamped FIRST LOOK, NOT FOR
+THE CLIENT into `$ZP_OUT/first-look/`, and writes notes of what it assumed
+and what to check (also when the render fails, with the log beside them).
+Edit the spec, render again with the command in the notes, then make the
+customer's proof with `proof_jpeg.py`. A relief draft takes about half a
+minute. `maps/drafts/` is not committed; an existing draft there is never
+written over (the new one gets the next number) unless you pass `--replace`.
+For a Formspree export, `--row` picks a row (0 is the oldest; the newest by
+date is the default).
+
 ## Rendering
 
     python relief.py mount-kenya 100    # a quick proof at 100 dpi
