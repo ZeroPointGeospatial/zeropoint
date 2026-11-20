@@ -31,7 +31,10 @@ ALIASES = {"tanzania": "United Republic of Tanzania", "drc": "Democratic Republi
            "dr congo": "Democratic Republic of the Congo", "congo": "Republic of the Congo",
            "ivory coast": "Ivory Coast", "cote d'ivoire": "Ivory Coast", "usa": "United States of America",
            "uk": "United Kingdom", "swaziland": "eSwatini", "eswatini": "eSwatini",
-           "south sudan": "South Sudan", "somaliland": "Somaliland"}
+           "south sudan": "South Sudan", "somaliland": "Somaliland",
+           # East Africa's own short forms ('Mwanza, TZ'). Not other two-letter codes: 'in', 'at', 'by',
+           # 'it', 'no', 'so', 'me' and 'us' are English words
+           "tz": "United Republic of Tanzania", "ug": "Uganda", "ke": "Kenya", "rw": "Rwanda"}
 
 
 def region_outline(region):

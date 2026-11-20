@@ -6,7 +6,7 @@
 #   name      what the customer is likely to write; matching ignores case,
 #             spaces and punctuation, and allows small typos
 #   aliases   other ways of writing it
-#   kind      mountain, hills, crater, lake, valley, park, escarpment or town
+#   kind      mountain, hills, crater, lake, valley, park, escarpment, forest or town
 #   bbox      [west, south, east, north] in degrees: the area a draft draws.
 #             These are generous first guesses; tighten them in the draft spec.
 #   centre    [lon, lat] for a town (a gold city print needs a centre and a
@@ -148,9 +148,14 @@
   bbox: [35.45, 0.20, 35.80, 1.00]
 
 - name: Mau Escarpment
-  aliases: [Mau, Mau Forest]
+  aliases: [Mau]
   kind: escarpment
   bbox: [35.40, -0.95, 36.00, -0.25]
+
+- name: Mau Forest
+  aliases: [Mau Forest Complex, The Mau Forest, Mau Complex]
+  kind: forest
+  bbox: [35.15, -1.03, 36.05, 0.09]            # the Mau Forest plate (23)
 
 - name: Nguruman Escarpment
   aliases: [Nguruman]

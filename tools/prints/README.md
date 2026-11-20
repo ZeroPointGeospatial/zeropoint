@@ -114,7 +114,9 @@ written over (the new one gets the next number) unless you pass `--replace`.
 For a Formspree export, `--row` picks a row (0 is the oldest; the newest by
 date is the default; when the dates can't be read it asks for `--row`). The
 form's land cover, forest loss, water and true colour styles become relief
-drafts with a `drape:`.
+drafts with a `drape:`, and the notes name the drape and carry its figures
+(for true colour, the scene date to pin). A style written into the area
+("Kenya land cover") is used when the request gives none.
 
 ## Rendering
 

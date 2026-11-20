@@ -2,7 +2,7 @@
 slug: lake-victoria-population
 order: 18
 plate: "25"
-series: Landforms
+series: Regions
 short: Population around Lake Victoria
 title: Lake Victoria
 theme: Where people live around the lake
