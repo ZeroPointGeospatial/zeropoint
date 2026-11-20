@@ -39,7 +39,8 @@ Pages: `index.html` (home), `projects.html`, `prints/index.html` (shop),
 Prices are set in `_data/shop.yml` under `pricing`: one table per series,
 by size (A2, A1, A0) and frame (none, black, natural wood, silver, gold).
 The Kenya atlas runs from KSh 18 000 to 23 000, the counties from 9 000 to
-20 000, and everything else from 9 000 to 15 500. The paper (matte or satin)
+20 000, the gold city prints from 10 000 to 16 500, and the landforms from
+9 000 to 15 500. The paper (matte or satin)
 does not change the price. Custom sizes are quoted by hand.
 
 Prints from the collection can be paid for on the site by M-Pesa or card
