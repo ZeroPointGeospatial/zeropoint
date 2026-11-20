@@ -54,7 +54,7 @@ series:
 # from the Paystack dashboard (Settings > API Keys & Webhooks), the one that
 # starts pk_live_. Never put the secret key (sk_...) here or anywhere in this
 # repository. Leave it empty to hide the Pay now button.
-paystack_key: ""
+paystack_key: "pk_test_d3bf596872ca053660bae40dce7d7da54b0c3a83"
 
 # Made-to-order prints (any county, a custom area) are not printed until the
 # customer approves a proof. These lines appear on the order pages; edit them
