@@ -62,12 +62,12 @@ def region_outline(region):
         geom = shapely.make_valid(shp.geometry.union_all())
         return geom, iso_codes(g[g.intersects(geom)]), Path(region["geojson"]).stem
     elif "county" in region:
-        from common import CACHE as C
-        c = gpd.read_file(C / "kenya_counties.gpkg")
-        c = c[c["name"].str.lower() == region["county"].lower()]
-        if c.empty:
-            raise SystemExit(f"no county called {region['county']!r}")
-        return shapely.make_valid(c.geometry.union_all()), ["KE"], region["county"] + " County"
+        from common import county_boundaries
+        c = county_boundaries()
+        sel = c[c["name"].str.lower() == region["county"].lower()]
+        if sel.empty:
+            raise SystemExit(f"no county called {region['county']!r}; try one of: {', '.join(c['name'])}")
+        return sel.geometry.iloc[0], ["KE"], sel["name"].iloc[0] + " County"
     else:
         raise SystemExit("region needs one of: countries, continent, bbox, geojson, county")
     geom = shapely.make_valid(sel.geometry.union_all())
@@ -229,7 +229,7 @@ def kontur_file(iso):
 
 
 def h3_resolution_for(scale, target_mm=0.35):
-    """The H3 resolution whose hexagons print about `target_mm` across at this scale."""
+    """The H3 resolution whose hexagon edge prints about `target_mm` at this scale (twice that across)."""
     want_km = target_mm * scale / 1e6
     return min(H3_EDGE_KM, key=lambda r: abs(math.log(H3_EDGE_KM[r] / want_km)))
 

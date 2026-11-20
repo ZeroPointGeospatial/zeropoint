@@ -9,7 +9,11 @@
 # they are cached for a week rather than for ever.
 /assets/fonts/*
   Cache-Control: public, max-age=31536000, immutable
-/assets/*
+/assets/img/*
+  Cache-Control: public, max-age=604800
+/assets/prints/*
+  Cache-Control: public, max-age=604800
+/assets/photos/*
   Cache-Control: public, max-age=604800
 /css/*
   Cache-Control: public, max-age=86400

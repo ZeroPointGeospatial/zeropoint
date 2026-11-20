@@ -34,8 +34,9 @@ posts: [why-your-map-coordinates-might-be-wrong, gnss-explained, drone-mapping-v
 faq:
   - q: How quickly can you get to site?
     a: >-
-      Construction surveys have the shortest turnaround on our list, 1 to 3 days. Tell us
-      when the excavation or the pour is booked and we plan the visit around it.
+      Construction surveys usually take 1 to 3 days, and RTK checks on a site we already
+      control can often be done the same day. Tell us when the excavation or the pour is
+      booked and we plan the visit around it.
   - q: What do you need from us?
     a: >-
       The approved drawings in DWG or PDF, the coordinate system they are drawn in, and any

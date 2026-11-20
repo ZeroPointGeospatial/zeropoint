@@ -3,7 +3,8 @@
 # nothing is shown.
 #
 # Put the photo in assets/photos/ (a JPEG or WebP about 1200 px on the long
-# side), then add a line:
+# side). Then delete the [] on the last line and put one entry per photo in
+# its place, starting at the left edge, like this:
 #
 #   - { print: kenya-rivers, src: assets/photos/kenya-rivers-office.jpg,
 #       w: 1200, h: 1500, alt: "Rivers of Kenya in a black frame above a desk",

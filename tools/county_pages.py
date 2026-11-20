@@ -45,12 +45,8 @@ def neighbours():
     """County -> (neighbouring counties, neighbouring countries), from shared boundary length."""
     import geopandas as gpd
     import shapely
-    g = gpd.read_file(CACHE / "kenya_counties.gpkg")
-    g["geometry"] = shapely.make_valid(g.geometry.values)
-    g = g.to_crs(MAP_CRS)
-    g["name"] = g["name"].str.replace("`", "'").str.replace("Taita Taveta", "Taita-Taveta")
-    g.loc[g["name"].str.contains("Elemi|Ilemi"), "name"] = "Turkana"
-    g = g.dissolve("name").reset_index()
+    from common import county_boundaries
+    g = county_boundaries().to_crs(MAP_CRS)
     countries = gpd.read_file(DATA / "ne" / "ne_10m_admin_0_countries").cx[30:46, -8:8]
     countries = countries[countries["ADMIN"] != "Kenya"].copy()
     countries["geometry"] = shapely.make_valid(countries.geometry.values)

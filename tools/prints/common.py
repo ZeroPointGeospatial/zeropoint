@@ -44,6 +44,19 @@ def countries():
 
 
 @lru_cache(maxsize=None)
+def county_boundaries():
+    """Kenya's 47 counties (OpenStreetMap via Overture Maps, EPSG:4326), named as the shop names
+    them (Murang'a, Taita-Taveta), with the Ilemi Triangle merged into Turkana as on Kenyan maps.
+    Needs `python fetch_overture.py counties` once."""
+    import geopandas as gpd
+    import shapely
+    g = gpd.read_file(CACHE / "kenya_counties.gpkg")
+    g["geometry"] = shapely.make_valid(g.geometry.values)
+    g["name"] = g["name"].str.replace("`", "'").str.replace("Taita Taveta", "Taita-Taveta")
+    g.loc[g["name"].str.contains("Elemi|Ilemi"), "name"] = "Turkana"
+    return g[["name", "geometry"]].dissolve("name", as_index=False)
+
+
 def kenya(crs="EPSG:4326"):
     """Kenya as a single (multi)polygon."""
     g = countries()

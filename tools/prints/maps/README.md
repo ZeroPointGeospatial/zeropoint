@@ -27,7 +27,8 @@ proof, with `_<dpi>` in its name.
 | `labels` | relief | point labels: `name`, optional `value` (a height), `lon`, `lat`, `side` (left/right), `snap` (metres: move the dot to the highest ground within this distance) |
 | `names` | relief | italic area names: `text`, `lon`, `lat`, optional `angle` (degrees) and `size` (mm) |
 | `towns` | population | `name`, `lon`, `lat`, `offset` [right, down] in mm for the text, `side` |
-| `scale` | both | force a scale, e.g. `2400000`; normally chosen to fill the sheet |
+| `scale` | relief, contours | relief: force a scale, e.g. `2400000`, normally chosen to fill the sheet. Contours: required. Population ignores it |
+| `model_width` | population | share of the map box the model spans, default 0.90; raise it toward 1.0 to make the area bigger on the sheet |
 | `crs` | both | force a projection (EPSG code or proj string); normally UTM for small areas and Lambert equal-area for large ones |
 | `zex` | relief | force the vertical exaggeration; normally from the area's width and relief |
 | `stops` | relief | colour stops `[[metres, "#hex"], ...]`; normally the shared ramp, or the area's own range when it has less than 1 500 m of relief |
@@ -35,6 +36,12 @@ proof, with `_<dpi>` in its name.
 | `h3_res` | population | force the hexagon size (H3 resolution 4 to 8; 8 is 400 m) |
 | `max_height_km` | population | height of the tallest column; normally half the width of the area |
 | `credit` | relief | replace the boundary credit, e.g. for a customer's own outline |
+| `centre` | contours | `[lon, lat]` of the sheet centre, required; contours take no `region` |
+| `interval` | contours | contour interval in metres, required |
+| `index` | contours | every how many metres a contour is drawn heavier and labelled; default five intervals |
+| `city` | city roads | `{ name, country, lon, lat, radius_km }`; the slug must end in `-gold`; takes no `region` |
+
+Contour specs also take `labels` and `names`, as relief does.
 
 ## Regions
 
@@ -57,8 +64,11 @@ to its outline.
   read at reduced resolution straight from Amazon S3, so even Africa takes
   about a minute.
 - **Population**: Kontur Population 2023, one file per country, downloaded
-  once into `$ZP_DATA/kontur`. For large areas the 400 m hexagons are summed
-  into larger H3 hexagons that print about a third of a millimetre across.
+  once into `$ZP_DATA/kontur`. Kontur's 400 m hexagons (H3 resolution 8) are
+  kept for areas up to about 700 km across; for larger areas they are summed
+  into coarser H3 hexagons whose edge prints about a third of a millimetre
+  (0.5 to 0.9 mm across). Kenya as a spec gets resolution 7; set `h3_res: 8`
+  to match plate 01.
 - **Outlines**: Natural Earth 1:10 m countries; Kenya's counties from
   OpenStreetMap via Overture Maps.
 

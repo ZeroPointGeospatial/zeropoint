@@ -56,7 +56,7 @@ Don't fake them with another style.
 ## 3. Write the spec
 
 Specs live in `tools/prints/maps/<slug>.yml`; `tools/prints/maps/README.md`
-lists every field. A relief spec is usually this short:
+lists the fields of each style. A relief spec is usually this short:
 
 ```yaml
 slug: uganda-relief
@@ -98,9 +98,12 @@ export ZP_DATA=/path/to/data ZP_OUT=/path/to/out
 python relief.py spec:maps/uganda-relief.yml 100 16
 ```
 
-The first run downloads what it needs: fonts and Natural Earth through
-`python fetch_data.py fonts` and `python fetch_data.py naturalearth` if they
-are missing, then elevation tiles or Kontur population per country. A proof
+Once per data folder, before the first render, run `python fetch_data.py
+fonts` and `python fetch_data.py naturalearth` (and `python fetch_overture.py
+counties` for a county region; `tools/prints/README.md` has the full setup).
+Without them the render stops at once on a missing font or `ne/` file. The
+render itself then downloads the elevation tiles, or the Kontur population
+file for each country, that it needs. A proof
 takes one to three minutes; a continent's elevation adds about a minute.
 
 **Open the proof image and look at it** before going further. Check it against
@@ -112,7 +115,8 @@ the review list in `references/house-style.md`. The usual fixes:
   default for countries and continents, so for other regions check the outline.
 - Relief too flat or too spiky: set `zex`. Counties sit around 3 to 12, Kenya
   at 22, East Africa at 30, Africa at 100.
-- The area too small on the sheet: set `scale` to the next tidy value down.
+- The area too small on the sheet: for relief, set `scale` to the next tidy
+  value down; for population, raise `model_width` (default 0.90) toward 1.0.
 - A flat area that is all one colour: the pipeline already uses the area's own
   range under 1 500 m of relief. Check that `stops` is not set by mistake.
 

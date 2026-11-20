@@ -28,7 +28,7 @@ A Jekyll site. Two copies are published:
 | Colours, type and layout | `css/site.css` |
 | Page furniture (head, navigation, footer) | `_includes/` and `_layouts/` |
 
-Pages: `index.html` (home), `projects.html`, `prints/index.html` (shop),
+Pages: `index.html` (home), `projects.html` (served at /projects/), `prints/index.html` (shop),
 `prints/counties/` (all 47 counties), `prints/custom/` (made-to-order prints),
 `blog/index.html`. Each print gets its own page at `/prints/<name>/` from
 `_layouts/print.html`, and each client type one at `/for/<name>/` from

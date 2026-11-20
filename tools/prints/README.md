@@ -21,6 +21,8 @@ for sending the files to a print shop.
 | 13 | Kenya, the 47 counties | `counties.py` | OpenStreetMap via Overture Maps, GLO-90 |
 | 14 | East Africa, relief | `relief.py east-africa` | Copernicus DEM GLO-90 |
 | 15 | Mount Kenya summit contours | `contours.py mount-kenya-summit` | Copernicus DEM GLO-30 |
+| 20 | Africa, relief | `relief.py spec:maps/africa-relief.yml` | Copernicus DEM GLO-90 (read at reduced resolution), Natural Earth |
+| 21 | Africa, population | `population.py spec:maps/africa-population.yml` | Kontur Population 2023, Natural Earth |
 | County | Relief of one county | `relief.py county:Kiambu` | Copernicus DEM, Overture Maps boundary |
 | City | Roads of a town in gold | `cities.py mombasa` | OpenStreetMap via Overture Maps |
 
@@ -83,7 +85,8 @@ Python 3.11 or newer.
 ## Rendering
 
     python relief.py mount-kenya 100    # a quick proof at 100 dpi
-    sh render_all.sh                    # every plate at A2, 300 dpi
+    sh render_all.sh                    # every plate in the table at A2, 300 dpi
+    sh render_counties.sh               # all 47 county plates (previews at 150 dpi)
     python export_print.py              # print-ready JPEGs in $ZP_OUT/print
 
 Every plate is designed at A2 portrait. The second argument is the dpi and

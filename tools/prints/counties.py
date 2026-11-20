@@ -20,7 +20,7 @@ from scipy import ndimage
 from shapely.geometry import box
 from shapely.ops import polylabel
 
-from common import (CACHE, INK, KenyaFrame, MAP_CRS, OLIVE, PAPER, Plate, draw_text, font,
+from common import (CACHE, INK, county_boundaries, KenyaFrame, MAP_CRS, OLIVE, PAPER, Plate, draw_text, font,
                     hex_rgb, load_dem, text_width, warp_to_map)
 from relief import COUNTY_NUMBERS
 
@@ -30,14 +30,7 @@ WATER = hex_rgb("#9db5bf")
 
 
 def load_counties():
-    g = gpd.read_file(CACHE / "kenya_counties.gpkg")
-    g["name"] = g["name"].str.replace("`", "'").str.replace("Taita Taveta", "Taita-Taveta")
-    # the Ilemi Triangle comes as its own area; on Kenyan maps it is part of Turkana
-    extra = g[g["name"].str.contains("Elemi|Ilemi")]
-    g = g[~g["name"].str.contains("Elemi|Ilemi")].copy()
-    if len(extra):
-        i = g.index[g["name"] == "Turkana"][0]
-        g.loc[i, "geometry"] = g.loc[i, "geometry"].union(extra.geometry.union_all())
+    g = county_boundaries()                  # with the Ilemi Triangle in Turkana, as on Kenyan maps
     g["number"] = g["name"].map(COUNTY_NUMBERS)
     assert g["number"].notna().all() and len(g) == 47, sorted(g["name"])
     return g.to_crs(MAP_CRS).sort_values("number").reset_index(drop=True)

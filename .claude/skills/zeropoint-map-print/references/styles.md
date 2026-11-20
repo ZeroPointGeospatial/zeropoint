@@ -46,10 +46,14 @@ python population.py spec:maps/<slug>.yml 300 40
 - **Data**: Kontur Population 2023 (CC BY 4.0), one file per country,
   downloaded once. A `continent` or `countries` region picks the countries
   itself; a `bbox` or `geojson` region uses every country it touches.
-- **Hexagon size**: Kontur's own 400 m hexagons for a single country at about
-  Kenya's size or smaller; for larger areas they are summed into bigger H3
-  hexagons that print about 0.35 mm across. Force it with `h3_res` (8 is 400 m,
-  5 is about 17 km).
+- **Hexagon size**: Kontur's own 400 m hexagons (H3 resolution 8) only for
+  areas up to about 700 km across, such as Uganda or Rwanda. Anything larger,
+  Kenya included, is summed into coarser H3 hexagons whose edge prints about
+  0.35 mm, so they are 0.5 to 0.9 mm across (Kenya gets resolution 7, about
+  2.4 km). Force it with `h3_res` (8 is 400 m, 5 is about 17 km); use
+  `h3_res: 8` for a Kenya plate that matches plate 01.
+- **Size on the sheet**: the model spans 90% of the map box width. Raise
+  `model_width` toward 1.0 to make it bigger; `scale` does nothing here.
 - **Settings worth changing**: `towns` (name, position and where the text sits,
   with a leader line), `max_height_km` if the tallest city towers over
   everything, `tilt`.

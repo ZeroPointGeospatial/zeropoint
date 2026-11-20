@@ -81,7 +81,7 @@ const base = process.argv[2] || 'http://localhost:4000/zeropoint/';
   p = await ctx.newPage();
   const merrs = [];
   p.on('pageerror', e => merrs.push(e.message));
-  await p.goto(base + 'projects.html', { waitUntil: 'load' });
+  await p.goto(base + 'projects/', { waitUntil: 'load' });
   ok('menu closed on load', !(await p.locator('#site-nav').isVisible()));
   await p.click('.nav-toggle');
   await p.waitForTimeout(300);

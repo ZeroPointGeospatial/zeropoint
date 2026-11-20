@@ -148,9 +148,10 @@ def draw(plate, cfg, xy, pop, land, water, crs, slug, dpi, spp, t0, bounds=None)
     xy = cen + (xy - cen) * 0.92
 
     height = pop / peak * cfg["max_height_km"] * 1000.0
-    # Colour starts at the same density on every plate: 30 people in a 400 m
-    # hexagon (resolution 8), about 190 per km2, so farmland stays pale whatever
-    # the hexagon size. Each coarser H3 resolution has seven times the area.
+    # Colour starts at the same density on every plate: 30 people in a
+    # resolution-8 hexagon (about 0.74 km2), about 40 per km2, so sparse land
+    # stays pale whatever the hexagon size. Each coarser H3 resolution has
+    # seven times the area (the rounding below brings it to 28 to 40 per km2).
     floor = 30.0 * 7 ** (8 - cfg["h3_res"])
     if floor >= 100:
         floor = float(round(floor, -int(np.floor(np.log10(floor)))))   # 10 290 -> 10 000

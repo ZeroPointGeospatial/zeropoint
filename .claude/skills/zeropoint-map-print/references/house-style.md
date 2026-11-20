@@ -47,8 +47,10 @@ the result and for knowing what not to override.
   less than 1 500 m of relief gets the same ramp stretched over its own range,
   so it doesn't print as a single colour.
 - Population uses sand to ochre to burnt orange to maroon, on a log scale that
-  starts at the same density on every plate (about 190 people per km²), so
-  farmland stays pale and only cities and dense countryside take colour.
+  starts at the same density on every plate (about 30 to 40 people per km²:
+  30 people in a resolution-8 Kontur hexagon of about 0.74 km², and the same
+  density on coarser hexagons), so sparse land stays pale and colour deepens
+  with density, darkest in the cities.
 - Lakes and the sea are a muted blue-grey, never bright blue.
 
 ## Light and form

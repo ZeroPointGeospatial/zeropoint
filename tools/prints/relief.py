@@ -194,9 +194,8 @@ def local_stops(zlo, zhi):
 def county_config(name, box_mm):
     """Build a plate description for one county: pick the largest tidy scale
     at which it fits the sheet, and a vertical exaggeration to suit its relief."""
-    import geopandas as gpd
-    g = gpd.read_file(CACHE / "kenya_counties.gpkg")
-    g["name"] = g["name"].str.replace("`", "'").str.replace("Taita Taveta", "Taita-Taveta")
+    from common import county_boundaries
+    g = county_boundaries()
     row = g[g["name"].str.lower() == name.lower()]
     if row.empty:
         raise SystemExit(f"no county called {name!r}; try one of: {', '.join(sorted(g['name']))}")

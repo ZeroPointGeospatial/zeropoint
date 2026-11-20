@@ -18,7 +18,7 @@ layout: default
         </button>
       </div>
       <p class="print__hint">Select the print to see it larger</p>
-      {%- assign photos = site.data.wall_photos | where: 'print', page.slug %}
+      {%- assign photos = site.data.wall_photos | default: empty | where: 'print', page.slug %}
       {%- if photos.size > 0 %}
       <div class="print__photos">
         {%- for ph in photos %}

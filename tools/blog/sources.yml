@@ -25,16 +25,19 @@ feeds:
 
 # An article must mention at least one of these to be considered. More matches,
 # and matches in the title, rank it higher. Kenya and East Africa rank highest.
+# Words are matched whole and ignoring case; a trailing * also matches longer
+# forms ("survey*" matches surveys, surveyed, surveyor).
 keywords:
-  strong: [Kenya, Nairobi, East Africa, Africa, cadastre, cadastral, land registry, land administration, title deed]
-  normal: [survey, surveying, surveyor, GNSS, GPS, RTK, CORS, geodesy, datum, lidar, LiDAR, photogrammetry,
-           drone, UAV, GIS, mapping, remote sensing, satellite imagery, Sentinel, Landsat, Earth observation,
-           topographic, elevation, boundary, total station, OpenStreetMap, flood mapping, land cover]
+  strong: ["Kenya*", Nairobi, "Africa*", "cadastr*", "land registr*", land administration, "title deed*"]
+  normal: ["survey*", GNSS, GPS, RTK, CORS, "geode*", "datum*", lidar, "photogrammetr*", "drone*", "UAV*",
+           GIS, mapping, remote sensing, satellite imagery, "Sentinel*", Landsat, Earth observation,
+           "topograph*", "elevation*", "boundar*", "total station*", OpenStreetMap, "flood map*", land cover]
 
 # Articles mentioning any of these are skipped: they are adverts, events or
-# subjects a land survey firm should not be writing about.
-exclude: [sponsored, webinar, podcast, "job opening", hiring, "press release", conference, award, military,
-          missile, weapon, defense, defence, jamming, spoofing, warfare, stock, shares, earnings, funding round]
+# subjects a land survey firm should not be writing about. Matched the same way.
+exclude: [sponsored, "webinar*", "podcast*", "job opening*", hiring, "press release*", "conference*", award,
+          awards, military, "missile*", "weapon*", defense, defence, jamming, spoofing, warfare, stock market,
+          share price, stock price, earnings, funding round]
 
 # Evergreen guides, written when there is no suitable news or in turn with it.
 # Each is written once. `brief` is what the post must be built on: the writer
