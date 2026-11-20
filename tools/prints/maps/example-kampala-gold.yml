@@ -1,0 +1,3 @@
+# A city print outside Kenya: the roads are fetched for the circle on first use.
+slug: kampala-gold
+city: { name: Kampala, country: Uganda, lon: 32.5825, lat: 0.3476, radius_km: 6.0 }

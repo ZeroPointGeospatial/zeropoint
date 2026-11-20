@@ -41,8 +41,32 @@ STUDIES = {
 }
 
 
+def contour_spec(path):
+    """A contour study from a map spec (maps/README.md): centre, scale and interval."""
+    from pathlib import Path
+    import yaml
+    import regions
+    sp = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+    lon, lat = sp["centre"]
+    crs, grid = regions.projection_for(_point_box(lon, lat))
+    return dict(number=str(sp.get("number", "")), label=sp.get("label", "CUSTOM"), title=sp["title"],
+                subtitle=sp.get("subtitle", "A contour study"), centre=(lon, lat), scale=sp["scale"],
+                interval=sp["interval"], index=sp.get("index", sp["interval"] * 5), crs=crs, grid=grid,
+                slug=sp["slug"],
+                labels=[(x["name"], x.get("value"), x["lon"], x["lat"], x.get("side", "right"), x.get("snap", 0))
+                        for x in sp.get("labels", [])],
+                names=[(x["text"], x["lon"], x["lat"], x.get("angle", 0), x.get("size", 3.0))
+                       for x in sp.get("names", [])])
+
+
+def _point_box(lon, lat):
+    from shapely.geometry import box
+    return box(lon - 0.01, lat - 0.01, lon + 0.01, lat + 0.01)
+
+
 def main(name, dpi=150):
-    cfg = STUDIES[name]
+    cfg = contour_spec(name.split(":", 1)[1]) if name.startswith("spec:") else STUDIES[name]
+    crs = cfg.get("crs", MAP_CRS)
     interval, index_every, scale = cfg["interval"], cfg["index"], cfg["scale"]
     plate = Plate(dpi=dpi, bg=BG, block_mm=90)
     l, t, r, b = plate.map_box
@@ -51,15 +75,22 @@ def main(name, dpi=150):
     l, t, r, b = l + inset, t + inset, r - inset, b - inset
     m_per_px = scale / plate.px(1000)
     gw, gh = (r - l) * m_per_px, (b - t) * m_per_px
-    tf = transformer()
+    tf = transformer("EPSG:4326", crs)
     lon0, lat0 = cfg["centre"]
     cx, cy = tf.transform(lon0, lat0)
     x0, y0, x1, y1 = cx - gw / 2, cy - gh / 2, cx + gw / 2, cy + gh / 2
 
-    dem, tr = load_dem((round(lon0 - 0.12, 3), round(lat0 - 0.12, 3),
-                        round(lon0 + 0.12, 3), round(lat0 + 0.12, 3)), "glo30")
+    half = max(0.12, round((max(gw, gh) / 2 + 600) / 111_000 * 1.15, 3))
+    if name.startswith("spec:"):                       # make sure the elevation tiles are here
+        import math
+        import fetch_data
+        fetch_data.dem((math.floor(lon0 - half), math.floor(lat0 - half),
+                        math.ceil(lon0 + half), math.ceil(lat0 + half)), 10, "glo30")
+    dem, tr = load_dem((round(lon0 - half, 3), round(lat0 - half, 3),
+                        round(lon0 + half, 3), round(lat0 + half, 3)), "glo30")
     cell = 10.0
-    z, _ = warp_to_map(dem, tr, (x0 - 200, y0 - 200, x1 + 200, y1 + 200), cell, resampling="cubic")
+    z, _ = warp_to_map(dem, tr, (x0 - 200, y0 - 200, x1 + 200, y1 + 200), cell, resampling="cubic",
+                       dst_crs=crs)
     z = ndimage.gaussian_filter(z, 2.0)
     ny, nx = z.shape
     xs = (x0 - 200) + (np.arange(nx) + 0.5) * cell
@@ -145,13 +176,13 @@ def main(name, dpi=150):
         cfg["title"], cfg["subtitle"], cfg["number"],
         facts=[("Scale at A2", f"1:{scale:,}".replace(",", " ")),
                ("Contour interval", f"{interval} m, index {index_every} m"),
-               ("Grid", "UTM zone 37S, WGS 84")],
+               ("Grid", cfg.get("grid", "UTM zone 37S, WGS 84"))],
         credit="Contours interpolated from Copernicus DEM GLO-30 (© DLR / Airbus, provided under "
                "Copernicus by the EU and ESA). Drawn by ZeroPoint Geospatial. Not a ground survey.",
-        centre=transformer(MAP_CRS, "EPSG:4326").transform(cx, cy),
+        centre=transformer(crs, "EPSG:4326").transform(cx, cy), label=cfg.get("label", "PLATE"),
         legend=line_key([(f"Index contour, {index_every} m", INDEX, 0.55),
                          (f"Contour, {interval} m", LINE, 0.22)]))
-    slug = f"{name}-contours" if name == "longonot" else name
+    slug = cfg.get("slug") or (f"{name}-contours" if name == "longonot" else name)
     path = plate.save(slug if dpi >= 250 else f"{slug}_{dpi}")
     print(path)
 

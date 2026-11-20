@@ -81,6 +81,11 @@ customer approves the proof.
    `series` must be one of the series listed in `_data/shop.yml`; `order`
    sets its place in the catalogue.
 
+Custom maps of any area (relief, population, contours, city roads) are made
+from a short spec file: see "Custom maps of any area" in
+`tools/prints/README.md`, or ask Claude Code, which has a skill for it in
+`.claude/skills/zeropoint-map-print`.
+
 County plates: `sh tools/prints/render_counties.sh` renders every county,
 `python tools/county_pages.py` writes their pages, and
 `python tools/site_assets.py counties` their previews. A city print for a

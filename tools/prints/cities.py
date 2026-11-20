@@ -4,6 +4,7 @@ its coordinates at the foot.
 
     python cities.py mombasa [width_px]
     python cities.py kisumu | nakuru | eldoret
+    python cities.py spec:maps/kampala-gold.yml [width_px]   # any town (maps/README.md)
 
 The layout, colours and proportions are measured from the existing Nairobi
 file so new cities hang with it as one series. Format is 11 x 14 inches
@@ -58,10 +59,31 @@ def dms(v, pos, neg):
     return f"{d}°{m:02d}′{s:02d}″{hemi}"
 
 
+def city_spec(path):
+    """(key, name, lon, lat, radius km, country line, roads file) from a map spec.
+    Roads outside Kenya are fetched for the circle the first time."""
+    from pathlib import Path
+    import yaml
+    sp = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+    c = sp["city"]
+    key = sp["slug"].removesuffix("-gold")
+    roads = CACHE / f"roads_{key}.npz"
+    if c.get("country", "Kenya").lower() != "kenya" and not roads.exists():
+        import fetch_overture
+        pad = c["radius_km"] / 100 * 1.6
+        fetch_overture.roads(fetch_overture.latest_release(),
+                             (c["lon"] - pad, c["lat"] - pad, c["lon"] + pad, c["lat"] + pad), f"roads_{key}")
+    return (key, c["name"], c["lon"], c["lat"], c["radius_km"], c.get("country", "Kenya").upper(),
+            roads if roads.exists() else CACHE / "kenya_roads.npz")
+
+
 def main(key, width=6744):
-    name, lon0, lat0, radius_km = CITIES[key]
+    if key.startswith("spec:"):
+        key, name, lon0, lat0, radius_km, country, roads_file = city_spec(key.split(":", 1)[1])
+    else:
+        (name, lon0, lat0, radius_km), country, roads_file = CITIES[key], "KENYA", CACHE / "kenya_roads.npz"
     w, h = width, int(round(width * RATIO))
-    z = np.load(CACHE / "kenya_roads.npz")
+    z = np.load(roads_file)
     xy, offs, code = z["xy"], z["offs"], z["code"]
 
     # an azimuthal projection centred on the city keeps the circle true
@@ -114,7 +136,7 @@ def main(key, width=6744):
         f_t = font("PlayfairDisplay-400", f_t.size * 0.96)
     draw_text(d, (w / 2, 0.8973 * h), name.upper(), f_t, TITLE, 0.02, "ms")
     f_c = font("PlayfairDisplay-400", 0.0128 * h)
-    draw_text(d, (w / 2, 0.9351 * h), "KENYA", f_c, SOFT, 1.05, "ms")
+    draw_text(d, (w / 2, 0.9351 * h), country, f_c, SOFT, 1.05, "ms")
     y = 0.9627 * h
     d.line([(0.393 * w, y), (0.607 * w, y)], fill=tuple(int(v * 0.75) for v in SOFT), width=rule)
     mono = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",

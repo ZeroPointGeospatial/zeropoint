@@ -36,7 +36,33 @@ spot heights for a county go in `COUNTY_LABELS` in `relief.py`; without an
 entry the plate is drawn unlabelled.
 
 **Another town.** Add a line to `CITIES` in `cities.py` with the centre and
-the radius in kilometres.
+the radius in kilometres, or write a map spec (below) for a town anywhere.
+
+## Custom maps of any area
+
+Relief, population, contour and city prints can be made for any area from a
+short YAML file in `maps/`: the area (countries, a continent, a box, an
+outline, a county), the title and the labels. The pipeline chooses the
+projection, scale, elevation data and hexagon size, so a custom map matches
+the collection. `maps/README.md` lists the fields; `maps/africa-relief.yml`,
+`maps/africa-population.yml` and the `maps/example-*.yml` files are worked
+examples.
+
+    python relief.py spec:maps/africa-relief.yml 100 16          # proof
+    python population.py spec:maps/africa-population.yml 300 40   # master
+    python contours.py spec:maps/example-ngorongoro-contours.yml 100
+    python cities.py spec:maps/example-kampala-gold.yml 1600
+    python proof_jpeg.py $ZP_OUT/africa-relief_100.png            # watermarked proof for a customer
+
+For large areas the elevation tiles are read at reduced resolution straight
+from S3 (`regions.load_dem_coarse`), so all of Africa takes about a minute.
+Population for several countries is downloaded once per country and, for large
+areas, summed into larger H3 hexagons.
+
+Claude Code sessions in this repository have a skill for this,
+`.claude/skills/zeropoint-map-print`, which holds the house style and the
+proof-review-print steps. Asking for "a relief map of Uganda" or "Kampala in
+gold, like the Nairobi print" is enough.
 
 ## Setting up
 
