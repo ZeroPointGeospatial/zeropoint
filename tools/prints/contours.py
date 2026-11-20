@@ -166,8 +166,9 @@ def main(name, dpi=150):
         if snap:  # move a summit label onto the highest cell nearby
             c0, r0, k = int((x - xs[0]) / cell), int((ys[0] - y) / cell), int(snap / cell)
             win = z[max(r0 - k, 0):r0 + k + 1, max(c0 - k, 0):c0 + k + 1]
-            dr, dc = np.unravel_index(np.argmax(win), win.shape)
-            x, y = xs[max(c0 - k, 0) + dc], ys[max(r0 - k, 0) + dr]
+            if win.size and np.isfinite(win).any():          # a label off the grid keeps its spot
+                dr, dc = np.unravel_index(np.nanargmax(win), win.shape)
+                x, y = xs[max(c0 - k, 0) + dc], ys[max(r0 - k, 0) + dr]
         return l + (x - x0) / m_per_px, t + (y1 - y) / m_per_px
 
     for text, lon, lat, angle, size in cfg["names"]:

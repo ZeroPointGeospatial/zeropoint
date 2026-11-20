@@ -40,10 +40,22 @@ extent, the title and subtitle, and the labels the customer asked for, and
 render again. The FIRST-LOOK file is for the owner only; the customer gets the
 watermarked proof from step 6 once the draft is right.
 
+Read the notes before trusting the draft. They say when a place was read from
+a close spelling, when only the wider place was found ("Juja, Kiambu" drawn as
+all of Kiambu), when the place found is outside Kenya, when the customer's
+coordinates are not on the sheet, and when a county page's request is simply
+the shop's county plate. A second request for the same place never replaces
+an earlier draft: it gets the next number (`draft-limuru-2-contours.yml`).
+
 If the script can't find the place, it says what it tried. Ask for
-coordinates (a point copied from Google Maps, or a box), or add the place to
-`tools/prints/places.yml`. When the computer is online it also tries
-OpenStreetMap's search.
+coordinates (a point copied from Google Maps, in any of its formats, or a box),
+or add the place to `tools/prints/places.yml`. It never takes a foreign town
+of the same name for a Kenyan one without saying so: offline, "Juja" or
+"Bondo" stop with that message rather than draw Peru or Congo. When the
+computer is online it asks OpenStreetMap's search, in Kenya first, sending
+only the place-name part of the request (never plot numbers, phone numbers or
+people's names). If a render fails, the notes still get written, with the
+likely cause and the full log beside them.
 
 ## 1. Pin down the brief
 

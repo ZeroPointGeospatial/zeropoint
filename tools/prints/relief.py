@@ -238,6 +238,7 @@ def spec_config(path, box_mm):
         shape="outline" if cut else "block", geom=geom, geom_ll=geom_ll,
         centre=((w + e) / 2, (s_ + n) / 2), source=spec.get("source") or ("glo30" if scale <= 400_000 else "glo90"),
         coarse=cell >= 300, zex=spec.get("zex"), sun_el=spec.get("sun_el", 30), spec=True,
+        local=spec.get("local", True if "county" in spec["region"] else None),
         stops=[(z, c) for z, c in spec["stops"]] if spec.get("stops") else None,
         min_water_km2=spec.get("min_water_km2", max(0.4, (cell / 1000) ** 2 * 25)),
         boundary=spec.get("credit", boundary),
@@ -332,7 +333,9 @@ def main(name, dpi=100, spp=32):
           f"exaggeration x{zex:g}, {time.time() - t0:.0f}s")
 
     # --- colour -----------------------------------------------------------------
-    local = shape == "county" or (cfg.get("spec") and zhi - zlo < 1500)
+    # a county, a small area, or a spec with `local: true` is coloured across its own heights
+    local = shape == "county" or (cfg.get("spec") and (cfg["local"] if cfg.get("local") is not None
+                                                       else zhi - zlo < 1500))
     stops = cfg.get("stops") or (local_stops(zlo, zhi) if local else HYPSO)
     facts_extra, legend, credit = None, None, None
     if cfg.get("texture") == "forest":

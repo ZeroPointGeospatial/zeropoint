@@ -177,7 +177,7 @@ def roads(release, bbox=None, name="kenya_roads"):
     offs = np.concatenate([[0], np.cumsum(np.bincount(idx, minlength=len(geoms)))])
     CACHE.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(CACHE / f"{name}.npz", xy=xy.astype("float32"), offs=offs,
-                        code=codes.astype("int8"), release=release)
+                        code=codes.astype("int8"), release=release, bbox=np.array(BBOX, "float64"))
     print(f"saved {len(geoms):,} roads, {len(xy):,} vertices; "
           f"per class: {np.bincount(codes).tolist()}")
 

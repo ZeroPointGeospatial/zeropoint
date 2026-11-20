@@ -175,6 +175,7 @@
   bbox: [35.95, 0.50, 36.15, 0.75]
 
 - name: Lake Elmenteita
+  aliases: [Lake Elementaita]          # the spelling KWS uses
   kind: lake
   bbox: [36.20, -0.48, 36.30, -0.36]
 
